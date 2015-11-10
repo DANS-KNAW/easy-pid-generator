@@ -1,0 +1,14 @@
+INTRODUCTION
+============
+
+This document briefly describes installation of this service on a server that
+supports initd.
+
+REQUIREMENTS
+============
+- initd
+- Java 1.7
+- 
+
+STEPS
+=====

@@ -1,0 +1,91 @@
+#!/bin/bash
+#chkconfig: 2345 88 12
+#
+# easy-pid-generator
+#
+#
+### BEGIN INIT INFO
+# Provides: easy-pid-generator
+# Required-Start: $network $syslog  # the set of facilities that should be started before starting this service.  
+# Required-Stop:  $network $syslog  # the list of facilities that has to be stopped only after stopping this facility. 
+# Default-Start:  2 3 4 5   #defines the run-levels in which the service has to be started
+# Default-Stop:   0 1 6     #defines the run-levels in which the service has to be stopped
+# Description:    Start/Stop/Restart/Status PID Generator
+# Short-Description: Start/Stop/Restart/Status PID Generator 
+### END INIT INFO
+
+## Source function library.
+#. /etc/rc.d/init.d/functions
+export EASY_PID_GENERATOR_HOME=/opt/easy-pid-generator
+export EASY_PID_GENERATOR_USER=easy_pid_generator
+SHUTDOWN_WAIT=20
+
+easy_pid_generator_pid() {
+  echo `ps aux | grep pid-generator.war | grep -v grep | awk '{ print $2 }'`
+}
+
+start() {
+  echo $EASY_PID_GENERATOR_USER
+  java -version
+  pid=$(easy_pid_generator_pid)
+  if [ -n "$pid" ] 
+  then
+    echo "easy-pid-generator (pid $pid) is already running"
+  else
+    echo "Starting easy-pid-generator ..."
+    umask 007 #completely exclude users who are not group members
+    /bin/su -c "cd $EASY_PID_GENERATOR_HOME; nohup $EASY_PID_GENERATOR_HOME/bin/run.sh >/dev/null 2>&1 &" - $EASY_PID_GENERATOR_USER
+  fi
+  return 0
+}
+
+stop() {
+  pid=$(easy_pid_generator_pid)
+  if [ -n "$pid" ]
+  then
+    echo "Stopping easy-pid-generator ..."
+    /bin/su -c "kill $pid" - $EASY_PID_GENERATOR_USER
+
+    let kwait=$SHUTDOWN_WAIT
+    count=0;
+    until [ `ps -p $pid | grep -c $pid` = '0' ] || [ $count -gt $kwait ]
+    do
+      echo -n -e "\nwaiting for processes to exit";
+      sleep 1
+      let count=$count+1;
+    done
+
+    if [ $count -gt $kwait ]; then
+      echo -n -e "\nkilling processes which didn't stop after $SHUTDOWN_WAIT seconds"
+      kill -9 $pid
+    fi
+  else
+    echo "easy-pid-generator is not running"
+  fi
+  return 0
+}
+
+case $1 in
+start)
+  start
+;; 
+stop)   
+  stop
+;; 
+restart)
+  stop
+  start
+;;
+status)
+  pid=$(easy_pid_generator_pid)
+  if [ -n "$pid" ]
+  then
+    echo "easy-pid-generator (pid $pid) is running"
+  else
+    echo "easy-pid-generator is not running"
+  fi
+;; 
+esac    
+exit 0
+
+
