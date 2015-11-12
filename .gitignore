@@ -6,3 +6,16 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
+*.class
+*~
+*.swp
+*.iml
+.idea/
+.DS_Store
+home/
+
+# Eclipse
+/.project
+/.settings
+/.classpath
+/.cache
