@@ -26,13 +26,13 @@
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
     <packaging>war</packaging>
-    <version>1.0.1</version>
+    <version>1.x-SNAPSHOT</version>
     <inceptionYear>2015-2016</inceptionYear>
     <name>EASY PID Generator Service</name>
     <description>Service that generates unique Persistent Identifiers on demand. Supported types are URN and DOI</description>
     <scm>
         <developerConnection>scm:git:https://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
-        <tag>v1.0.1</tag>
+        <tag>HEAD</tag>
     </scm>
     <dependencies>
         <dependency>
