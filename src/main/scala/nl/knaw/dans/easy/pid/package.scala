@@ -15,10 +15,6 @@
  */
 package nl.knaw.dans.easy
 
-import Math.pow
-import java.io.File
-import com.typesafe.config.ConfigFactory
-
 package object pid {
   val MAX_RADIX = 36
 
@@ -35,7 +31,7 @@ package object pid {
    *   should therefore be sufficiently small to have enough unused chars.
    * @param dashPos position to insert a dash for readability
    * @param pid the PID number to format
-   * @returns the formatted PID 
+   * @return the formatted PID
    */
   def format(prefix: String, radix: Int, len: Int, charMap: Map[Char, Char], dashPos: Int)(pid: Long): String =
     prefix + insertDashAt(dashPos)(convertToString(pid, radix, len, charMap))
