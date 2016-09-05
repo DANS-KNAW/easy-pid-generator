@@ -16,7 +16,6 @@
 package nl.knaw.dans.easy.pid
 
 import java.io.File
-import java.lang.Thread._
 import javax.persistence.Entity
 
 import org.hibernate.HibernateException
@@ -35,7 +34,7 @@ sealed trait SeedStorage {
    * sure that it is persisted. Returns a Failure if there is no next PID seed or
    * if the new seed could not be persisted
    */
-  def calculateAndPersist(f: Long => Option[Long]): Try[Long]
+  def calculateAndPersist(nextPid: Long => Option[Long]): Try[Long]
 }
 
 @Entity
@@ -65,16 +64,16 @@ case class DbBasedSeedStorage(key: String, first: Long, hibernateConfig: File) e
 
   var sessionFactory = conf.buildSessionFactory(serviceRegistry)
 
-  override def calculateAndPersist(f: Long => Option[Long]): Try[Long] = {
+  override def calculateAndPersist(nextPid: Long => Option[Long]): Try[Long] = {
 
     //@tailrec
-    def iterWhileRestarting(timeout: Int = 0, maxRetry: Int = 3): Try[Long] = {
+    def iterWhileRestarting(timeout: Int = 5000, maxRetry: Int = 3): Try[Long] = {
       val session = sessionFactory.getCurrentSession
       session.beginTransaction()
       try {
         session.get(classOf[Seed], key) match {
           case seed: Seed =>
-            f(seed.value)
+            nextPid(seed.value)
               .map(next => {
                 val seed = Seed.create(key, next)
                 session.merge(seed)
@@ -100,8 +99,7 @@ case class DbBasedSeedStorage(key: String, first: Long, hibernateConfig: File) e
           else {
             log.warn(s"Trying with a new session factory, $msg")
             sessionFactory = conf.buildSessionFactory(serviceRegistry)
-            if (timeout > 0)
-              sleep(timeout)
+            Thread.sleep(timeout)
             iterWhileRestarting(5000, maxRetry - 1)
           }
         case e: HibernateException =>
