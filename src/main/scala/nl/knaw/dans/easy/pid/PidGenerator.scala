@@ -24,7 +24,7 @@ import scala.util.Try
 
 case class PidGenerator(seed: SeedStorage, firstSeed: Long, format: Long => String) {
 
-  def next(): Try[String] = seed.calculateAndPersist(getNextPidNumber).map(format(_))
+  def next(): Try[String] = seed.calculateAndPersist(getNextPidNumber).map(format)
 
   /**
    * Generates a new PID number from a provided seed. The PID number is then formatted as a DOI or a URN.
@@ -38,8 +38,9 @@ case class PidGenerator(seed: SeedStorage, firstSeed: Long, format: Long => Stri
     val increment = 5
     val modulo = pow(2, 31).toLong
     val newSeed = (seed * factor + increment) % modulo
-    if (newSeed == firstSeed) None
-    else Some(newSeed)
+
+    if (newSeed == firstSeed) Option.empty
+    else Option(newSeed)
   }
 }
 
@@ -47,13 +48,13 @@ object PidGenerator {
   private def generate(key: String, length: Int, conf: Config, home: File, illegalChars: Map[Char, Char]): PidGenerator = {
     val firstSeed = conf.getLong(s"types.$key.firstSeed")
     val storage = DbBasedSeedStorage(key, firstSeed, new File(home, "cfg/hibernate.conf.xml"))
-    val formatter = format(
+    def formatter(pid: Long) = format(
       prefix = conf.getString(s"types.$key.namespace"),
       radix = MAX_RADIX - illegalChars.size,
       len = length,
       charMap = illegalChars,
       dashPos = conf.getInt(s"types.$key.dashPosition")
-    )
+    )(pid)
 
     PidGenerator(storage, firstSeed, formatter)
   }
