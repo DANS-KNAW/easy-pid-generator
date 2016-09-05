@@ -26,7 +26,6 @@ import org.hibernate.exception.GenericJDBCException
 import org.postgresql.util.PSQLException
 import org.slf4j.LoggerFactory
 
-import scala.annotation.tailrec
 import scala.beans.BeanProperty
 import scala.util.{Failure, Success, Try}
 
@@ -68,7 +67,7 @@ case class DbBasedSeedStorage(key: String, first: Long, hibernateConfig: File) e
 
   override def calculateAndPersist(f: Long => Option[Long]): Try[Long] = {
 
-    @tailrec
+    //@tailrec
     def iterWhileRestarting(timeout: Int = 0, maxRetry: Int = 3): Try[Long] = {
       val session = sessionFactory.getCurrentSession
       session.beginTransaction()
