@@ -41,5 +41,8 @@ package object pid {
     padWithZeroes(java.lang.Long.toString(pid, radix).toLowerCase).map { c => illegalCharMap.getOrElse(c, c) }
   }
 
-  def insertDashAt(i: Int)(s: String): String = s.substring(0, i) + "-" + s.substring(i)
+  def insertDashAt(i: Int)(s: String): String = {
+    val (prefix, suffix) = s.splitAt(i)
+    s"$prefix-$suffix"
+  }
 }
