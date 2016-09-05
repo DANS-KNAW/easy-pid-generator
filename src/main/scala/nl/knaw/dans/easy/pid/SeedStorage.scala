@@ -51,7 +51,7 @@ object Seed {
   def create(pidType: String, value: Long) = {
     val seed = new Seed
     seed.pidType = pidType
-    seed.value = next
+    seed.value = value
 
     seed
   }
