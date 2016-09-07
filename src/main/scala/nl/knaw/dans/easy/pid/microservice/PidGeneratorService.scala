@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.pid.microservice
 
-import scala.concurrent.duration.DurationInt
 import java.io.File
 import java.util.UUID
 
