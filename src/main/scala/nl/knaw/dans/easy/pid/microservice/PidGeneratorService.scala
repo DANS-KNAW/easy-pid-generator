@@ -32,19 +32,22 @@ object PidGeneratorService {
   def executeRequest(request: RequestMessage): Response = {
     val RequestMessage(RequestHead(uuid, responseDS), RequestBody(pidType)) = request
 
-    def respond(result: Try[String]): ResponseResult =
+    def respond(result: Try[String]): ResponseResult = {
       result match {
         case Success(pid) => ResponseSuccessResult(pid)
         case Failure(RanOutOfSeeds()) => ResponseFailureResult("No more identifiers")
         case Failure(_) => ResponseFailureResult("Error when retrieving previous seed or saving current seed")
       }
-
-    val result: ResponseResult = pidType match {
-      case URN => respond(urns.next())
-      case DOI => respond(dois.next())
     }
 
-    (uuid, responseDS, ResponseMessage(ResponseHead(uuid), ResponseBody(pidType, result)))
+    val result = pidType match {
+      case URN => respond(urns.next())
+      case DOI => respond(dois.next())
+      case unknown => ResponseFailureResult(s"Unknown PID type: $unknown")
+    }
+    val responseMessage = ResponseMessage(ResponseHead(uuid), ResponseBody(pidType, result))
+
+    (uuid, responseDS, responseMessage)
   }
 
   def send(response: Response)(implicit hz: HazelcastInstance): Unit = {
