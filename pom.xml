@@ -129,6 +129,13 @@
             </releases>
             <url>http://maven.dans.knaw.nl/</url>
         </repository>
+        <repository>
+            <id>jcenter</id>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <url>http://jcenter.bintray.com</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
