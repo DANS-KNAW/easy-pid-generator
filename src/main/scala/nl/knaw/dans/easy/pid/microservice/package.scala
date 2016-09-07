@@ -16,12 +16,10 @@
 package nl.knaw.dans.easy.pid
 
 import java.util.UUID
-import java.util.concurrent.{BlockingQueue, TimeUnit}
+import java.util.concurrent.BlockingQueue
 
 import rx.lang.scala.{Observable, Scheduler}
 import rx.lang.scala.schedulers.NewThreadScheduler
-
-import scala.concurrent.duration.Duration
 
 package object microservice {
 
@@ -29,12 +27,12 @@ package object microservice {
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
 
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
-    def observe(duration: Duration, scheduler: Scheduler = NewThreadScheduler()): Observable[T] = {
+    def observe(scheduler: Scheduler = NewThreadScheduler()): Observable[T] = {
       Observable(subscriber => {
         val worker = scheduler.createWorker
         val subscription = worker.scheduleRec {
           try {
-            val t = queue.poll(duration.toMillis, TimeUnit.MILLISECONDS)
+            val t = queue.take()
             subscriber.onNext(t)
           }
           catch {

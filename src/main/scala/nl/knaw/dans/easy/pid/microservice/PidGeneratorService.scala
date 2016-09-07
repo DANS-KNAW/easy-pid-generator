@@ -40,7 +40,7 @@ object PidGeneratorService {
 
   def run(implicit hz: HazelcastInstance) = {
     hz.getQueue[String]("pid-inbox")
-      .observe(5 seconds)
+      .observe()
       .map(JSON.parseRequest _ andThen executeRequest)
       .subscribe(response => send(response))
   }
