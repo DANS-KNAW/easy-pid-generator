@@ -15,14 +15,18 @@
  */
 package nl.knaw.dans.easy.pid.microservice
 
+import scala.concurrent.duration.DurationInt
 import java.io.File
 import java.util.UUID
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicBoolean
 
 import com.hazelcast.core.HazelcastInstance
 import com.typesafe.config.ConfigFactory
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
 import org.slf4j.LoggerFactory
 
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 object PidGeneratorService {
@@ -37,11 +41,24 @@ object PidGeneratorService {
   val urns = PidGenerator.urnGenerator(conf, home)
   val dois = PidGenerator.doiGenerator(conf, home)
 
+  val running = new AtomicBoolean(true)
+  val safeToTerminate = new CountDownLatch(1)
+
+  def stop() = running.compareAndSet(true, false)
+
+  def awaitTermination() = safeToTerminate.await()
+
   def run(implicit hz: HazelcastInstance) = {
     hz.getQueue[String]("pid-inbox")
-      .observe()
+      .observe(conf.getInt("queue-poll-interval") seconds)(running.get)
       .map(JSON.parseRequest _ andThen executeRequest)
-      .subscribe(response => send(response))
+      .subscribe(send,
+        e => { /* TODO log error */ },
+        () => {
+          // TODO log
+          safeToTerminate.countDown()
+        }
+      )
   }
 
   def executeRequest(request: RequestMessage): Response = {

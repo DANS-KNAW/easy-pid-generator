@@ -16,10 +16,14 @@
 package nl.knaw.dans.easy.pid
 
 import java.util.UUID
-import java.util.concurrent.BlockingQueue
+import java.util.concurrent.{BlockingQueue, TimeUnit}
 
+import com.hazelcast.core.HazelcastInstanceNotActiveException
 import rx.lang.scala.{Observable, Scheduler}
 import rx.lang.scala.schedulers.NewThreadScheduler
+import rx.lang.scala.subscriptions.CompositeSubscription
+
+import scala.concurrent.duration.Duration
 
 package object microservice {
 
@@ -27,20 +31,22 @@ package object microservice {
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
 
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
-    def observe(scheduler: Scheduler = NewThreadScheduler()): Observable[T] = {
+    def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {
       Observable(subscriber => {
         val worker = scheduler.createWorker
         val subscription = worker.scheduleRec {
           try {
-            val t = queue.take()
-            subscriber.onNext(t)
+            if (running()) {
+              Option(queue.poll(timeout.toMillis, TimeUnit.MILLISECONDS)).foreach(subscriber.onNext)
+            }
+            else subscriber.onCompleted()
           }
           catch {
-            case e: Throwable => subscriber.onError(e)
+            case e: HazelcastInstanceNotActiveException => subscriber.onCompleted()
+            case e: Throwable => println(s"  caught ${e.getClass.getSimpleName}: ${e.getMessage}"); subscriber.onError(e)
           }
         }
-        subscriber.add(subscription)
-        subscriber.add(worker)
+        subscriber.add(CompositeSubscription(subscription, worker))
       })
     }
   }

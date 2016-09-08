@@ -43,11 +43,12 @@ class ServiceStarter extends Daemon {
 
   def stop(): Unit = {
     log.info("Stopping pid-generator service ...")
-    // TODO stop service
+    PidGeneratorService.stop()
   }
 
   def destroy(): Unit = {
-    // TODO do something?
+    PidGeneratorService.awaitTermination()
+    hz.shutdown()
     log.info("Service pid-generator stopped.")
   }
 }
