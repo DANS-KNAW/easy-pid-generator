@@ -1,11 +1,11 @@
 package nl.knaw.dans.easy.pid.microservice
 
 import org.json4s.DefaultFormats
-import org.scalatest.{FlatSpec, Matchers, OneInstancePerTest}
+import org.scalatest.{FlatSpec, Matchers}
 
 import scala.util.{Failure, Success}
 
-class JsonTransformerSpec extends FlatSpec with Matchers with OneInstancePerTest {
+class JsonTransformerSpec extends FlatSpec with Matchers {
 
   case class TestObject(foo: String, bar: Int)
   case class NestedTestObject(identifier: String, nest: TestObject)

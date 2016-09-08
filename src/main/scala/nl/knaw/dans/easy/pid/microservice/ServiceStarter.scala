@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory
 class ServiceStarter extends Daemon {
 
   val log = LoggerFactory.getLogger(getClass)
-  var hz: HazelcastInstance = _
+  implicit var hz: HazelcastInstance = _
 
   def init(context: DaemonContext): Unit = {
     log.info("Initializing pid-generator service ...")
@@ -38,7 +38,7 @@ class ServiceStarter extends Daemon {
     serialization.Defaults.register(hzConf.getSerializationConfig)
     hz = hzConf.newClient()
 
-    PidGeneratorService.run(hz) // can't pass this implicitly since `hz` is a variable
+    PidGeneratorService.run // can't pass this implicitly since `hz` is a variable
   }
 
   def stop(): Unit = {

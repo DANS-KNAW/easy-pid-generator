@@ -69,6 +69,45 @@ object PidGeneratorService {
       .subscribe(response => send(response))
   }
 
+  @deprecated
+  def executeRequest(request: RequestMessage): Response = {
+    val RequestMessage(RequestHead(uuid, responseDS), RequestBody(pidType)) = request
+
+    def respond(result: Try[String]): ResponseResult = {
+      // TODO replace with `onError` once this is added to the common library
+      result match {
+        case Success(pid) => ResponseSuccessResult(pid)
+        case Failure(RanOutOfSeeds()) => ResponseFailureResult("No more identifiers")
+        case Failure(_) => ResponseFailureResult("Error when retrieving previous seed or saving current seed")
+      }
+    }
+
+    val result = pidType match {
+      case URN => respond(urns.next())
+      case DOI => respond(dois.next())
+      case unknown => ResponseFailureResult(s"Unknown PID type: $unknown")
+    }
+    val responseMessage = ResponseMessage(ResponseHead(uuid), ResponseBody(pidType, result))
+
+    (uuid, responseDS, responseMessage)
+  }
+
+  @deprecated
+  def send(response: Response)(implicit hz: HazelcastInstance): Unit = {
+    val (uuid, responseDS, message) = response
+    val ds = hz.getMap[UUID, String](responseDS)
+    val json = jsonTransformer.writeJSON(message)
+
+    log.trace(s"sending to $responseDS: ($uuid, $message)")
+
+    ds.put(uuid, json)
+  }
+}
+
+class PidGeneratorService(jsonTransformer: JsonTransformer,
+                          urns: PidGenerator,
+                          dois: PidGenerator) {
+
   def executeRequest(request: RequestMessage): Response = {
     val RequestMessage(RequestHead(uuid, responseDS), RequestBody(pidType)) = request
 
