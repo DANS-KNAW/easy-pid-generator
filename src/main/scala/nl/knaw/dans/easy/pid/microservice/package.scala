@@ -25,6 +25,7 @@ import rx.lang.scala.schedulers.NewThreadScheduler
 import rx.lang.scala.subscriptions.CompositeSubscription
 
 import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success, Try}
 
 package object microservice {
 
@@ -59,6 +60,16 @@ package object microservice {
         }
         subscriber.add(CompositeSubscription(subscription, worker))
       })
+    }
+  }
+
+  // TODO candidate for library!
+  implicit class TryToObservable[+T](val t: Try[T]) extends AnyVal {
+    def toObservable: Observable[T] = {
+      t match {
+        case Success(s) => Observable.just(s)
+        case Failure(e) => Observable.error(e)
+      }
     }
   }
 }

@@ -18,10 +18,12 @@ package nl.knaw.dans.easy.pid.microservice
 import org.json4s.Formats
 import org.json4s.native.{JsonMethods, Serialization}
 
+import scala.util.Try
+
 // this can become the basis of a common library class
 class JsonTransformer(implicit formatters: Formats) {
 
-  def parseJSON[T](json: String)(implicit m: Manifest[T]): T = {
+  def parseJSON[T](json: String)(implicit m: Manifest[T]): Try[T] = Try {
     JsonMethods.parse(json).extract[T]
   }
 
