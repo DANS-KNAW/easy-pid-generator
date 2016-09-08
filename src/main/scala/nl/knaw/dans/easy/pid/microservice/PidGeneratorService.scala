@@ -41,6 +41,9 @@ object PidGeneratorService {
   val urns = PidGenerator.urnGenerator(conf, home)
   val dois = PidGenerator.doiGenerator(conf, home)
 
+  val inboxName = conf.getString("inbox-name")
+  val pollTimeout = conf.getInt("inbox-poll-timeout")
+
   val running = new AtomicBoolean(true)
   val safeToTerminate = new CountDownLatch(1)
 
@@ -49,16 +52,17 @@ object PidGeneratorService {
   def awaitTermination() = safeToTerminate.await()
 
   def run(implicit hz: HazelcastInstance) = {
-    hz.getQueue[String]("pid-inbox")
-      .observe(conf.getInt("queue-poll-interval") seconds)(running.get)
+    hz.getQueue[String](inboxName)
+      .observe(pollTimeout seconds)(running.get)
+      .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
+      .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
+      .retry
       .map(JSON.parseRequest _ andThen executeRequest)
-      .subscribe(send,
-        e => { /* TODO log error */ },
-        () => {
-          // TODO log
-          safeToTerminate.countDown()
-        }
-      )
+      .doOnCompleted {
+        log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
+        safeToTerminate.countDown()
+      }
+      .subscribe(response => send(response))
   }
 
   def executeRequest(request: RequestMessage): Response = {
@@ -86,6 +90,9 @@ object PidGeneratorService {
     val (uuid, responseDS, message) = response
     val ds = hz.getMap[UUID, String](responseDS)
     val json = JSON.writeResponse(message)
+
+    log.trace(s"sending to $responseDS: ($uuid, $message)")
+
     ds.put(uuid, json)
   }
 }

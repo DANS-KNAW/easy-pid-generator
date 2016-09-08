@@ -19,6 +19,7 @@ import java.util.UUID
 import java.util.concurrent.{BlockingQueue, TimeUnit}
 
 import com.hazelcast.core.HazelcastInstanceNotActiveException
+import org.slf4j.LoggerFactory
 import rx.lang.scala.{Observable, Scheduler}
 import rx.lang.scala.schedulers.NewThreadScheduler
 import rx.lang.scala.subscriptions.CompositeSubscription
@@ -30,6 +31,8 @@ package object microservice {
   type ResponseDatastructure = String
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
 
+  val log = LoggerFactory.getLogger(getClass)
+
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
     def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {
       Observable(subscriber => {
@@ -37,13 +40,21 @@ package object microservice {
         val subscription = worker.scheduleRec {
           try {
             if (running()) {
-              Option(queue.poll(timeout.toMillis, TimeUnit.MILLISECONDS)).foreach(subscriber.onNext)
+              Option(queue.poll(timeout.toMillis, TimeUnit.MILLISECONDS)).foreach(t => {
+                log.trace(s"received new item: $t")
+                subscriber.onNext(t)
+              })
             }
-            else subscriber.onCompleted()
+            else {
+              log.trace("no longer running; completing the stream")
+              subscriber.onCompleted()
+            }
           }
           catch {
             case e: HazelcastInstanceNotActiveException => subscriber.onCompleted()
-            case e: Throwable => println(s"  caught ${e.getClass.getSimpleName}: ${e.getMessage}"); subscriber.onError(e)
+            case e: Throwable =>
+              log.debug(s"exception caught while polling the queue: ${e.getClass.getSimpleName} - ${e.getMessage}", e)
+              subscriber.onError(e)
           }
         }
         subscriber.add(CompositeSubscription(subscription, worker))

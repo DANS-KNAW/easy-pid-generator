@@ -34,9 +34,9 @@ class ServiceStarter extends Daemon {
   def start(): Unit = {
     log.info("Starting pid-generator service ...")
 
-    val conf = new ClientConfig()
-    serialization.Defaults.register(conf.getSerializationConfig)
-    hz = conf.newClient()
+    val hzConf = new ClientConfig()
+    serialization.Defaults.register(hzConf.getSerializationConfig)
+    hz = hzConf.newClient()
 
     PidGeneratorService.run(hz) // can't pass this implicitly since `hz` is a variable
   }
