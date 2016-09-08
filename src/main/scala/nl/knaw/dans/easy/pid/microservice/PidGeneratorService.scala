@@ -61,7 +61,7 @@ object PidGeneratorService {
       .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
       .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
       .retry
-      .flatMap(json => jsonTransformer.parseJSON[RequestMessage](json).map(executeRequest).toObservable)
+      .flatMap(jsonTransformer.parseJSON[RequestMessage](_).map(executeRequest).toObservable)
       .doOnCompleted {
         log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
         safeToTerminate.countDown()

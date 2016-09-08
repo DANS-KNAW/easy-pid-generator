@@ -34,6 +34,7 @@ package object microservice {
 
   val log = LoggerFactory.getLogger(getClass)
 
+  // TODO candidate for microservice library
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
     def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {
       Observable(subscriber => {
@@ -63,7 +64,7 @@ package object microservice {
     }
   }
 
-  // TODO candidate for library!
+  // TODO candidate for common library!
   implicit class TryToObservable[+T](val t: Try[T]) extends AnyVal {
     def toObservable: Observable[T] = {
       t match {
