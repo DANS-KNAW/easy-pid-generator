@@ -22,7 +22,11 @@ import com.typesafe.config.Config
 
 import scala.util.Try
 
-case class PidGenerator(seed: SeedStorage, firstSeed: Long, format: Long => String) {
+trait PidGenerator {
+  def next(): Try[String]
+}
+
+case class PidGeneratorImpl(seed: SeedStorage, firstSeed: Long, format: Long => String) extends PidGenerator {
 
   def next(): Try[String] = seed.calculateAndPersist(getNextPidNumber).map(format)
 
@@ -56,7 +60,7 @@ object PidGenerator {
       dashPos = conf.getInt(s"types.$key.dashPosition")
     )(pid)
 
-    PidGenerator(storage, firstSeed, formatter)
+    PidGeneratorImpl(storage, firstSeed, formatter)
   }
 
   def urnGenerator(conf: Config, home: File): PidGenerator = {
