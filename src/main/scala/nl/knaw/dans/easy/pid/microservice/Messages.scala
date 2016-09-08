@@ -17,6 +17,9 @@ package nl.knaw.dans.easy.pid.microservice
 
 import java.util.UUID
 
+import org.json4s.CustomSerializer
+import org.json4s.JsonAST.{JField, JObject, JString}
+
 /*
   TODO: add version to RequestMessage (header)
   TODO: add version and sender to ResponseMessage (header)
@@ -41,3 +44,21 @@ case class ResponseFailureResult(error: String) extends ResponseResult
 case class ResponseHead(requestID: UUID)
 case class ResponseBody(pidType: PidType, result: ResponseResult)
 case class ResponseMessage(head: ResponseHead, body: ResponseBody)
+
+// custom serializers
+case object PidTypeSerializer extends CustomSerializer[PidType](format => ( {
+  case JString("urn") => URN
+  case JString("doi") => DOI
+}, {
+  case pid: PidType => JString(pid.name)
+})
+)
+
+case object ResponseResultSerializer extends CustomSerializer[ResponseResult](format => ( {
+  case JObject(List(JField("result", JString(result)))) => ResponseSuccessResult(result)
+  case JObject(List(JField("error", JString(error)))) => ResponseFailureResult(error)
+}, {
+  case ResponseSuccessResult(result) => JObject(JField("result", JString(result)))
+  case ResponseFailureResult(error) => JObject(JField("error", JString(error)))
+})
+)

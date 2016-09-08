@@ -23,6 +23,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 import com.hazelcast.core.HazelcastInstance
 import com.typesafe.config.ConfigFactory
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
+import org.json4s.DefaultFormats
+import org.json4s.ext.UUIDSerializer
 import org.slf4j.LoggerFactory
 
 import scala.concurrent.duration.DurationInt
@@ -51,13 +53,15 @@ object PidGeneratorService {
 
   def awaitTermination() = safeToTerminate.await()
 
+  val jsonTransformer = JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer)
+
   def run(implicit hz: HazelcastInstance) = {
     hz.getQueue[String](inboxName)
       .observe(pollTimeout)(running.get)
       .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
       .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
       .retry
-      .map(JSON.parseRequest _ andThen executeRequest)
+      .map(jsonTransformer.parseJSON[RequestMessage] _ andThen executeRequest)
       .doOnCompleted {
         log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
         safeToTerminate.countDown()
@@ -69,6 +73,7 @@ object PidGeneratorService {
     val RequestMessage(RequestHead(uuid, responseDS), RequestBody(pidType)) = request
 
     def respond(result: Try[String]): ResponseResult = {
+      // TODO replace with `onError` once this is added to the common library
       result match {
         case Success(pid) => ResponseSuccessResult(pid)
         case Failure(RanOutOfSeeds()) => ResponseFailureResult("No more identifiers")
@@ -89,7 +94,7 @@ object PidGeneratorService {
   def send(response: Response)(implicit hz: HazelcastInstance): Unit = {
     val (uuid, responseDS, message) = response
     val ds = hz.getMap[UUID, String](responseDS)
-    val json = JSON.writeResponse(message)
+    val json = jsonTransformer.writeJSON(message)
 
     log.trace(s"sending to $responseDS: ($uuid, $message)")
 
