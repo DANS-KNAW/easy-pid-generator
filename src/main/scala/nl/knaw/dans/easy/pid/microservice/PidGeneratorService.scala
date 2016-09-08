@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.pid.microservice
 
-import scala.concurrent.duration.DurationInt
 import java.io.File
 import java.util.UUID
 import java.util.concurrent.CountDownLatch
@@ -26,6 +25,7 @@ import com.typesafe.config.ConfigFactory
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
 import org.slf4j.LoggerFactory
 
+import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -42,7 +42,7 @@ object PidGeneratorService {
   val dois = PidGenerator.doiGenerator(conf, home)
 
   val inboxName = conf.getString("inbox-name")
-  val pollTimeout = conf.getInt("inbox-poll-timeout")
+  val pollTimeout = conf.getInt("inbox-poll-timeout") milliseconds
 
   val running = new AtomicBoolean(true)
   val safeToTerminate = new CountDownLatch(1)
@@ -53,7 +53,7 @@ object PidGeneratorService {
 
   def run(implicit hz: HazelcastInstance) = {
     hz.getQueue[String](inboxName)
-      .observe(pollTimeout seconds)(running.get)
+      .observe(pollTimeout)(running.get)
       .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
       .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
       .retry
