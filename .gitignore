@@ -13,6 +13,7 @@ buildNumber.properties
 .idea/
 .DS_Store
 home/
+*.sc
 
 # Eclipse
 /.project
