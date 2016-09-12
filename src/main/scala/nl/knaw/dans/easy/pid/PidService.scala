@@ -15,9 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
+import nl.knaw.dans.easy.pid.microservice.SettingsParser
 import org.scalatra._
 import org.scalatra.scalate.ScalateSupport
 import org.slf4j._
@@ -27,11 +25,10 @@ import scala.util.{Failure, Success, Try}
 class PidService extends ScalatraServlet with ScalateSupport {
   val log = LoggerFactory.getLogger(getClass)
 
-  val home = new File(System.getenv("EASY_PID_GENERATOR_HOME"))
-  val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
+  implicit val settings = SettingsParser.parse
 
-  val urns = PidGenerator.urnGenerator(conf, home)
-  val dois = PidGenerator.doiGenerator(conf, home)
+  val urns = PidGenerator.urnGenerator
+  val dois = PidGenerator.doiGenerator
 
   log.info("PID Generator Service running ...")
       

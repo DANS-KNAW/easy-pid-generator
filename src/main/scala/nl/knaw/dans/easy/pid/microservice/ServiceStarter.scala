@@ -19,37 +19,49 @@ import com.hazelcast.Scala.client._
 import com.hazelcast.Scala.serialization
 import com.hazelcast.client.config.ClientConfig
 import com.hazelcast.core.HazelcastInstance
+import nl.knaw.dans.easy.pid.PidGenerator
 import org.apache.commons.daemon.{Daemon, DaemonContext}
+import org.json4s.DefaultFormats
+import org.json4s.ext.UUIDSerializer
 import org.slf4j.LoggerFactory
 
 class ServiceStarter extends Daemon {
 
   val log = LoggerFactory.getLogger(getClass)
   implicit var hz: HazelcastInstance = _
+  var service: PidGeneratorService = _
 
   def init(context: DaemonContext): Unit = {
     log.info("Initializing pid-generator service ...")
-  }
 
-  def start(): Unit = {
-    log.info("Starting pid-generator service ...")
+    implicit val settings = SettingsParser.parse
 
     val hzConf = new ClientConfig()
     serialization.Defaults.register(hzConf.getSerializationConfig)
     hz = hzConf.newClient()
 
-    PidGeneratorService.run // can't pass this implicitly since `hz` is a variable
+    service = new PidGeneratorService(
+      JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
+      PidGenerator.urnGenerator,
+      PidGenerator.doiGenerator
+    )
+  }
+
+  def start(): Unit = {
+    log.info("Starting pid-generator service ...")
+
+    service.run()
       .doOnError(e => log.error(s"an error occured in the PID service: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
       .subscribe()
   }
 
   def stop(): Unit = {
     log.info("Stopping pid-generator service ...")
-    PidGeneratorService.stop()
+    service.stop()
   }
 
   def destroy(): Unit = {
-    PidGeneratorService.awaitTermination()
+    service.awaitTermination()
     hz.shutdown()
     log.info("Service pid-generator stopped.")
   }

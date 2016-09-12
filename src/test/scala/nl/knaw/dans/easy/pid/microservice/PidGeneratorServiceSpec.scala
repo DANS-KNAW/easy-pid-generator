@@ -27,7 +27,10 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     new TestHazelcastInstanceFactory(1).newHazelcastInstance(config)
   }
-  implicit val settings = Settings("pid-test-inbox", 10 milliseconds)
+  implicit val settings = Settings(
+    home = null,
+    inboxName = "pid-test-inbox",
+    inboxPollTimeout = 10 milliseconds)
 
   val service = new PidGeneratorService(
     JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
