@@ -34,6 +34,8 @@ package object microservice {
 
   val log = LoggerFactory.getLogger(getClass)
 
+  case class Settings(inboxName: String, inboxPollTimeout: Duration)
+
   // TODO candidate for microservice library
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
     def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {

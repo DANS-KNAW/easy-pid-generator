@@ -26,6 +26,7 @@ import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
 import org.slf4j.LoggerFactory
+import rx.lang.scala.Observable
 
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
@@ -55,6 +56,7 @@ object PidGeneratorService {
 
   val jsonTransformer = JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer)
 
+  @deprecated
   def run(implicit hz: HazelcastInstance) = {
     hz.getQueue[String](inboxName)
       .observe(pollTimeout)(running.get)
@@ -66,7 +68,7 @@ object PidGeneratorService {
         log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
         safeToTerminate.countDown()
       }
-      .subscribe(response => send(response))
+      .doOnNext(send)
   }
 
   @deprecated
@@ -106,7 +108,32 @@ object PidGeneratorService {
 
 class PidGeneratorService(jsonTransformer: JsonTransformer,
                           urns: PidGenerator,
-                          dois: PidGenerator) {
+                          dois: PidGenerator)
+                         (implicit hz: HazelcastInstance, settings: Settings) {
+
+  val running = new AtomicBoolean(true)
+  val safeToTerminate = new CountDownLatch(1)
+
+  def stop() = running.compareAndSet(true, false)
+
+  def awaitTermination() = safeToTerminate.await()
+
+  def run(): Observable[Response] = {
+    val inboxName = settings.inboxName
+    val pollTimeout = settings.inboxPollTimeout
+
+    hz.getQueue[String](inboxName)
+      .observe(pollTimeout)(running.get)
+      .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
+      .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
+      .retry
+      .flatMap(jsonTransformer.parseJSON[RequestMessage](_).map(executeRequest).toObservable)
+      .doOnCompleted {
+        log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
+        safeToTerminate.countDown()
+      }
+      .doOnNext(send)
+  }
 
   def executeRequest(request: RequestMessage): Response = {
     val RequestMessage(RequestHead(uuid, responseDS), RequestBody(pidType)) = request
@@ -130,7 +157,7 @@ class PidGeneratorService(jsonTransformer: JsonTransformer,
     (uuid, responseDS, responseMessage)
   }
 
-  def send(response: Response)(implicit hz: HazelcastInstance): Unit = {
+  def send(response: Response): Unit = {
     val (uuid, responseDS, message) = response
     val ds = hz.getMap[UUID, String](responseDS)
     val json = jsonTransformer.writeJSON(message)

@@ -39,6 +39,8 @@ class ServiceStarter extends Daemon {
     hz = hzConf.newClient()
 
     PidGeneratorService.run // can't pass this implicitly since `hz` is a variable
+      .doOnError(e => log.error(s"an error occured in the PID service: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
+      .subscribe()
   }
 
   def stop(): Unit = {
