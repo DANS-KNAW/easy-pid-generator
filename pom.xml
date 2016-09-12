@@ -131,6 +131,10 @@
             <artifactId>commons-daemon</artifactId>
         </dependency>
 
+        <!--
+        TODO remove this dependency as of Hazelcast 3.8.
+        See pull request ???
+         -->
         <dependency>
             <!-- required for hazelcast test classes -->
             <groupId>junit</groupId>
