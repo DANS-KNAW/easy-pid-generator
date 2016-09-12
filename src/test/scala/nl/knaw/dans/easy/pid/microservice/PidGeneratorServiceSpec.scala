@@ -4,6 +4,7 @@ import java.util.UUID
 
 import com.hazelcast.config.Config
 import com.hazelcast.core.Hazelcast
+import com.hazelcast.test.{HazelcastTestSupport, TestHazelcastInstanceFactory}
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
@@ -44,8 +45,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with BeforeAndAfter
     responseDS shouldBe responseDatastructure
     responseMessage shouldBe ResponseMessage(ResponseHead(uuid), ResponseBody(URN, ResponseSuccessResult(urn)))
   }
-
-  // TODO continue testing URN/DOI met failure results such as RanOutOfSeeds and others
 
   it should "handle a DOI request by generating a new DOI and returning that together with the UUID and response datastructure" in {
     val doi: String = "my-generated-doi"
@@ -95,7 +94,8 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with BeforeAndAfter
   "send" should "transform the response into json format and put it in the appropriate map" in {
     val config = new Config
     config.setProperty("hazelcast.logging.type", "none")
-    implicit val hz = Hazelcast.newHazelcastInstance(config)
+
+    implicit val hz = new TestHazelcastInstanceFactory(1).newHazelcastInstance(config)
 
     val uuid = UUID.randomUUID()
     val response = (uuid, "send-test-map", ResponseMessage(ResponseHead(uuid), ResponseBody(URN, ResponseSuccessResult("test-result"))))
