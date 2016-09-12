@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.hazelcast.config.Config
 import com.hazelcast.core.Hazelcast
-import com.hazelcast.test.{HazelcastTestSupport, TestHazelcastInstanceFactory}
+import com.hazelcast.test.TestHazelcastInstanceFactory
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
@@ -62,7 +62,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with BeforeAndAfter
   }
 
   it should "return a RanOutOfSeeds message when a corresponding error occurs" in {
-    val doi: String = "my-generated-doi"
     urnGeneratorMock.next _ expects () never()
     doiGeneratorMock.next _ expects () returning Failure(RanOutOfSeeds())
 
@@ -77,7 +76,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with BeforeAndAfter
   }
 
   it should "return a general error message when another kind of error occurs" in {
-    val doi: String = "my-generated-doi"
     urnGeneratorMock.next _ expects () never()
     doiGeneratorMock.next _ expects () returning Failure(new Exception("this text is ignored"))
 
