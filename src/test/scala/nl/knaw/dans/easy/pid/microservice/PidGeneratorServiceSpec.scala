@@ -81,7 +81,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     testSubscriber.assertValueCount(1)
     testSubscriber.assertNoErrors()
     testSubscriber.assertCompleted()
-    testSubscriber.assertUnsubscribed()
 
     resultMap should contain key uuid
 
@@ -124,7 +123,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     testSubscriber.assertValueCount(1)
     testSubscriber.assertNoErrors()
     testSubscriber.assertCompleted()
-    testSubscriber.assertUnsubscribed()
 
     resultMap should contain key uuid // processed the given item
 
@@ -157,7 +155,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     testSubscriber.assertNoValues()
     testSubscriber.assertNoErrors()
     testSubscriber.assertCompleted()
-    testSubscriber.assertUnsubscribed()
 
     inbox should have size 1
     inbox should contain (json)
