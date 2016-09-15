@@ -33,14 +33,13 @@ package object microservice {
   type ResponseDatastructure = String
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
 
-  val log = LoggerFactory.getLogger(getClass)
-
   case class GeneratorSettings(namespace: String, dashPosition: Int, firstSeed: Long)
   case class Settings(home: File, inboxName: String, inboxPollTimeout: Duration, generatorSettings: Map[PidType, GeneratorSettings] = Map.empty)
 
   // TODO candidate for microservice library
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
     def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {
+      val log = LoggerFactory.getLogger(getClass)
       Observable(subscriber => {
         val worker = scheduler.createWorker
         val subscription = worker.scheduleRec {

@@ -112,8 +112,6 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     run.subscribe(testSubscriber)
 
     val inbox = hz.getQueue[String](settings.inboxName)
-    val resultMap = hz.getMap[UUID, String](responseDS)
-
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
     inbox.put(json)
 
@@ -124,6 +122,7 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     testSubscriber.assertNoErrors()
     testSubscriber.assertCompleted()
 
+    val resultMap = hz.getMap[UUID, String](responseDS)
     resultMap should contain key uuid // processed the given item
 
     service.safeToTerminate.getCount shouldBe 0 // successful onCompleted event
@@ -141,12 +140,11 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val testSubscriber = TestSubscriber[Response]()
     run.subscribe(testSubscriber)
 
-    val inbox = hz.getQueue[String](settings.inboxName)
-    val resultMap = hz.getMap[UUID, String](responseDS)
-
     service.stop() shouldBe true // successful service stopping
 
     testSubscriber.awaitTerminalEvent()
+
+    val inbox = hz.getQueue[String](settings.inboxName)
 
     // send a message after terminating the service
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
@@ -158,6 +156,58 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     inbox should have size 1
     inbox should contain (json)
+
+    val resultMap = hz.getMap[UUID, String](responseDS)
+    resultMap shouldBe empty
+  }
+
+  it should "discard invalid json" in {
+    val responseDS: ResponseDatastructure = "run-result-map"
+
+    val run = service.run()
+    val testSubscriber = TestSubscriber[Response]()
+    run.subscribe(testSubscriber)
+
+    val inbox = hz.getQueue[String](settings.inboxName)
+    val invalidJson = "this is completely invalid json"
+    inbox.put(invalidJson)
+
+    service.stop()
+
+    testSubscriber.awaitTerminalEvent()
+    testSubscriber.assertNoValues()
+    testSubscriber.assertNoErrors()
+    testSubscriber.assertCompleted()
+
+    inbox shouldBe empty
+
+    val resultMap = hz.getMap[UUID, String](responseDS)
+    resultMap shouldBe empty
+  }
+
+  it should "discard partially invalid json" in {
+    val responseDS: ResponseDatastructure = "run-result-map"
+    val uuid = UUID.randomUUID()
+    val pidType = URN
+
+    val run = service.run()
+    val testSubscriber = TestSubscriber[Response]()
+    run.subscribe(testSubscriber)
+
+    val inbox = hz.getQueue[String](settings.inboxName)
+    val invalidJson = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"invalidPidTypeKey":"${pidType.name}"}}"""
+    inbox.put(invalidJson)
+
+    service.stop()
+
+    testSubscriber.awaitTerminalEvent()
+    testSubscriber.assertNoValues()
+    testSubscriber.assertNoErrors()
+    testSubscriber.assertCompleted()
+
+    inbox shouldBe empty
+
+    val resultMap = hz.getMap[UUID, String](responseDS)
     resultMap shouldBe empty
   }
 

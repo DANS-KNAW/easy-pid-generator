@@ -21,6 +21,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 import com.hazelcast.core.HazelcastInstance
 import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
+import org.slf4j.LoggerFactory
 import rx.lang.scala.Observable
 
 import scala.language.postfixOps
@@ -30,6 +31,8 @@ class PidGeneratorService(jsonTransformer: JsonTransformer,
                           urns: PidGenerator,
                           dois: PidGenerator)
                          (implicit hz: HazelcastInstance, settings: Settings) {
+
+  val log = LoggerFactory.getLogger(getClass)
 
   val running = new AtomicBoolean(true)
   val safeToTerminate = new CountDownLatch(1)
@@ -47,7 +50,11 @@ class PidGeneratorService(jsonTransformer: JsonTransformer,
       .doOnSubscribe(log.trace(s"listening to queue $inboxName"))
       .doOnError(e => log.error(s"an error occured while listening to $inboxName: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
       .retry
-      .flatMap(jsonTransformer.parseJSON[RequestMessage](_).map(executeRequest).toObservable)
+      .flatMap(json => jsonTransformer.parseJSON[RequestMessage](json)
+        .toObservable
+        .doOnError(e => log.error(s"Could not parse the given json. Error message: ${e.getMessage}. JSON: $json"))
+        .onErrorResumeNext(_ => Observable.empty)) // consume and discard error
+      .map(executeRequest)
       .doOnCompleted {
         log.trace(s"stop listening to queue $inboxName; safe to terminate now...")
         safeToTerminate.countDown()
