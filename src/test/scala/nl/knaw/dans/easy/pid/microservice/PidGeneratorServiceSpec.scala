@@ -115,6 +115,10 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
     inbox.put(json)
 
+    while (!inbox.isEmpty) {
+      // wait until invalidJson is take out of the inbox
+    }
+
     service.stop() shouldBe true // successful service stopping
 
     testSubscriber.awaitTerminalEvent()
@@ -172,6 +176,10 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val invalidJson = "this is completely invalid json"
     inbox.put(invalidJson)
 
+    while (!inbox.isEmpty) {
+      // wait until invalidJson is take out of the inbox
+    }
+
     service.stop()
 
     testSubscriber.awaitTerminalEvent()
@@ -197,6 +205,10 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val inbox = hz.getQueue[String](settings.inboxName)
     val invalidJson = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"invalidPidTypeKey":"${pidType.name}"}}"""
     inbox.put(invalidJson)
+
+    while (!inbox.isEmpty) {
+      // wait until invalidJson is take out of the inbox
+    }
 
     service.stop()
 
