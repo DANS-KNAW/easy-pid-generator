@@ -15,8 +15,9 @@
  */
 package nl.knaw.dans.easy.pid
 
-import com.typesafe.config.Config
-
+/**
+ * Temporary interface to the service, for use by Services
+ */
 trait Service {
   def start()
 

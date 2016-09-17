@@ -29,7 +29,7 @@ object PidGeneratorService {
 
   val log = LoggerFactory.getLogger(getClass)
 
-  val home = new File(System.getenv("EASY_PID_GENERATOR_HOME"))
+  val home = new File(System.getProperty("app.home"))
   val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
   // TODO refactor to the other parsing library
   // TODO refactor to parsing the config to a Settings or Parameters object

@@ -18,10 +18,9 @@ package nl.knaw.dans.easy.pid
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
+import nl.knaw.dans.easy.pid.microservice.HazelcastService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
 import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatra.servlet.ScalatraListener
 import org.slf4j.LoggerFactory
 
 class ServiceStarter extends Daemon {
@@ -37,7 +36,7 @@ class ServiceStarter extends Daemon {
     mode = conf.getString("mode")
     service = mode match {
       case "rest" => RestService(conf)
-      case "hazelcast" => HazelCastService(conf)
+      case "hazelcast" => HazelcastService(conf)
       case mode => throw new IllegalArgumentException(s"Invalid mode: $mode. Valid modes are rest, hazelcast")
     }
   }
