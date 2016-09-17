@@ -16,7 +16,8 @@
 package nl.knaw.dans.easy.pid
 
 /**
- * Temporary interface to the service, for use by Services
+ * Temporary interface to the service, for use by ServiceStarter, so that we can have a REST and Hazelcast mode
+ * in one service.
  */
 trait Service {
   def start()
