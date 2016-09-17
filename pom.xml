@@ -27,8 +27,8 @@
     <artifactId>easy-pid-generator</artifactId>
     <version>1.x-SNAPSHOT</version>
     <inceptionYear>2015-2016</inceptionYear>
-    <name>EASY PID Generator nl.knaw.dans.easy.pid.Service</name>
-    <description>nl.knaw.dans.easy.pid.Service that generates unique Persistent Identifiers on demand. Supported types are URN and DOI</description>
+    <name>EASY PID Generator Service</name>
+    <description>Service that generates unique Persistent Identifiers on demand. Supported types are URN and DOI</description>
     <scm>
         <developerConnection>scm:git:https://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
         <tag>HEAD</tag>
