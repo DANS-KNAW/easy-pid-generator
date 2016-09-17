@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="3 minutes">
-	<property name="LOGDIR" value="${EASY_PID_GENERATOR_HOME}/log" />
+	<property name="LOGDIR" value="/var/log/easy-pid-generator" />
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>

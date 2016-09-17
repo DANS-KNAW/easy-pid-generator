@@ -14,6 +14,6 @@
 		<property name="hibernate.connection.username">{{ easy_pid_generator_db_username }}</property>
 		<property name="hibernate.connection.password">{{ easy_pid_generator_db_password }}</property>
 		<property name="hibernate.connection.url">jdbc:postgresql://{{ easy_pid_generator_db_host }}:{{ easy_pid_generator_db_port }}/pid_db</property>
-		<mapping resource="/seed.hbm.xml" />
+		<mapping resource="seed.hbm.xml" />
 	</session-factory>
 </hibernate-configuration>
