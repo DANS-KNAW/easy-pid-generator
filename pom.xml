@@ -21,7 +21,7 @@
     <parent>
         <groupId>nl.knaw.dans.shared</groupId>
         <artifactId>dans-scala-prototype</artifactId>
-        <version>1.32</version>
+        <version>1.33</version>
     </parent>
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
@@ -92,39 +92,31 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxscala_2.11</artifactId>
         </dependency>
-
-        <!-- TODO add these dependencies to a parent project -->
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>3.6.4</version>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>3.6.4</version>
             <classifier>tests</classifier>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-client</artifactId>
-            <version>3.6.4</version>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-scala_2.11</artifactId>
-            <version>3.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-native_2.11</artifactId>
-            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-ext_2.11</artifactId>
-            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>commons-daemon</groupId>
