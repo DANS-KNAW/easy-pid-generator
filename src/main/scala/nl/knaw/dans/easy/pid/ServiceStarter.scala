@@ -13,41 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid.microservice
+package nl.knaw.dans.easy.pid
 
-import com.hazelcast.Scala.client._
-import com.hazelcast.Scala.serialization
-import com.hazelcast.client.config.ClientConfig
-import com.hazelcast.core.HazelcastInstance
+import java.io.File
+
+import com.typesafe.config.ConfigFactory
+import nl.knaw.dans.easy.pid.microservice.HazelcastService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
+import org.eclipse.jetty.server.Server
 import org.slf4j.LoggerFactory
 
 class ServiceStarter extends Daemon {
-
   val log = LoggerFactory.getLogger(getClass)
-  var hz: HazelcastInstance = _
+  var server: Server = null
+  var mode: String = null
+  var service: Service = null
 
-  def init(context: DaemonContext): Unit = {
-    log.info("Initializing pid-generator service ...")
+  def init(ctx: DaemonContext): Unit = {
+    log.info("Initializing service ...")
+    val home = new File(System.getProperty("app.home"))
+    val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
+    mode = conf.getString("mode")
+    service = mode match {
+      case "rest" => RestService(conf)
+      case "hazelcast" => HazelcastService(conf)
+      case mode => throw new IllegalArgumentException(s"Invalid mode: $mode. Valid modes are rest, hazelcast")
+    }
   }
 
   def start(): Unit = {
-    log.info("Starting pid-generator service ...")
-
-    val conf = new ClientConfig()
-    serialization.Defaults.register(conf.getSerializationConfig)
-    hz = conf.newClient()
-
-    PidGeneratorService.run(hz) // can't pass this implicitly since `hz` is a variable
+    log.info("Starting service ...")
+    service.start()
   }
 
   def stop(): Unit = {
-    log.info("Stopping pid-generator service ...")
-    // TODO stop service
+    log.info("Stopping service ...")
+    service.stop()
   }
 
   def destroy(): Unit = {
-    // TODO do something?
-    log.info("Service pid-generator stopped.")
+    log.info("Service stopped.")
   }
+
 }

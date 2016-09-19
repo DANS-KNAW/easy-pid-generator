@@ -27,9 +27,8 @@ import scala.util.{Failure, Success, Try}
 class PidService extends ScalatraServlet with ScalateSupport {
   val log = LoggerFactory.getLogger(getClass)
 
-  val home = new File(System.getenv("EASY_PID_GENERATOR_HOME"))
+  val home = new File(System.getProperty("app.home"))
   val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
-
   val urns = PidGenerator.urnGenerator(conf, home)
   val dois = PidGenerator.doiGenerator(conf, home)
 
