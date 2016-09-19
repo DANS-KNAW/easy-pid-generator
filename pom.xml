@@ -143,6 +143,7 @@
             </releases>
             <url>http://maven.dans.knaw.nl/</url>
         </repository>
+        <!-- TODO can we get rid of this repository declaration again? -->
         <repository>
             <id>jcenter</id>
             <releases>
