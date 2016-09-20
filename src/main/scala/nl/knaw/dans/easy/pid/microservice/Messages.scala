@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid.microservice
 
 import java.util.UUID
 
+import nl.knaw.dans.easy.pid.{DOI, PidType, URN}
 import org.json4s.CustomSerializer
 import org.json4s.JsonAST.{JField, JObject, JString}
 
@@ -24,11 +25,6 @@ import org.json4s.JsonAST.{JField, JObject, JString}
   TODO: add version to RequestMessage (header)
   TODO: add version and sender to ResponseMessage (header)
  */
-
-// a PID can either be an URN or a DOI
-sealed abstract class PidType(val name: String)
-case object URN extends PidType("urn")
-case object DOI extends PidType("doi")
 
 // request
 case class RequestHead(requestID: UUID, responseDS: ResponseDatastructure)

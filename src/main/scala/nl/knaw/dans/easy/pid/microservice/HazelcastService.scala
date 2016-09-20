@@ -18,36 +18,28 @@ package nl.knaw.dans.easy.pid.microservice
 import com.hazelcast.Scala.client._
 import com.hazelcast.Scala.serialization
 import com.hazelcast.client.config.ClientConfig
-import com.hazelcast.core.HazelcastInstance
-import nl.knaw.dans.easy.pid.Service
 import nl.knaw.dans.easy.pid.generator.PidGenerator
-import org.apache.commons.daemon.DaemonContext
+import nl.knaw.dans.easy.pid.{Service, Settings}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
 import org.slf4j.LoggerFactory
 
-case class HazelcastService(conf: com.typesafe.config.Config) extends Service {
+class HazelcastService(implicit settings: Settings) extends Service {
   val log = LoggerFactory.getLogger(getClass)
-  implicit var hz: HazelcastInstance = _
-  var service: PidGeneratorService = _
 
-  def init(context: DaemonContext): Unit = {
-    log.info("Initializing pid-generator service ...")
+  log.info("Initializing pid-generator service ...")
 
-    implicit val settings = SettingsParser.parse
+  val hzConf = new ClientConfig()
+  serialization.Defaults.register(hzConf.getSerializationConfig)
+  implicit val hz = hzConf.newClient()
 
-    val hzConf = new ClientConfig()
-    serialization.Defaults.register(hzConf.getSerializationConfig)
-    hz = hzConf.newClient()
+  val service: PidGeneratorService = new PidGeneratorService(
+    JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
+    PidGenerator.urnGenerator,
+    PidGenerator.doiGenerator
+  )
 
-    service = new PidGeneratorService(
-      JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
-      PidGenerator.urnGenerator,
-      PidGenerator.doiGenerator
-    )
-  }
-
-  def start(): Unit = {
+  override def start(): Unit = {
     log.info("Starting pid-generator service ...")
 
     service.run()
@@ -55,12 +47,12 @@ case class HazelcastService(conf: com.typesafe.config.Config) extends Service {
       .subscribe()
   }
 
-  def stop(): Unit = {
+  override def stop(): Unit = {
     log.info("Stopping pid-generator service ...")
     service.stop()
   }
 
-  def destroy(): Unit = {
+  override def destroy(): Unit = {
     service.awaitTermination()
     hz.shutdown()
     log.info("Service pid-generator stopped.")

@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.io.File
 import java.util.UUID
 import java.util.concurrent.{BlockingQueue, TimeUnit}
 
@@ -32,9 +31,6 @@ package object microservice {
 
   type ResponseDatastructure = String
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
-
-  case class GeneratorSettings(namespace: String, dashPosition: Int, firstSeed: Long)
-  case class Settings(home: File, inboxName: String, inboxPollTimeout: Duration, generatorSettings: Map[PidType, GeneratorSettings] = Map.empty)
 
   // TODO candidate for microservice library
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {

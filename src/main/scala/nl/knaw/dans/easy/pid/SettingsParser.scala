@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid.microservice
+package nl.knaw.dans.easy.pid
 
 import java.io.File
 
@@ -25,17 +25,19 @@ import scala.language.postfixOps
 object SettingsParser {
 
   def parse: Settings = {
-    val home = new File(System.getenv("EASY_PID_GENERATOR_HOME"))
+    val home = new File(System.getProperty("app.home"))
     val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
     val inboxName = conf.getString("inbox-name")
     val pollTimeout = conf.getInt("inbox-poll-timeout") milliseconds
+    val port = conf.getInt("port")
+    val mode = getMode(conf.getString("mode"))
 
     val generators = Map[PidType, GeneratorSettings](
       DOI -> generatorSettings(DOI, conf),
       URN -> generatorSettings(URN, conf)
     )
 
-    Settings(home, inboxName, pollTimeout, generators)
+    Settings(home, generators, inboxName, pollTimeout, port, mode)
   }
 
   private def generatorSettings(pidType: PidType, conf: Config): GeneratorSettings = {
@@ -44,5 +46,12 @@ object SettingsParser {
       conf.getInt(s"types.${pidType.name}.dashPosition"),
       conf.getLong(s"types.${pidType.name}.firstSeed")
     )
+  }
+
+  private def getMode(mode: String) = {
+    mode match {
+      case "rest" => Rest
+      case "hazelcast" => Hazelcast
+    }
   }
 }

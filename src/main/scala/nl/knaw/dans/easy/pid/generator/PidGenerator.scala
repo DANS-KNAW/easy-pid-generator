@@ -18,8 +18,7 @@ package nl.knaw.dans.easy.pid.generator
 import java.io.File
 import java.lang.Math.pow
 
-import nl.knaw.dans.easy.pid.microservice.{DOI, PidType, Settings, URN}
-import nl.knaw.dans.easy.pid.DbBasedSeedStorage
+import nl.knaw.dans.easy.pid.{DOI, PidType, Settings, URN}
 
 import scala.util.Try
 

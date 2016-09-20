@@ -15,18 +15,16 @@
  */
 package nl.knaw.dans.easy.pid.rest
 
+import nl.knaw.dans.easy.pid.Settings
 import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
-import nl.knaw.dans.easy.pid.microservice.SettingsParser
 import org.scalatra._
 import org.scalatra.scalate.ScalateSupport
 import org.slf4j._
 
 import scala.util.{Failure, Success, Try}
 
-class PidService extends ScalatraServlet with ScalateSupport {
+class PidService(implicit settings: Settings) extends ScalatraServlet with ScalateSupport {
   val log = LoggerFactory.getLogger(getClass)
-
-  implicit val settings = SettingsParser.parse
 
   val urns = PidGenerator.urnGenerator
   val dois = PidGenerator.doiGenerator

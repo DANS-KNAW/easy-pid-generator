@@ -15,24 +15,27 @@
  */
 package nl.knaw.dans.easy.pid.rest
 
-import com.typesafe.config.Config
-import nl.knaw.dans.easy.pid.Service
+import nl.knaw.dans.easy.pid.{Service, Settings}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.scalatra.servlet.ScalatraListener
 
-case class RestService(conf: Config) extends Service {
-  val server = new Server(conf.getInt("port"))
+class RestService(implicit settings: Settings) extends Service {
+
+  val server = new Server(settings.port)
   val context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS)
   context.addEventListener(new ScalatraListener())
   server.setHandler(context)
 
-  override def start(): Unit = {
+  override def start() = {
     server.start()
   }
 
-  override def stop(): Unit = {
+  override def stop() = {
     server.stop()
+  }
+
+  override def destroy() = {
     server.destroy()
   }
 }
