@@ -21,6 +21,7 @@ import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.test.TestHazelcastInstanceFactory
 import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
+import nl.knaw.dans.easy.pid.{DOI, Hazelcast, Settings, URN}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
 import org.scalamock.scalatest.MockFactory
@@ -45,7 +46,9 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
   implicit val settings = Settings(
     home = null,
     inboxName = "pid-test-inbox",
-    inboxPollTimeout = 10 milliseconds)
+    inboxPollTimeout = 10 milliseconds,
+    port = 8080,
+    mode = Hazelcast)
 
   val service = new PidGeneratorService(
     JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
