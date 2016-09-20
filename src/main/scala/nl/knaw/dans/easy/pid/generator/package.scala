@@ -13,9 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid
 
-package object pid {
+package object generator {
   val MAX_RADIX = 36
 
   /**

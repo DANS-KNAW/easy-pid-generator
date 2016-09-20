@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 import org.scalatra.LifeCycle
-
 import javax.servlet.ServletContext
-import nl.knaw.dans.easy.pid.PidService
+
+import nl.knaw.dans.easy.pid.rest.PidService
 
 class ScalatraBootstrap extends LifeCycle {
 

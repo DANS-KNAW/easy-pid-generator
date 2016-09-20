@@ -20,7 +20,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.hazelcast.core.HazelcastInstance
-import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
+import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
 import org.slf4j.LoggerFactory
 import rx.lang.scala.Observable
 

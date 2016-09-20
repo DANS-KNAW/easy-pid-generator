@@ -19,17 +19,18 @@ import java.io.File
 
 import com.typesafe.config.ConfigFactory
 import nl.knaw.dans.easy.pid.microservice.HazelcastService
+import nl.knaw.dans.easy.pid.rest.RestService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
 import org.eclipse.jetty.server.Server
 import org.slf4j.LoggerFactory
 
 class ServiceStarter extends Daemon {
   val log = LoggerFactory.getLogger(getClass)
-  var server: Server = null
-  var mode: String = null
-  var service: Service = null
+  var server: Server = _
+  var mode: String = _
+  var service: Service = _
 
-  def init(ctx: DaemonContext): Unit = {
+  override def init(ctx: DaemonContext): Unit = {
     log.info("Initializing service ...")
     val home = new File(System.getProperty("app.home"))
     val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
@@ -41,18 +42,17 @@ class ServiceStarter extends Daemon {
     }
   }
 
-  def start(): Unit = {
+  override def start(): Unit = {
     log.info("Starting service ...")
     service.start()
   }
 
-  def stop(): Unit = {
+  override def stop(): Unit = {
     log.info("Stopping service ...")
     service.stop()
   }
 
-  def destroy(): Unit = {
+  override def destroy(): Unit = {
     log.info("Service stopped.")
   }
-
 }

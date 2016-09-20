@@ -19,7 +19,8 @@ import com.hazelcast.Scala.client._
 import com.hazelcast.Scala.serialization
 import com.hazelcast.client.config.ClientConfig
 import com.hazelcast.core.HazelcastInstance
-import nl.knaw.dans.easy.pid.{PidGenerator, Service}
+import nl.knaw.dans.easy.pid.Service
+import nl.knaw.dans.easy.pid.generator.PidGenerator
 import org.apache.commons.daemon.DaemonContext
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer

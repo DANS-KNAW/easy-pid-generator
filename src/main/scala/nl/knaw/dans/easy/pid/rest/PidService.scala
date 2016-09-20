@@ -13,8 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.rest
 
+import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
 import nl.knaw.dans.easy.pid.microservice.SettingsParser
 import org.scalatra._
 import org.scalatra.scalate.ScalateSupport

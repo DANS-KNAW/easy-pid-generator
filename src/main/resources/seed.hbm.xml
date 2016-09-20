@@ -4,7 +4,7 @@
 
 <hibernate-mapping>
 
-	<class name="nl.knaw.dans.easy.pid.Seed" table="seed" schema="public">
+	<class name="nl.knaw.dans.easy.pid.generator.Seed" table="seed" schema="public">
 		<id name="pidType" type="string">
 			<column name="type" length="64" />
 			<generator class="assigned" />

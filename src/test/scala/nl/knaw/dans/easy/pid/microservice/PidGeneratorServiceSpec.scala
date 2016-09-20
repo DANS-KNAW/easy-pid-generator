@@ -20,7 +20,7 @@ import java.util.UUID
 import com.hazelcast.config.Config
 import com.hazelcast.core.HazelcastInstance
 import com.hazelcast.test.TestHazelcastInstanceFactory
-import nl.knaw.dans.easy.pid.{PidGenerator, RanOutOfSeeds}
+import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
 import org.json4s.DefaultFormats
 import org.json4s.ext.UUIDSerializer
 import org.scalamock.scalatest.MockFactory
