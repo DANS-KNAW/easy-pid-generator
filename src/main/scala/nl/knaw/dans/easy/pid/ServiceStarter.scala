@@ -20,14 +20,14 @@ import nl.knaw.dans.easy.pid.rest.RestService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
 import org.slf4j.LoggerFactory
 
-class ServiceStarter extends Daemon {
+class ServiceStarter extends Daemon with SettingsParser {
   val log = LoggerFactory.getLogger(getClass)
   var service: Service = _
 
   override def init(ctx: DaemonContext): Unit = {
     log.info("Initializing service ...")
 
-    implicit val settings = SettingsParser.parse
+    implicit val settings = getSettings
     service = settings.mode match {
       case Rest => new RestService
       case Hazelcast => new HazelcastService

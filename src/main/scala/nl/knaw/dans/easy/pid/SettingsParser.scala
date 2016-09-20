@@ -22,9 +22,9 @@ import com.typesafe.config.{Config, ConfigFactory}
 import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 
-object SettingsParser {
+trait SettingsParser {
 
-  def parse: Settings = {
+  def getSettings = {
     val home = new File(System.getProperty("app.home"))
     val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
     val inboxName = conf.getString("inbox-name")
