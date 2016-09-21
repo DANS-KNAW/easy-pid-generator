@@ -15,7 +15,6 @@
  */
 package nl.knaw.dans.easy.pid.microservice
 
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
