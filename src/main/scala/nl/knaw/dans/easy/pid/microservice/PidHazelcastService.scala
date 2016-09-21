@@ -87,11 +87,11 @@ class PidHazelcastService(jsonTransformer: JsonTransformer,
 
   def send(response: Response): Unit = {
     val (uuid, responseDS, message) = response
-    val ds = hz.getMap[UUID, String](responseDS)
+    val ds = hz.getMap[String, String](responseDS)
     val json = jsonTransformer.writeJSON(message)
 
     log.trace(s"sending to $responseDS: ($uuid, $message)")
 
-    ds.put(uuid, json)
+    ds.put(uuid.toString, json)
   }
 }

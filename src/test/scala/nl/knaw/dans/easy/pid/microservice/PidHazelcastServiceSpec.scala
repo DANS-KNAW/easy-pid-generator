@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.pid.microservice
 import java.util.UUID
 
 import com.hazelcast.config.Config
-import com.hazelcast.core.HazelcastInstance
+import com.hazelcast.core.{HazelcastInstance, IMap, IQueue}
 import com.hazelcast.test.TestHazelcastInstanceFactory
 import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
 import nl.knaw.dans.easy.pid.{DOI, Hazelcast, Settings, URN}
@@ -61,9 +61,12 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     hz.shutdown()
   }
 
+  def getQueue: IQueue[String] = hz.getQueue(settings.inboxName)
+  def getResultMap(name: String): IMap[String, String] = hz.getMap(name)
+
   "run" should "observe the inbox queue and process only the first item that arrives in there" in {
     val responseDS: ResponseDatastructure = "run-result-map"
-    val uuid = UUID.randomUUID()
+    val uuid = UUID.randomUUID().toString
     val pidType = URN
 
     val urn: String = "my-generated-urn"
@@ -74,8 +77,8 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val testSubscriber = TestSubscriber[Response]()
     run.take(1).subscribe(testSubscriber)
 
-    val inbox = hz.getQueue[String](settings.inboxName)
-    val resultMap = hz.getMap[UUID, String](responseDS)
+    val inbox = getQueue
+    val resultMap = getResultMap(responseDS)
 
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
     inbox.put(json)
@@ -103,7 +106,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
   it should "observe the inbox queue and process the requests that arrive until the service is stopped" in {
     val responseDS: ResponseDatastructure = "run-result-map"
-    val uuid = UUID.randomUUID()
+    val uuid = UUID.randomUUID().toString
     val pidType = URN
 
     val urn: String = "my-generated-urn"
@@ -114,7 +117,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val testSubscriber = TestSubscriber[Response]()
     run.subscribe(testSubscriber)
 
-    val inbox = hz.getQueue[String](settings.inboxName)
+    val inbox = getQueue
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
     inbox.put(json)
 
@@ -129,7 +132,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     testSubscriber.assertNoErrors()
     testSubscriber.assertCompleted()
 
-    val resultMap = hz.getMap[UUID, String](responseDS)
+    val resultMap = getResultMap(responseDS)
     resultMap should contain key uuid // processed the given item
 
     service.safeToTerminate.getCount shouldBe 0 // successful onCompleted event
@@ -151,7 +154,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     testSubscriber.awaitTerminalEvent()
 
-    val inbox = hz.getQueue[String](settings.inboxName)
+    val inbox = getQueue
 
     // send a message after terminating the service
     val json = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"pidType":"${pidType.name}"}}"""
@@ -164,7 +167,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     inbox should have size 1
     inbox should contain (json)
 
-    val resultMap = hz.getMap[UUID, String](responseDS)
+    val resultMap = getResultMap(responseDS)
     resultMap shouldBe empty
   }
 
@@ -175,7 +178,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val testSubscriber = TestSubscriber[Response]()
     run.subscribe(testSubscriber)
 
-    val inbox = hz.getQueue[String](settings.inboxName)
+    val inbox = getQueue
     val invalidJson = "this is completely invalid json"
     inbox.put(invalidJson)
 
@@ -192,7 +195,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     inbox shouldBe empty
 
-    val resultMap = hz.getMap[UUID, String](responseDS)
+    val resultMap = getResultMap(responseDS)
     resultMap shouldBe empty
   }
 
@@ -205,7 +208,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
     val testSubscriber = TestSubscriber[Response]()
     run.subscribe(testSubscriber)
 
-    val inbox = hz.getQueue[String](settings.inboxName)
+    val inbox = getQueue
     val invalidJson = s"""{"head":{"requestID":"$uuid","responseDS":"$responseDS"},"body":{"invalidPidTypeKey":"${pidType.name}"}}"""
     inbox.put(invalidJson)
 
@@ -222,7 +225,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     inbox shouldBe empty
 
-    val resultMap = hz.getMap[UUID, String](responseDS)
+    val resultMap = getResultMap(responseDS)
     resultMap shouldBe empty
   }
 
@@ -290,7 +293,7 @@ class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePer
 
     service.send(response)
 
-    val resultMap = hz.getMap[UUID, String]("send-test-map")
-    resultMap.get(uuid) shouldBe s"""{"head":{"requestID":"$uuid"},"body":{"pidType":"urn","result":{"result":"test-result"}}}"""
+    val resultMap = getResultMap("send-test-map")
+    resultMap.get(uuid.toString) shouldBe s"""{"head":{"requestID":"$uuid"},"body":{"pidType":"urn","result":{"result":"test-result"}}}"""
   }
 }
