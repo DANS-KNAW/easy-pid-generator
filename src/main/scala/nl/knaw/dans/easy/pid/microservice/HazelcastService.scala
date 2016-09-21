@@ -33,7 +33,7 @@ class HazelcastService(implicit settings: Settings) extends Service {
   serialization.Defaults.register(hzConf.getSerializationConfig)
   implicit val hz = hzConf.newClient()
 
-  val service: PidGeneratorService = new PidGeneratorService(
+  val service: PidHazelcastService = new PidHazelcastService(
     JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
     PidGenerator.urnGenerator,
     PidGenerator.doiGenerator

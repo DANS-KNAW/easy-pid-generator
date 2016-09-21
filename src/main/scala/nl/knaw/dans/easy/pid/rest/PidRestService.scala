@@ -23,7 +23,7 @@ import org.slf4j._
 
 import scala.util.{Failure, Success, Try}
 
-class PidService(implicit settings: Settings) extends ScalatraServlet with ScalateSupport {
+class PidRestService(implicit settings: Settings) extends ScalatraServlet with ScalateSupport {
   val log = LoggerFactory.getLogger(getClass)
 
   val urns = PidGenerator.urnGenerator

@@ -17,12 +17,12 @@ import org.scalatra.LifeCycle
 import javax.servlet.ServletContext
 
 import nl.knaw.dans.easy.pid.SettingsParser
-import nl.knaw.dans.easy.pid.rest.PidService
+import nl.knaw.dans.easy.pid.rest.PidRestService
 
 class ScalatraBootstrap extends LifeCycle with SettingsParser {
 
   override def init(context: ServletContext) {
     implicit val settings = getSettings
-    context mount (new PidService, "/pids")
+    context mount (new PidRestService, "/pids")
   }
 }

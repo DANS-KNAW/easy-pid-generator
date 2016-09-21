@@ -26,6 +26,11 @@ package object pid {
   case object URN extends PidType("urn")
   case object DOI extends PidType("doi")
 
+  // the service can either run with REST or Hazelcast mode enabled
+  sealed abstract class Mode
+  case object Rest extends Mode
+  case object Hazelcast extends Mode
+
   case class GeneratorSettings(namespace: String, dashPosition: Int, firstSeed: Long)
   case class Settings(home: File,
                       generatorSettings: Map[PidType, GeneratorSettings] = Map.empty,
@@ -33,8 +38,4 @@ package object pid {
                       inboxPollTimeout: Duration,
                       port: Int,
                       mode: Mode)
-
-  sealed abstract class Mode
-  case object Rest extends Mode
-  case object Hazelcast extends Mode
 }

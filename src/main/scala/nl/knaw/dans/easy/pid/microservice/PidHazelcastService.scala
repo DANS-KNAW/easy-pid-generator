@@ -28,7 +28,7 @@ import rx.lang.scala.Observable
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-class PidGeneratorService(jsonTransformer: JsonTransformer,
+class PidHazelcastService(jsonTransformer: JsonTransformer,
                           urns: PidGenerator,
                           dois: PidGenerator)
                          (implicit hz: HazelcastInstance, settings: Settings) {

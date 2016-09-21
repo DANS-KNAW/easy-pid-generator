@@ -32,7 +32,7 @@ import scala.concurrent.duration.DurationInt
 import scala.language.postfixOps
 import scala.util.{Failure, Success}
 
-class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePerTest with BeforeAndAfter with MockFactory {
+class PidHazelcastServiceSpec extends FlatSpec with Matchers with OneInstancePerTest with BeforeAndAfter with MockFactory {
 
   val urnGeneratorMock = mock[PidGenerator]
   val doiGeneratorMock = mock[PidGenerator]
@@ -50,7 +50,7 @@ class PidGeneratorServiceSpec extends FlatSpec with Matchers with OneInstancePer
     port = 8080,
     mode = Hazelcast)
 
-  val service = new PidGeneratorService(
+  val service = new PidHazelcastService(
     JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
     urnGeneratorMock,
     doiGeneratorMock)

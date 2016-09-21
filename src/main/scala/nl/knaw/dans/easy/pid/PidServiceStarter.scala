@@ -20,7 +20,7 @@ import nl.knaw.dans.easy.pid.rest.RestService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
 import org.slf4j.LoggerFactory
 
-class ServiceStarter extends Daemon with SettingsParser {
+class PidServiceStarter extends Daemon with SettingsParser {
   val log = LoggerFactory.getLogger(getClass)
   var service: Service = _
 

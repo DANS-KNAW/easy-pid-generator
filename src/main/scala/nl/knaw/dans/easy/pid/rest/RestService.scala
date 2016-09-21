@@ -27,6 +27,8 @@ class RestService(implicit settings: Settings) extends Service {
   context.addEventListener(new ScalatraListener())
   server.setHandler(context)
 
+  // the actual PidRestService is mounted to the server in ScalatraBootstrap
+
   override def start() = {
     server.start()
   }
