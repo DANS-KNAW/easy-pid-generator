@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import org.scalatra.LifeCycle
 import javax.servlet.ServletContext
 
 import nl.knaw.dans.easy.pid.SettingsParser
 import nl.knaw.dans.easy.pid.rest.PidRestService
+import org.scalatra.LifeCycle
 
 class ScalatraBootstrap extends LifeCycle with SettingsParser {
 

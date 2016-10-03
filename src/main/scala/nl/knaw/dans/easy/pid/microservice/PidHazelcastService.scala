@@ -19,8 +19,8 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.atomic.AtomicBoolean
 
 import com.hazelcast.core.HazelcastInstance
-import nl.knaw.dans.easy.pid.{DOI, Settings, URN}
 import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
+import nl.knaw.dans.easy.pid.{DOI, Settings, URN}
 import org.slf4j.LoggerFactory
 import rx.lang.scala.Observable
 

@@ -20,9 +20,9 @@ import java.util.concurrent.{BlockingQueue, TimeUnit}
 
 import com.hazelcast.core.HazelcastInstanceNotActiveException
 import org.slf4j.LoggerFactory
-import rx.lang.scala.{Observable, Scheduler}
 import rx.lang.scala.schedulers.NewThreadScheduler
 import rx.lang.scala.subscriptions.CompositeSubscription
+import rx.lang.scala.{Observable, Scheduler}
 
 import scala.concurrent.duration.Duration
 import scala.util.{Failure, Success, Try}
