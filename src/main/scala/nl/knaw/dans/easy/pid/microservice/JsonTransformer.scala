@@ -13,26 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.microservice
 
-import com.typesafe.config.Config
-import org.eclipse.jetty.server.Server
-import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatra.servlet.ScalatraListener
+import org.json4s.Formats
+import org.json4s.native.{JsonMethods, Serialization}
 
-case class RestService(conf: Config) extends Service {
-  val server = new Server(conf.getInt("port"))
-  val context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS)
-  context.addEventListener(new ScalatraListener())
-  server.setHandler(context)
+import scala.util.Try
 
-  override def start(): Unit = {
-    server.start()
+// TODO candidate for microservice library
+class JsonTransformer(implicit formatters: Formats) {
+
+  def parseJSON[T](json: String)(implicit m: Manifest[T]): Try[T] = Try {
+    JsonMethods.parse(json).extract[T]
   }
 
-  override def stop(): Unit = {
-    server.stop()
-    server.destroy()
+  def writeJSON[T <: AnyRef](response: T): String = {
+    Serialization.write(response)
   }
 }
 
+object JsonTransformer {
+  def apply(implicit formatters: Formats) = new JsonTransformer
+}

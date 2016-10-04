@@ -15,44 +15,38 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
 import nl.knaw.dans.easy.pid.microservice.HazelcastService
+import nl.knaw.dans.easy.pid.rest.RestService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
-import org.eclipse.jetty.server.Server
 import org.slf4j.LoggerFactory
 
-class ServiceStarter extends Daemon {
+class PidServiceStarter extends Daemon with SettingsParser {
   val log = LoggerFactory.getLogger(getClass)
-  var server: Server = null
-  var mode: String = null
-  var service: Service = null
+  var service: Service = _
 
-  def init(ctx: DaemonContext): Unit = {
+  override def init(ctx: DaemonContext): Unit = {
     log.info("Initializing service ...")
-    val home = new File(System.getProperty("app.home"))
-    val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
-    mode = conf.getString("mode")
-    service = mode match {
-      case "rest" => RestService(conf)
-      case "hazelcast" => HazelcastService(conf)
-      case mode => throw new IllegalArgumentException(s"Invalid mode: $mode. Valid modes are rest, hazelcast")
+
+    implicit val settings = getSettings
+    service = settings.mode match {
+      case Rest => new RestService
+      case Hazelcast => new HazelcastService
+      case unknown => throw new IllegalArgumentException(s"Invalid mode: $unknown. Valid modes are 'rest', 'hazelcast'")
     }
   }
 
-  def start(): Unit = {
+  override def start(): Unit = {
     log.info("Starting service ...")
     service.start()
   }
 
-  def stop(): Unit = {
+  override def stop(): Unit = {
     log.info("Stopping service ...")
     service.stop()
   }
 
-  def destroy(): Unit = {
+  override def destroy(): Unit = {
+    service.destroy()
     log.info("Service stopped.")
   }
-
 }

@@ -13,16 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.generator
 
 import java.io.File
 import java.lang.Math.pow
 
-import com.typesafe.config.Config
+import nl.knaw.dans.easy.pid.{DOI, PidType, Settings, URN}
 
 import scala.util.Try
 
-case class PidGenerator(seed: SeedStorage, firstSeed: Long, format: Long => String) {
+trait PidGenerator {
+  def next(): Try[String]
+}
+
+case class PidGeneratorImpl(seed: SeedStorage, firstSeed: Long, format: Long => String) extends PidGenerator {
 
   def next(): Try[String] = seed.calculateAndPersist(getNextPidNumber).map(format)
 
@@ -45,25 +49,27 @@ case class PidGenerator(seed: SeedStorage, firstSeed: Long, format: Long => Stri
 }
 
 object PidGenerator {
-  private def generate(key: String, length: Int, conf: Config, home: File, illegalChars: Map[Char, Char]): PidGenerator = {
-    val firstSeed = conf.getLong(s"types.$key.firstSeed")
-    val storage = DbBasedSeedStorage(key, firstSeed, new File(home, "cfg/hibernate.conf.xml"))
+  private def generate(key: PidType, length: Int, illegalChars: Map[Char, Char])(implicit settings: Settings): PidGenerator = {
+    val generatorSettings = settings.generatorSettings(key)
+    val firstSeed = generatorSettings.firstSeed
+    val storage = DbBasedSeedStorage(key.name, firstSeed, new File(settings.home, "cfg/hibernate.conf.xml"))
+
     def formatter(pid: Long) = format(
-      prefix = conf.getString(s"types.$key.namespace"),
+      prefix = generatorSettings.namespace,
       radix = MAX_RADIX - illegalChars.size,
       len = length,
       charMap = illegalChars,
-      dashPos = conf.getInt(s"types.$key.dashPosition")
+      dashPos = generatorSettings.dashPosition
     )(pid)
 
-    PidGenerator(storage, firstSeed, formatter)
+    PidGeneratorImpl(storage, firstSeed, formatter)
   }
 
-  def urnGenerator(conf: Config, home: File): PidGenerator = {
-    generate("urn", 6, conf, home, Map.empty)
+  def urnGenerator(implicit settings: Settings): PidGenerator = {
+    generate(URN, 6, Map.empty)
   }
 
-  def doiGenerator(conf: Config, home: File): PidGenerator = {
-    generate("doi", 7, conf, home, Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v'))
+  def doiGenerator(implicit settings: Settings): PidGenerator = {
+    generate(DOI, 7, Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v'))
   }
 }

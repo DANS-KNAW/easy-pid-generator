@@ -13,24 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.rest
 
-import java.io.File
-
-import com.typesafe.config.ConfigFactory
+import nl.knaw.dans.easy.pid.Settings
+import nl.knaw.dans.easy.pid.generator.{PidGenerator, RanOutOfSeeds}
 import org.scalatra._
 import org.scalatra.scalate.ScalateSupport
 import org.slf4j._
 
 import scala.util.{Failure, Success, Try}
 
-class PidService extends ScalatraServlet with ScalateSupport {
+class PidRestService(implicit settings: Settings) extends ScalatraServlet with ScalateSupport {
   val log = LoggerFactory.getLogger(getClass)
 
-  val home = new File(System.getProperty("app.home"))
-  val conf = ConfigFactory.parseFile(new File(home, "cfg/application.conf"))
-  val urns = PidGenerator.urnGenerator(conf, home)
-  val dois = PidGenerator.doiGenerator(conf, home)
+  val urns = PidGenerator.urnGenerator
+  val dois = PidGenerator.doiGenerator
 
   log.info("PID Generator Service running ...")
       

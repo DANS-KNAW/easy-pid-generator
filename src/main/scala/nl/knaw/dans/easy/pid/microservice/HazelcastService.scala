@@ -18,26 +18,44 @@ package nl.knaw.dans.easy.pid.microservice
 import com.hazelcast.Scala.client._
 import com.hazelcast.Scala.serialization
 import com.hazelcast.client.config.ClientConfig
-import com.hazelcast.core.HazelcastInstance
-import nl.knaw.dans.easy.pid.Service
-import org.apache.commons.daemon.{Daemon, DaemonContext}
+import nl.knaw.dans.easy.pid.generator.PidGenerator
+import nl.knaw.dans.easy.pid.{Service, Settings}
+import org.json4s.DefaultFormats
+import org.json4s.ext.UUIDSerializer
 import org.slf4j.LoggerFactory
 
-case class HazelcastService(conf: com.typesafe.config.Config) extends Service {
+class HazelcastService(implicit settings: Settings) extends Service {
   val log = LoggerFactory.getLogger(getClass)
-  var hz: HazelcastInstance = _
+
+  log.info("Initializing pid-generator service ...")
+
+  val hzConf = new ClientConfig()
+  serialization.Defaults.register(hzConf.getSerializationConfig)
+  implicit val hz = hzConf.newClient()
+
+  val service: PidHazelcastService = new PidHazelcastService(
+    JsonTransformer(DefaultFormats + UUIDSerializer + PidTypeSerializer + ResponseResultSerializer),
+    PidGenerator.urnGenerator,
+    PidGenerator.doiGenerator
+  )
 
   override def start(): Unit = {
-    log.info("Running as Hazelcast client ...")
-    val conf = new ClientConfig()
-    serialization.Defaults.register(conf.getSerializationConfig)
-    hz = conf.newClient()
-    PidGeneratorService.run(hz) // can't pass this implicitly since `hz` is a variable
+    log.info("Starting pid-generator service ...")
+
+    service.run()
+      .doOnError(e => log.error(s"an error occured in the PID service: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
+      .subscribe()
   }
 
   override def stop(): Unit = {
-    log.info("Stopping Hazelcastclient...")
-    // TODO stop service
+    log.info("Stopping pid-generator service ...")
+    service.stop()
+  }
+
+  override def destroy(): Unit = {
+    service.awaitTermination()
+    hz.shutdown()
+    log.info("Service pid-generator stopped.")
   }
 }
 

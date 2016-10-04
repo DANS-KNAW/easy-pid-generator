@@ -16,32 +16,60 @@
 package nl.knaw.dans.easy.pid
 
 import java.util.UUID
-import java.util.concurrent.BlockingQueue
+import java.util.concurrent.{BlockingQueue, TimeUnit}
 
-import rx.lang.scala.{Observable, Scheduler}
+import com.hazelcast.core.HazelcastInstanceNotActiveException
+import org.slf4j.LoggerFactory
 import rx.lang.scala.schedulers.NewThreadScheduler
+import rx.lang.scala.subscriptions.CompositeSubscription
+import rx.lang.scala.{Observable, Scheduler}
+
+import scala.concurrent.duration.Duration
+import scala.util.{Failure, Success, Try}
 
 package object microservice {
 
   type ResponseDatastructure = String
   type Response = (UUID, ResponseDatastructure, ResponseMessage)
 
+  // TODO candidate for microservice library
   implicit class ObserveBlockingQueue[T](val queue: BlockingQueue[T]) extends AnyVal {
-    def observe(scheduler: Scheduler = NewThreadScheduler()): Observable[T] = {
+    def observe(timeout: Duration, scheduler: Scheduler = NewThreadScheduler())(running: () => Boolean): Observable[T] = {
+      val log = LoggerFactory.getLogger(getClass)
       Observable(subscriber => {
         val worker = scheduler.createWorker
         val subscription = worker.scheduleRec {
           try {
-            val t = queue.take()
-            subscriber.onNext(t)
+            if (running()) {
+              Option(queue.poll(timeout.toMillis, TimeUnit.MILLISECONDS)).foreach(t => {
+                log.trace(s"received new item: $t")
+                subscriber.onNext(t)
+              })
+            }
+            else {
+              log.trace("no longer running; completing the stream")
+              subscriber.onCompleted()
+            }
           }
           catch {
-            case e: Throwable => subscriber.onError(e)
+            case e: HazelcastInstanceNotActiveException => subscriber.onCompleted()
+            case e: Throwable =>
+              log.debug(s"exception caught while polling the queue: ${e.getClass.getSimpleName} - ${e.getMessage}", e)
+              subscriber.onError(e)
           }
         }
-        subscriber.add(subscription)
-        subscriber.add(worker)
+        subscriber.add(CompositeSubscription(subscription, worker))
       })
+    }
+  }
+
+  // TODO candidate for common library!
+  implicit class TryToObservable[+T](val t: Try[T]) extends AnyVal {
+    def toObservable: Observable[T] = {
+      t match {
+        case Success(s) => Observable.just(s)
+        case Failure(e) => Observable.error(e)
+      }
     }
   }
 }

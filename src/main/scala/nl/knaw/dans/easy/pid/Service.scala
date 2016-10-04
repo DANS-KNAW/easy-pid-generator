@@ -20,7 +20,9 @@ package nl.knaw.dans.easy.pid
  * in one service.
  */
 trait Service {
-  def start()
+  def start(): Unit
 
-  def stop()
+  def stop(): Unit
+
+  def destroy(): Unit
 }

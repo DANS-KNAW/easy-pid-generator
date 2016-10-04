@@ -21,7 +21,7 @@
     <parent>
         <groupId>nl.knaw.dans.shared</groupId>
         <artifactId>dans-scala-prototype</artifactId>
-        <version>1.32</version>
+        <version>1.33</version>
     </parent>
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
@@ -37,6 +37,10 @@
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_2.11</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.scalamock</groupId>
+            <artifactId>scalamock-scalatest-support_2.11</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
@@ -87,36 +91,47 @@
             <groupId>io.reactivex</groupId>
             <artifactId>rxscala_2.11</artifactId>
         </dependency>
-
-        <!-- TODO add these dependencies to a parent project -->
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast</artifactId>
-            <version>3.6.4</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-client</artifactId>
-            <version>3.6.4</version>
         </dependency>
         <dependency>
             <groupId>com.hazelcast</groupId>
             <artifactId>hazelcast-scala_2.11</artifactId>
-            <version>3.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-native_2.11</artifactId>
-            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.json4s</groupId>
             <artifactId>json4s-ext_2.11</artifactId>
-            <version>3.4.0</version>
         </dependency>
         <dependency>
             <groupId>commons-daemon</groupId>
             <artifactId>commons-daemon</artifactId>
+        </dependency>
+
+        <!--
+        TODO remove this dependency as of Hazelcast 3.8.
+        See issue https://github.com/hazelcast/hazelcast/issues/8868 and
+        pull request https://github.com/hazelcast/hazelcast/pull/8872
+         -->
+        <dependency>
+            <!-- required for hazelcast test classes -->
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
     <repositories>
@@ -127,6 +142,7 @@
             </releases>
             <url>http://maven.dans.knaw.nl/</url>
         </repository>
+        <!-- TODO can we get rid of this repository declaration again? -->
         <repository>
             <id>jcenter</id>
             <releases>

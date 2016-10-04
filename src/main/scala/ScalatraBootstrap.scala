@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import javax.servlet.ServletContext
+
+import nl.knaw.dans.easy.pid.SettingsParser
+import nl.knaw.dans.easy.pid.rest.PidRestService
 import org.scalatra.LifeCycle
 
-import javax.servlet.ServletContext
-import nl.knaw.dans.easy.pid.PidService
-
-class ScalatraBootstrap extends LifeCycle {
+class ScalatraBootstrap extends LifeCycle with SettingsParser {
 
   override def init(context: ServletContext) {
-
-    context mount (new PidService, "/pids")
+    implicit val settings = getSettings
+    context mount (new PidRestService, "/pids")
   }
 }
