@@ -15,7 +15,7 @@ EXEC="/usr/bin/jsvc"
 APPHOME="/opt/easy-pid-generator"
 JAVA_HOME="/usr/lib/jvm/jre"
 CLASSPATH="$APPHOME/bin/$NAME.jar:`echo $APPHOME/lib/*.jar | sed 's/ /:/g'`"
-CLASS="nl.knaw.dans.easy.pid.PidServiceStarter"
+CLASS="nl.knaw.dans.easy.pid.ServiceStarter"
 ARGS=""
 USER="easy_pid_generator"
 PID="/var/run/$NAME.pid"
@@ -25,21 +25,45 @@ ERRFILE="/var/log/$NAME/$NAME.err"
 jsvc_exec()
 {
     cd $APPHOME
-    $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID \
+    $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID -wait 20 \
           -Dapp.home=$APPHOME -Dconfig.file=$APPHOME/cfg/application.conf \
           -Dlogback.configurationFile=$APPHOME/cfg/logback.xml $1 $CLASS $ARGS
 }
 
+start_jsvc_exec()
+{
+    echo "Starting $NAME ..."
+    jsvc_exec
+
+    local exitcode=$?
+
+    if [[ $exitcode == 0 ]]; then
+        echo "$NAME has started."
+    else
+        echo "$NAME did not start successfully. exit code is $exitcode"
+    fi
+}
+
+stop_jsvc_exec()
+{
+    echo "Stopping $NAME ..."
+    jsvc_exec "-stop"
+
+    local exitcode=$?
+
+    if [[ $exitcode == 0 ]]; then
+        echo "$NAME has stopped."
+    else
+        echo "$NAME did not stop successfully. exit code is $exitcode"
+    fi
+}
+
 case "$1" in
     start)
-        echo "Starting $NAME ..."
-        jsvc_exec
-        echo "$NAME has started."
+        start_jsvc_exec
     ;;
     stop)
-        echo "Stopping $NAME ..."
-        jsvc_exec "-stop"
-        echo "$NAME has stopped."
+        stop_jsvc_exec
     ;;
     restart)
         if [ -f "$PID" ]; then
