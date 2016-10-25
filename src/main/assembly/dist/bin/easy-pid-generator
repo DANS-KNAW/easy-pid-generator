@@ -55,7 +55,12 @@ stop_jsvc_exec()
 
 case "$1" in
     start)
-        start_jsvc_exec
+        if [ -f "$PID" ]; then
+            start_jsvc_exec
+        else
+            echo "$NAME is already running, no action taken"
+            exit 1
+        fi
     ;;
     stop)
         stop_jsvc_exec
