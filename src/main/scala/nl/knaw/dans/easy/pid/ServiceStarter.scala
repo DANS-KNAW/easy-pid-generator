@@ -27,6 +27,8 @@ class ServiceStarter extends Daemon with SettingsParser {
   override def init(ctx: DaemonContext): Unit = {
     log = LoggerFactory.getLogger(getClass)
 
+    log.info("Initializing service ...")
+
     implicit val settings = getSettings
     service = settings.mode match {
       case Rest => new RestService
@@ -40,6 +42,7 @@ class ServiceStarter extends Daemon with SettingsParser {
   override def start(): Unit = {
     log.info("Starting service ...")
     service.start()
+    log.info("Service started ...")
   }
 
   override def stop(): Unit = {

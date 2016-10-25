@@ -26,8 +26,7 @@ import org.slf4j.LoggerFactory
 
 class HazelcastService(implicit settings: Settings) extends Service {
   val log = LoggerFactory.getLogger(getClass)
-
-  log.info("Initializing pid-generator service ...")
+  log.info("Initializing Hazelcast pid-generator service ...")
 
   val hzConf = new ClientConfig()
   serialization.Defaults.register(hzConf.getSerializationConfig)
@@ -40,7 +39,7 @@ class HazelcastService(implicit settings: Settings) extends Service {
   )
 
   override def start(): Unit = {
-    log.info("Starting pid-generator service ...")
+    log.info("Starting Hazelcast pid-generator service ...")
 
     service.run()
       .doOnError(e => log.error(s"an error occured in the PID service: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
@@ -48,14 +47,14 @@ class HazelcastService(implicit settings: Settings) extends Service {
   }
 
   override def stop(): Unit = {
-    log.info("Stopping pid-generator service ...")
+    log.info("Stopping Hazelcast pid-generator service ...")
     service.stop()
   }
 
   override def destroy(): Unit = {
     service.awaitTermination()
     hz.shutdown()
-    log.info("Service pid-generator stopped.")
+    log.info("Service Hazelcast pid-generator stopped.")
   }
 }
 

@@ -19,8 +19,11 @@ import nl.knaw.dans.easy.pid.{Service, Settings}
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
 import org.scalatra.servlet.ScalatraListener
+import org.slf4j.LoggerFactory
 
 class RestService(implicit settings: Settings) extends Service {
+  val log = LoggerFactory.getLogger(getClass)
+  log.info("Initializing REST pid-generator service ...")
 
   val server = new Server(settings.port)
   val context = new ServletContextHandler(ServletContextHandler.NO_SESSIONS)
@@ -30,15 +33,18 @@ class RestService(implicit settings: Settings) extends Service {
   // the actual PidRestService is mounted to the server in ScalatraBootstrap
 
   override def start() = {
+    log.info("Starting REST pid-generator service ...")
     server.start()
   }
 
   override def stop() = {
+    log.info("Stopping REST pid-generator service ...")
     server.stop()
   }
 
   override def destroy() = {
     server.destroy()
+    log.info("Service REST pid-generator stopped.")
   }
 }
 

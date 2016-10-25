@@ -29,7 +29,7 @@ class PidRestService(implicit settings: Settings) extends ScalatraServlet with S
   val urns = PidGenerator.urnGenerator
   val dois = PidGenerator.doiGenerator
 
-  log.info("PID Generator Service running ...")
+  log.info("PID Generator REST Service running ...")
       
   get("/") {
     Ok("Persistent Identifier Generator running")
