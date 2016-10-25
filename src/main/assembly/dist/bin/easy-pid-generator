@@ -21,11 +21,12 @@ USER="easy_pid_generator"
 PID="/var/run/$NAME.pid"
 OUTFILE="/var/log/$NAME/$NAME.out"
 ERRFILE="/var/log/$NAME/$NAME.err"
+WAIT_TIME=20
 
 jsvc_exec()
 {
     cd $APPHOME
-    $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID -wait 20 \
+    $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID -wait $WAIT_TIME \
           -Dapp.home=$APPHOME -Dconfig.file=$APPHOME/cfg/application.conf \
           -Dlogback.configurationFile=$APPHOME/cfg/logback.xml $1 $CLASS $ARGS
 }
@@ -34,13 +35,10 @@ start_jsvc_exec()
 {
     echo "Starting $NAME ..."
     jsvc_exec
-
-    local exitcode=$?
-
-    if [[ $exitcode == 0 ]]; then
+    if [[ $? == 0 ]]; then
         echo "$NAME has started."
     else
-        echo "$NAME did not start successfully. exit code is $exitcode"
+        echo "$NAME did not start successfully (exit code: $?)"
     fi
 }
 
@@ -48,13 +46,10 @@ stop_jsvc_exec()
 {
     echo "Stopping $NAME ..."
     jsvc_exec "-stop"
-
-    local exitcode=$?
-
-    if [[ $exitcode == 0 ]]; then
+    if [[ $? == 0 ]]; then
         echo "$NAME has stopped."
     else
-        echo "$NAME did not stop successfully. exit code is $exitcode"
+        echo "$NAME did not stop successfully (exit code: $?)"
     fi
 }
 
