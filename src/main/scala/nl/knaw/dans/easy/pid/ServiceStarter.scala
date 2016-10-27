@@ -27,7 +27,7 @@ class ServiceStarter extends Daemon with SettingsParser {
   override def init(ctx: DaemonContext): Unit = {
     log = LoggerFactory.getLogger(getClass)
 
-    log.info("Initializing service ...")
+    log.info("Initializing service...")
 
     implicit val settings = getSettings
     service = settings.mode match {
@@ -36,17 +36,17 @@ class ServiceStarter extends Daemon with SettingsParser {
       case unknown => throw new IllegalArgumentException(s"Invalid mode: $unknown. Valid modes are 'rest', 'hazelcast'")
     }
 
-    log.info("Service initialized ...")
+    log.info("Service initialized.")
   }
 
   override def start(): Unit = {
-    log.info("Starting service ...")
+    log.info("Starting service...")
     service.start()
-    log.info("Service started ...")
+    log.info("Service started.")
   }
 
   override def stop(): Unit = {
-    log.info("Stopping service ...")
+    log.info("Stopping service...")
     service.stop()
   }
 
