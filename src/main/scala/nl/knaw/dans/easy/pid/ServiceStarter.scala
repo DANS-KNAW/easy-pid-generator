@@ -18,14 +18,16 @@ package nl.knaw.dans.easy.pid
 import nl.knaw.dans.easy.pid.microservice.HazelcastService
 import nl.knaw.dans.easy.pid.rest.RestService
 import org.apache.commons.daemon.{Daemon, DaemonContext}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
-class PidServiceStarter extends Daemon with SettingsParser {
-  val log = LoggerFactory.getLogger(getClass)
+class ServiceStarter extends Daemon with SettingsParser {
+  var log: Logger = _
   var service: Service = _
 
   override def init(ctx: DaemonContext): Unit = {
-    log.info("Initializing service ...")
+    log = LoggerFactory.getLogger(getClass)
+
+    log.info("Initializing service...")
 
     implicit val settings = getSettings
     service = settings.mode match {
@@ -33,15 +35,18 @@ class PidServiceStarter extends Daemon with SettingsParser {
       case Hazelcast => new HazelcastService
       case unknown => throw new IllegalArgumentException(s"Invalid mode: $unknown. Valid modes are 'rest', 'hazelcast'")
     }
+
+    log.info("Service initialized.")
   }
 
   override def start(): Unit = {
-    log.info("Starting service ...")
+    log.info("Starting service...")
     service.start()
+    log.info("Service started.")
   }
 
   override def stop(): Unit = {
-    log.info("Stopping service ...")
+    log.info("Stopping service...")
     service.stop()
   }
 
