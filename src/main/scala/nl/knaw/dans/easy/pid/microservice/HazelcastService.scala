@@ -39,7 +39,7 @@ class HazelcastService(implicit settings: Settings) extends Service {
   )
 
   override def start(): Unit = {
-    log.info("Starting Hazelcast pid-generator service ...")
+    log.info("Starting Hazelcast pid-generator service...")
 
     service.run()
       .doOnError(e => log.error(s"an error occured in the PID service: ${e.getClass.getSimpleName} - ${e.getMessage}", e))
@@ -47,7 +47,7 @@ class HazelcastService(implicit settings: Settings) extends Service {
   }
 
   override def stop(): Unit = {
-    log.info("Stopping Hazelcast pid-generator service ...")
+    log.info("Stopping Hazelcast pid-generator service...")
     service.stop()
   }
 

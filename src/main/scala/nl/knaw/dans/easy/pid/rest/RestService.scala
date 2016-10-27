@@ -33,12 +33,12 @@ class RestService(implicit settings: Settings) extends Service {
   // the actual PidRestService is mounted to the server in ScalatraBootstrap
 
   override def start() = {
-    log.info("Starting REST pid-generator service ...")
+    log.info("Starting REST pid-generator service...")
     server.start()
   }
 
   override def stop() = {
-    log.info("Stopping REST pid-generator service ...")
+    log.info("Stopping REST pid-generator service...")
     server.stop()
   }
 
