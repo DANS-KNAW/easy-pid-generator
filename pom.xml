@@ -77,6 +77,7 @@
         <dependency>
             <groupId>nl.knaw.dans.lib</groupId>
             <artifactId>dans-scala-lib</artifactId>
+            <version>1.2</version>
         </dependency>
 
         <!-- Apache Commons -->
@@ -145,14 +146,6 @@
             </releases>
             <url>http://maven.dans.knaw.nl/</url>
         </repository>
-        <!-- TODO can we get rid of this repository declaration again? -->
-        <repository>
-            <id>jcenter</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <url>http://jcenter.bintray.com</url>
-        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -181,10 +174,6 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
             </plugin>
-            <!--<plugin>-->
-            <!--<groupId>org.eclipse.jetty</groupId>-->
-            <!--<artifactId>jetty-maven-plugin</artifactId>-->
-            <!--</plugin>-->
             <plugin>
                 <groupId>org.scalatest</groupId>
                 <artifactId>scalatest-maven-plugin</artifactId>

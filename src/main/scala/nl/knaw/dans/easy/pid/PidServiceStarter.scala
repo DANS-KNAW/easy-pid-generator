@@ -19,6 +19,7 @@ import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
 import nl.knaw.dans.easy.pid.service.{ PidServiceComponent, PidServletComponent, ServletMounterComponent }
+import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
@@ -52,7 +53,7 @@ class PidServiceStarter extends Daemon
   override def init(context: DaemonContext): Unit = {
     logger.info("Initializing service ...")
 
-    // TODO nothing to do?
+    // nothing to do
 
     logger.info("Service initialized.")
   }
@@ -61,30 +62,30 @@ class PidServiceStarter extends Daemon
     logger.info("Starting service ...")
     databaseAccess.initConnectionPool()
       .flatMap(_ => service.start())
-      .ifSuccess(_ => logger.info("Service started."))
-      .ifFailure {
+      .doIfSuccess(_ => logger.info("Service started."))
+      .doIfFailure {
         case NonFatal(e) => logger.error(s"Service startup failed: ${ e.getMessage }", e)
       }
-      .onError(throw _)
+      .getOrRecover(throw _)
   }
 
   override def stop(): Unit = {
     logger.info("Stopping service ...")
     databaseAccess.closeConnectionPool()
       .flatMap(_ => service.stop())
-      .ifSuccess(_ => logger.info("Cleaning up ..."))
-      .ifFailure {
+      .doIfSuccess(_ => logger.info("Cleaning up ..."))
+      .doIfFailure {
         case NonFatal(e) => logger.error(s"Service stop failed: ${ e.getMessage }", e)
       }
-      .onError(throw _)
+      .getOrRecover(throw _)
   }
 
   override def destroy(): Unit = {
     service.destroy()
-      .ifSuccess(_ => logger.info("Service stopped."))
-      .ifFailure {
+      .doIfSuccess(_ => logger.info("Service stopped."))
+      .doIfFailure {
         case e => logger.error(s"Service destroy failed: ${ e.getMessage }", e)
       }
-      .onError(throw _)
+      .getOrRecover(throw _)
   }
 }

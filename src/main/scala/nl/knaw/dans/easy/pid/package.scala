@@ -15,8 +15,6 @@
  */
 package nl.knaw.dans.easy
 
-import scala.util.{ Failure, Success, Try }
-
 package object pid {
 
   sealed abstract class PidType(val name: String)
@@ -24,34 +22,4 @@ package object pid {
   case object URN extends PidType("urn")
 
   case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
-
-  implicit class TryExtensions[T](val t: Try[T]) extends AnyVal {
-    // TODO candidate for dans-scala-lib, see also implementation/documentation in easy-split-multi-deposit
-    def onError[S >: T](handle: Throwable => S): S = {
-      t match {
-        case Success(value) => value
-        case Failure(throwable) => handle(throwable)
-      }
-    }
-
-    def ifSuccess(f: T => Unit): Try[T] = {
-      t match {
-        case success @ Success(x) => Try {
-          f(x)
-          return success
-        }
-        case e => e
-      }
-    }
-
-    def ifFailure(f: PartialFunction[Throwable, Unit]): Try[T] = {
-      t match {
-        case failure @ Failure(e) if f.isDefinedAt(e) => Try {
-          f(e)
-          return failure
-        }
-        case x => x
-      }
-    }
-  }
 }

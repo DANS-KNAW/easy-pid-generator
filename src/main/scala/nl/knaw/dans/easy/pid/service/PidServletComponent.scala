@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid.service
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
+import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatra._
 
@@ -45,8 +46,8 @@ trait PidServletComponent {
 
     private def respond(result: Try[String]): ActionResult = {
       result.map(Ok(_))
-        .ifFailure { case e => logger.error(e.getMessage, e) }
-        .onError {
+        .doIfFailure { case e => logger.error(e.getMessage, e) }
+        .getOrRecover {
           case e: RanOutOfSeeds => NotFound(e.getMessage)
           case _ => InternalServerError("Error when retrieving previous seed or saving current seed")
         }

@@ -29,6 +29,7 @@ object PidGeneratorService extends DebugEnhancedLogging {
         service.destroy()
       }
     })
+    service.init(null)
     service.start()
   }
 }
