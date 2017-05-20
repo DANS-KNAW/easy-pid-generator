@@ -19,7 +19,6 @@ import nl.knaw.dans.easy.pid.{ PidType, PropertiesComponent, URN }
 
 trait URNGeneratorComponent extends PidGeneratorComponent {
   this: PropertiesComponent
-    with DatabaseComponent
     with SeedStorageComponent
     with PidFormatterComponent =>
 
