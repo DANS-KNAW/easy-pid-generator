@@ -26,10 +26,10 @@ import scala.util.{ Failure, Success }
 
 class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedStorageComponent with DatabaseComponent with DebugEnhancedLogging {
   implicit val connection: Connection = mock[Connection]
-  val database: Database = mock[Database]
+  override val database: Database = mock[Database]
   val seedStorage: SeedStorage = new SeedStorage {
-    val pidType: PidType = DOI
-    val firstSeed: Long = 654321
+    override val pidType: PidType = DOI
+    override val firstSeed: Long = 654321
   }
 
   "calculateAndPersist" should "succeed by returning the next PID after persisting this new one" in {

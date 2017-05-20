@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid.generator
 
 trait PidFormatterComponent {
 
+  // not a singleton, so no access point
   val formatter: PidFormatter
 
   trait PidFormatter {

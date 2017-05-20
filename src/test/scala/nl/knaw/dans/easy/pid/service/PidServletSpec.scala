@@ -30,10 +30,15 @@ class PidServletSpec extends PropertiesSupportFixture
   with ScalatraSuite
   with MockFactory
   with PidServletComponent
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with DOIGeneratorComponent
+  with URNGeneratorComponent
+  with PidFormatterComponent
+  with SeedStorageComponent
+  with DatabaseComponent
   with DebugEnhancedLogging {
 
+  val formatter: PidFormatter = mock[PidFormatter]
+  val database: Database = mock[Database]
   override val dois: DOIGenerator = mock[DOIGenerator]
   override val urns: URNGenerator = mock[URNGenerator]
   override val pidServlet: PidServlet = new PidServlet {}
@@ -55,7 +60,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   "post with URN request" should "return the next URN PID" in {
-    (urns.generate()(_: Connection)) expects * once() returning Success("urn output")
+    (urns.next()(_: Connection)) expects * once() returning Success("urn output")
     post("/", ("type", "urn")) {
       status shouldBe 200
       body shouldBe "urn output"
@@ -63,7 +68,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   it should "return a failure if the generator ran out of seeds" in {
-    (urns.generate()(_: Connection)) expects * once() returning Failure(RanOutOfSeeds(URN))
+    (urns.next()(_: Connection)) expects * once() returning Failure(RanOutOfSeeds(URN))
     post("/", ("type", "urn")) {
       status shouldBe 404
       body shouldBe "No more urn seeds available."
@@ -71,7 +76,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   it should "return a failure if the generator failed unexpectedly" in {
-    (urns.generate()(_: Connection)) expects * once() returning Failure(new Exception("unexpected failure"))
+    (urns.next()(_: Connection)) expects * once() returning Failure(new Exception("unexpected failure"))
     post("/", ("type", "urn")) {
       status shouldBe 500
       body shouldBe "Error when retrieving previous seed or saving current seed"
@@ -79,7 +84,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   "post with DOI request" should "return the next DOI PID" in {
-    (dois.generate()(_: Connection)) expects * once() returning Success("doi output")
+    (dois.next()(_: Connection)) expects * once() returning Success("doi output")
     post("/", ("type", "doi")) {
       status shouldBe 200
       body shouldBe "doi output"
@@ -87,7 +92,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   it should "return a failure if the generator ran out of seeds" in {
-    (dois.generate()(_: Connection)) expects * once() returning Failure(RanOutOfSeeds(DOI))
+    (dois.next()(_: Connection)) expects * once() returning Failure(RanOutOfSeeds(DOI))
     post("/", ("type", "doi")) {
       status shouldBe 404
       body shouldBe "No more doi seeds available."
@@ -95,7 +100,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   it should "return a failure if the generator failed unexpectedly" in {
-    (dois.generate()(_: Connection)) expects * once() returning Failure(new Exception("unexpected failure"))
+    (dois.next()(_: Connection)) expects * once() returning Failure(new Exception("unexpected failure"))
     post("/", ("type", "doi")) {
       status shouldBe 500
       body shouldBe "Error when retrieving previous seed or saving current seed"
@@ -110,7 +115,7 @@ class PidServletSpec extends PropertiesSupportFixture
   }
 
   "post with no request type" should "default to requesting a DOI" in {
-    (dois.generate()(_: Connection)) expects * once() returning Success("doi output")
+    (dois.next()(_: Connection)) expects * once() returning Success("doi output")
     post("/") {
       status shouldBe 200
       body shouldBe "doi output"

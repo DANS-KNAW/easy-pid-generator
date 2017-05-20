@@ -25,7 +25,7 @@ import scala.util.{ Failure, Try }
 trait SeedStorageComponent {
   this: DatabaseComponent with DebugEnhancedLogging =>
 
-  val seedStorage: SeedStorage
+  // not a singleton, so no access point
 
   trait SeedStorage {
 

@@ -27,11 +27,12 @@ import scala.io.Source
  */
 trait PropertiesComponent {
 
+  // singleton component, so access component here
   val properties: GeneralProperties
 
   trait GeneralProperties {
-    val version: String
-    val properties: PropertiesConfiguration
+    def version: String
+    def properties: PropertiesConfiguration
   }
 
   object GeneralProperties {

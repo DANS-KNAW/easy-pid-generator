@@ -15,7 +15,9 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.{ PidType, RanOutOfSeeds, SeedDatabaseFixture, URN }
+import java.sql.Connection
+
+import nl.knaw.dans.easy.pid.{ RanOutOfSeeds, SeedDatabaseFixture, URN }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalamock.scalatest.MockFactory
 
@@ -29,36 +31,38 @@ class PidGeneratorSpec extends SeedDatabaseFixture
   with DatabaseComponent
   with DebugEnhancedLogging {
 
-  val database: Database = new Database {}
-  val seedStorage: SeedStorage = new SeedStorage {
-    val pidType: PidType = URN
-    val firstSeed: Long = 1L
-  }
-  val formatter: PidFormatter = mock[PidFormatter]
+  override val database: Database = mock[Database]
+  private val seedStore: SeedStorage = mock[SeedStorage]
+  override val formatter: PidFormatter = mock[PidFormatter]
+
   val generator: PidGenerator = new PidGenerator {
-    val length: Int = 7
-    val illegalChars: Map[Char, Char] = Map('a' -> '0', 'b' -> '1')
-    val namespace: String = "test"
-    val dashPosition: Int = 3
+    override val length: Int = 7
+    override val illegalChars: Map[Char, Char] = Map('a' -> '0', 'b' -> '1')
+    override val namespace: String = "test"
+    override val dashPosition: Int = 3
+    override val seedStorage: SeedStorage = seedStore
   }
 
   "next" should "calculate the next PID and format it according to the formatter" in {
     val formattedPid = "output"
-    val pid = 654321L
-    val next = 96140546L
+    val nextPid = 96140546L
 
-    database.initSeed(seedStorage.pidType, pid) shouldBe a[Success[_]]
+    (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
+      (*, *) once() returning Success(nextPid)
     (formatter.format(_: String, _: Int, _: Int, _: Map[Char, Char], _: Int)(_: Long)) expects
-      ("test", 34, 7, Map('a' -> '0', 'b' -> '1'), 3, next) once() returning formattedPid
+      (generator.namespace,
+        36 - generator.illegalChars.size,
+        generator.length,
+        generator.illegalChars,
+        generator.dashPosition,
+        nextPid) once() returning formattedPid
 
     generator.next() should matchPattern { case Success(`formattedPid`) => }
-    database.getSeed(seedStorage.pidType) should matchPattern { case Success(Some(`next`)) => }
   }
 
-  it should "not return a next PID if the newly calculated PID is equal to the initial seed" in {
-    val pid = 1752523756L // with this PID, the next PID is 1L, which is equal to the initial PID
-
-    database.initSeed(seedStorage.pidType, pid) shouldBe a[Success[_]]
+  it should "fail if there is no new PID of the given type anymore" in {
+    (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
+      (*, *) once() returning Failure(RanOutOfSeeds(URN))
     (formatter.format(_: String, _: Int, _: Int, _: Map[Char, Char], _: Int)(_: Long)) expects
       (*, *, *, *, *, *) never()
 

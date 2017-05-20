@@ -22,6 +22,7 @@ import org.scalatra.LifeCycle
 trait ServletMounterComponent {
   this: PidServletComponent =>
 
+  // singleton component, so access component here
   val mounter: ServletMounter
 
   trait ServletMounter extends LifeCycle {

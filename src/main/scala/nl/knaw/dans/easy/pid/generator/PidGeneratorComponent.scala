@@ -23,7 +23,7 @@ import scala.util.Try
 trait PidGeneratorComponent {
   this: SeedStorageComponent with PidFormatterComponent =>
 
-  val generator: PidGenerator
+  // not a singleton, so no access point
 
   trait PidGenerator {
 
@@ -33,6 +33,7 @@ trait PidGeneratorComponent {
     val dashPosition: Int
     val illegalChars: Map[Char, Char]
     val length: Int
+    val seedStorage: SeedStorage
 
     def next()(implicit connection: Connection): Try[String] = {
       seedStorage.calculateAndPersist(getNextPidNumber).map(format)
@@ -54,6 +55,7 @@ trait PidGeneratorComponent {
       Option(newSeed).filterNot(seedStorage.firstSeed ==)
     }
 
+    // TODO move parameters for this function to the formatter
     protected def format(pid: Long): String = {
       formatter.format(
         prefix = namespace,

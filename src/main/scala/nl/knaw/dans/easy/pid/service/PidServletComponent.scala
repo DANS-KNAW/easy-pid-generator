@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid.service
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
+import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorComponent, URNGeneratorComponent }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatra._
@@ -24,11 +24,12 @@ import org.scalatra._
 import scala.util.Try
 
 trait PidServletComponent {
-  this: DOIGeneratorWiring
-    with URNGeneratorWiring
+  this: DOIGeneratorComponent
+    with URNGeneratorComponent
     with DatabaseAccessComponent
     with DebugEnhancedLogging =>
 
+  // singleton component, so access component here
   val pidServlet: PidServlet
 
   trait PidServlet extends ScalatraServlet {
@@ -56,11 +57,11 @@ trait PidServletComponent {
     post("/") {
       params.get("type")
         .map {
-          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urns.generate() })
-          case "doi" => respond(databaseAccess.doTransaction { implicit connection => dois.generate() })
+          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urns.next() })
+          case "doi" => respond(databaseAccess.doTransaction { implicit connection => dois.next() })
           case pidType => BadRequest(s"Unknown PID type '$pidType'")
         }
-        .getOrElse(respond(databaseAccess.doTransaction { implicit connection => dois.generate() }))
+        .getOrElse(respond(databaseAccess.doTransaction { implicit connection => dois.next() }))
     }
   }
 }

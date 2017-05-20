@@ -25,12 +25,15 @@ import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
 import scala.util.control.NonFatal
 
-class PidServiceStarter extends Daemon
+class PidServiceWiring extends Daemon
   with DebugEnhancedLogging
   with PropertiesComponent
   with DatabaseAccessComponent
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with DatabaseComponent
+  with SeedStorageComponent
+  with PidFormatterComponent
+  with DOIGeneratorComponent
+  with URNGeneratorComponent
   with PidServletComponent
   with ServletMounterComponent
   with PidServiceComponent {
@@ -44,6 +47,8 @@ class PidServiceStarter extends Daemon
     override val dbUsername: Option[String] = Option(properties.properties.getString("pid-generator.database.username"))
     override val dbPassword: Option[String] = Option(properties.properties.getString("pid-generator.database.password"))
   }
+  override lazy val database: Database = new Database {}
+  override lazy val formatter: PidFormatter = new PidFormatter {}
   override lazy val urns: URNGenerator = new URNGenerator {}
   override lazy val dois: DOIGenerator = new DOIGenerator {}
   override lazy val pidServlet: PidServlet = new PidServlet {}

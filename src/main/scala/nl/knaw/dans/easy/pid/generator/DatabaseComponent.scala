@@ -26,6 +26,7 @@ import scala.util.{ Failure, Success, Try }
 trait DatabaseComponent {
   this: DebugEnhancedLogging =>
 
+  // singleton component, so access component here
   val database: Database
 
   trait Database {

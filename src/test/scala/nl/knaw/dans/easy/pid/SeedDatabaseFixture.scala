@@ -18,14 +18,14 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.Files
 import java.sql.Connection
 
-import resource.managed
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import org.scalatest.BeforeAndAfter
+import org.scalatest.BeforeAndAfterEach
+import resource.managed
 
 import scala.io.Source
 
 trait SeedDatabaseFixture extends TestSupportFixture
-  with BeforeAndAfter
+  with BeforeAndAfterEach
   with DatabaseAccessComponent
   with DebugEnhancedLogging {
 
@@ -52,13 +52,15 @@ trait SeedDatabaseFixture extends TestSupportFixture
     }
   }
 
-  before {
+  override def beforeEach(): Unit =  {
+    super.beforeEach()
     databaseAccess.initConnectionPool()
   }
 
-  after {
+  override def afterEach(): Unit = {
     connection.close()
     databaseAccess.closeConnectionPool()
     Files.deleteIfExists(testDir.resolve("seed.db"))
+    super.afterEach()
   }
 }

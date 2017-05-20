@@ -15,21 +15,63 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.PropertiesSupportFixture
+import nl.knaw.dans.easy.pid._
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-class DOIGeneratorSpec extends PropertiesSupportFixture with DOIGeneratorWiring {
+import scala.util.{ Failure, Success }
 
+class DOIGeneratorSpec extends SeedDatabaseFixture
+  with PropertiesSupportFixture
+  with DOIGeneratorComponent
+  with PropertiesComponent
+  with SeedStorageComponent
+  with DatabaseComponent
+  with PidFormatterComponent
+  with DebugEnhancedLogging {
+
+  override val database: Database = new Database {}
+  override val formatter: PidFormatter = new PidFormatter {}
   override val dois: DOIGenerator = new DOIGenerator {}
 
-  "seedStorage" should "have the correct configured first seed" in {
+  "namespace" should "have the correct value based on the properties" in {
+    dois.namespace shouldBe "10.5072/dans-"
+  }
+
+  "dashPosition" should "have the correct value based on the properties" in {
+    dois.dashPosition shouldBe 3
+  }
+
+  "firstSeed" should "have the correct value based on the properties" in {
     dois.seedStorage.firstSeed shouldBe 1073741824L
   }
 
-  "generator" should "have the correct configured namespace" in {
-    dois.generator.namespace shouldBe "10.5072/dans-"
+  "next" should "return the initial DOI when it is never called before and store this DOI in the database" in {
+    val doi = dois.next()
+    doi shouldBe Success("10.5072/dans-x6f-kf6x")
+
+    inside(database.getSeed(DOI)) {
+      case Success(Some(seed)) =>
+        seed shouldBe 1073741824L
+        formatter.format(dois.namespace, 36 - dois.illegalChars.size, dois.length, dois.illegalChars, dois.dashPosition)(seed) shouldBe doi.get
+    }
   }
 
-  it should "have the correct configured dashPosition" in {
-    dois.generator.dashPosition shouldBe 3
+  it should "return the second DOI when it is called for the second PID and store this DOI in the database" in {
+    dois.next() shouldBe a[Success[_]]
+    val doi = dois.next()
+    doi shouldBe Success("10.5072/dans-x6f-kf66")
+
+    inside(database.getSeed(DOI)) {
+      case Success(Some(seed)) =>
+        seed shouldBe 1073741829L
+        formatter.format(dois.namespace, 36 - dois.illegalChars.size, dois.length, dois.illegalChars, dois.dashPosition)(seed) shouldBe doi.get
+    }
+  }
+
+  it should "fail when the seed in the database is the last seed available and leave the database unchanged" in {
+    database.initSeed(DOI, 43171047L) shouldBe a[Success[_]]
+    dois.next() should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
+
+    database.getSeed(DOI) shouldBe Success(Some(43171047L))
   }
 }

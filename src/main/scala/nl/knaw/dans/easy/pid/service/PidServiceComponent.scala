@@ -26,6 +26,7 @@ import scala.util.Try
 trait PidServiceComponent {
   this: ServletMounterComponent with DebugEnhancedLogging =>
 
+  // singleton component, so access component here
   val service: PidService
 
   class PidService(serverPort: Int) {
