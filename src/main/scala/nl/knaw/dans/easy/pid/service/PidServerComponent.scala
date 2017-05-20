@@ -23,13 +23,13 @@ import org.scalatra.servlet.ScalatraListener
 
 import scala.util.Try
 
-trait PidServiceComponent {
+trait PidServerComponent {
   this: ServletMounterComponent with DebugEnhancedLogging =>
 
   // singleton component, so access component here
-  val service: PidService
+  val server: PidServer
 
-  class PidService(serverPort: Int) {
+  class PidServer(serverPort: Int) {
     private val server = new Server(serverPort)
 
     new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
@@ -43,18 +43,18 @@ trait PidServiceComponent {
     logger.info(s"HTTP port is $serverPort")
 
     def start(): Try[Unit] = Try {
-      logger.info("Starting REST pid-generator service...")
+      logger.info("Starting REST pid-generator server...")
       server.start()
     }
 
     def stop(): Try[Unit] = Try {
-      logger.info("Stopping REST pid-generator service...")
+      logger.info("Stopping REST pid-generator server...")
       server.stop()
     }
 
     def destroy(): Try[Unit] = Try {
       server.destroy()
-      logger.info("Service REST pid-generator stopped.")
+      logger.info("REST pid-generator server stopped.")
     }
   }
 }

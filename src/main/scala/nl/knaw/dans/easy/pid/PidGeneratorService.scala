@@ -17,18 +17,20 @@ package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-object PidGeneratorService extends PidServiceWiring with DebugEnhancedLogging { self =>
+object PidGeneratorService extends DebugEnhancedLogging {
 
   def main(args: Array[String]): Unit = {
     logger.info("Starting PID Generator Service")
+    
+    val service = new PidServiceDaemon
 
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
-        self.stop()
-        self.destroy()
+        service.stop()
+        service.destroy()
       }
     })
-    self.init(null)
-    self.start()
+    service.init(null)
+    service.start()
   }
 }

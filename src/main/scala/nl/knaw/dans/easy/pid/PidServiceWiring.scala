@@ -18,15 +18,10 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.easy.pid.service.{ PidServiceComponent, PidServletComponent, ServletMounterComponent }
-import nl.knaw.dans.lib.error._
+import nl.knaw.dans.easy.pid.service.{ PidServerComponent, PidServletComponent, ServletMounterComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
-import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
-import scala.util.control.NonFatal
-
-class PidServiceWiring extends Daemon
-  with DebugEnhancedLogging
+object PidServiceWiring extends DebugEnhancedLogging
   with PropertiesComponent
   with DatabaseAccessComponent
   with DatabaseComponent
@@ -36,7 +31,7 @@ class PidServiceWiring extends Daemon
   with URNGeneratorComponent
   with PidServletComponent
   with ServletMounterComponent
-  with PidServiceComponent {
+  with PidServerComponent {
 
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
@@ -52,44 +47,5 @@ class PidServiceWiring extends Daemon
   override lazy val dois: DOIGenerator = new DOIGenerator {}
   override lazy val pidServlet: PidServlet = new PidServlet {}
   override lazy val mounter: ServletMounter = new ServletMounter {}
-  override lazy val service: PidService = new PidService(properties.properties.getInt("pid-generator.daemon.http.port"))
-
-  override def init(context: DaemonContext): Unit = {
-    logger.info("Initializing service ...")
-
-    // nothing to do
-
-    logger.info("Service initialized.")
-  }
-
-  override def start(): Unit = {
-    logger.info("Starting service ...")
-    databaseAccess.initConnectionPool()
-      .flatMap(_ => service.start())
-      .doIfSuccess(_ => logger.info("Service started."))
-      .doIfFailure {
-        case NonFatal(e) => logger.error(s"Service startup failed: ${ e.getMessage }", e)
-      }
-      .getOrRecover(throw _)
-  }
-
-  override def stop(): Unit = {
-    logger.info("Stopping service ...")
-    databaseAccess.closeConnectionPool()
-      .flatMap(_ => service.stop())
-      .doIfSuccess(_ => logger.info("Cleaning up ..."))
-      .doIfFailure {
-        case NonFatal(e) => logger.error(s"Service stop failed: ${ e.getMessage }", e)
-      }
-      .getOrRecover(throw _)
-  }
-
-  override def destroy(): Unit = {
-    service.destroy()
-      .doIfSuccess(_ => logger.info("Service stopped."))
-      .doIfFailure {
-        case e => logger.error(s"Service destroy failed: ${ e.getMessage }", e)
-      }
-      .getOrRecover(throw _)
-  }
+  override lazy val server: PidServer = new PidServer(properties.properties.getInt("pid-generator.daemon.http.port"))
 }
