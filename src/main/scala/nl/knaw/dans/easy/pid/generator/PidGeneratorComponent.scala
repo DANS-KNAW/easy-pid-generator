@@ -27,16 +27,11 @@ trait PidGeneratorComponent {
 
   trait PidGenerator {
 
-    private val MAX_RADIX = 36
-
-    val namespace: String
-    val dashPosition: Int
-    val illegalChars: Map[Char, Char]
-    val length: Int
     val seedStorage: SeedStorage
+    val formatter: PidFormatter
 
     def next()(implicit connection: Connection): Try[String] = {
-      seedStorage.calculateAndPersist(getNextPidNumber).map(format)
+      seedStorage.calculateAndPersist(getNextPidNumber).map(formatter.format)
     }
 
     /**
@@ -53,17 +48,6 @@ trait PidGeneratorComponent {
       val newSeed = (seed * factor + increment) % modulo
 
       Option(newSeed).filterNot(seedStorage.firstSeed ==)
-    }
-
-    // TODO move parameters for this function to the formatter
-    protected def format(pid: Long): String = {
-      formatter.format(
-        prefix = namespace,
-        radix = MAX_RADIX - illegalChars.size,
-        len = length,
-        charMap = illegalChars,
-        dashPos = dashPosition
-      )(pid)
     }
   }
 }

@@ -30,15 +30,14 @@ class DOIGeneratorSpec extends SeedDatabaseFixture
   with DebugEnhancedLogging {
 
   override val database: Database = new Database {}
-  override val formatter: PidFormatter = new PidFormatter {}
   override val dois: DOIGenerator = new DOIGenerator {}
 
   "namespace" should "have the correct value based on the properties" in {
-    dois.namespace shouldBe "10.5072/dans-"
+    dois.formatter.namespace shouldBe "10.5072/dans-"
   }
 
   "dashPosition" should "have the correct value based on the properties" in {
-    dois.dashPosition shouldBe 3
+    dois.formatter.dashPosition shouldBe 3
   }
 
   "firstSeed" should "have the correct value based on the properties" in {
@@ -52,7 +51,7 @@ class DOIGeneratorSpec extends SeedDatabaseFixture
     inside(database.getSeed(DOI)) {
       case Success(Some(seed)) =>
         seed shouldBe 1073741824L
-        formatter.format(dois.namespace, 36 - dois.illegalChars.size, dois.length, dois.illegalChars, dois.dashPosition)(seed) shouldBe doi.get
+        dois.formatter.format(seed) shouldBe doi.get
     }
   }
 
@@ -64,7 +63,7 @@ class DOIGeneratorSpec extends SeedDatabaseFixture
     inside(database.getSeed(DOI)) {
       case Success(Some(seed)) =>
         seed shouldBe 1073741829L
-        formatter.format(dois.namespace, 36 - dois.illegalChars.size, dois.length, dois.illegalChars, dois.dashPosition)(seed) shouldBe doi.get
+        dois.formatter.format(seed) shouldBe doi.get
     }
   }
 

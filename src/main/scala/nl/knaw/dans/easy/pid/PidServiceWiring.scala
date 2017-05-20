@@ -48,7 +48,6 @@ class PidServiceWiring extends Daemon
     override val dbPassword: Option[String] = Option(properties.properties.getString("pid-generator.database.password"))
   }
   override lazy val database: Database = new Database {}
-  override lazy val formatter: PidFormatter = new PidFormatter {}
   override lazy val urns: URNGenerator = new URNGenerator {}
   override lazy val dois: DOIGenerator = new DOIGenerator {}
   override lazy val pidServlet: PidServlet = new PidServlet {}

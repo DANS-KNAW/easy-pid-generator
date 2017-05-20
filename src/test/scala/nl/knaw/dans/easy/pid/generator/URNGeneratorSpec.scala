@@ -20,8 +20,6 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.{ Failure, Success }
 
-
-// last URN seed should be 1752523756L; the next PID is 1L, which is equal to the initial PID
 class URNGeneratorSpec extends SeedDatabaseFixture
   with PropertiesSupportFixture
   with URNGeneratorComponent
@@ -32,15 +30,14 @@ class URNGeneratorSpec extends SeedDatabaseFixture
   with DebugEnhancedLogging {
 
   override val database: Database = new Database {}
-  override val formatter: PidFormatter = new PidFormatter {}
   override val urns: URNGenerator = new URNGenerator {}
 
   "namespace" should "have the correct value based on the properties" in {
-    urns.namespace shouldBe "urn:nbn:nl:ui:13-"
+    urns.formatter.namespace shouldBe "urn:nbn:nl:ui:13-"
   }
 
   "dashPosition" should "have the correct value based on the properties" in {
-    urns.dashPosition shouldBe 4
+    urns.formatter.dashPosition shouldBe 4
   }
 
   "firstSeed" should "have the correct value based on the properties" in {
@@ -54,7 +51,7 @@ class URNGeneratorSpec extends SeedDatabaseFixture
     inside(database.getSeed(URN)) {
       case Success(Some(seed)) =>
         seed shouldBe 1L
-        formatter.format(urns.namespace, 36 - urns.illegalChars.size, urns.length, urns.illegalChars, urns.dashPosition)(seed) shouldBe urn.get
+        urns.formatter.format(seed) shouldBe urn.get
     }
   }
 
@@ -66,7 +63,7 @@ class URNGeneratorSpec extends SeedDatabaseFixture
     inside(database.getSeed(URN)) {
       case Success(Some(seed)) =>
         seed shouldBe 69074L
-        formatter.format(urns.namespace, 36 - urns.illegalChars.size, urns.length, urns.illegalChars, urns.dashPosition)(seed) shouldBe urn.get
+        urns.formatter.format(seed) shouldBe urn.get
     }
   }
 

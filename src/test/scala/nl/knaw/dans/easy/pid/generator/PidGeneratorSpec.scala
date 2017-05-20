@@ -33,14 +33,11 @@ class PidGeneratorSpec extends SeedDatabaseFixture
 
   override val database: Database = mock[Database]
   private val seedStore: SeedStorage = mock[SeedStorage]
-  override val formatter: PidFormatter = mock[PidFormatter]
+  private val pidFormatter = mock[PidFormatter]
 
   val generator: PidGenerator = new PidGenerator {
-    override val length: Int = 7
-    override val illegalChars: Map[Char, Char] = Map('a' -> '0', 'b' -> '1')
-    override val namespace: String = "test"
-    override val dashPosition: Int = 3
     override val seedStorage: SeedStorage = seedStore
+    override val formatter: PidFormatter = pidFormatter
   }
 
   "next" should "calculate the next PID and format it according to the formatter" in {
@@ -49,13 +46,7 @@ class PidGeneratorSpec extends SeedDatabaseFixture
 
     (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
       (*, *) once() returning Success(nextPid)
-    (formatter.format(_: String, _: Int, _: Int, _: Map[Char, Char], _: Int)(_: Long)) expects
-      (generator.namespace,
-        36 - generator.illegalChars.size,
-        generator.length,
-        generator.illegalChars,
-        generator.dashPosition,
-        nextPid) once() returning formattedPid
+    pidFormatter.format _ expects nextPid once() returning formattedPid
 
     generator.next() should matchPattern { case Success(`formattedPid`) => }
   }
@@ -63,8 +54,7 @@ class PidGeneratorSpec extends SeedDatabaseFixture
   it should "fail if there is no new PID of the given type anymore" in {
     (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
       (*, *) once() returning Failure(RanOutOfSeeds(URN))
-    (formatter.format(_: String, _: Int, _: Int, _: Map[Char, Char], _: Int)(_: Long)) expects
-      (*, *, *, *, *, *) never()
+    pidFormatter.format _ expects * never()
 
     generator.next() should matchPattern { case Failure(RanOutOfSeeds(URN)) => }
   }

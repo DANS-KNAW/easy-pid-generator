@@ -27,13 +27,15 @@ trait DOIGeneratorComponent extends PidGeneratorComponent {
 
   trait DOIGenerator extends PidGenerator {
 
-    override val length: Int = 7
-    override val illegalChars: Map[Char, Char] = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v')
-    override val namespace: String = properties.properties.getString("pid-generator.types.doi.namespace")
-    override val dashPosition: Int = properties.properties.getInt("pid-generator.types.doi.dashPosition")
     override val seedStorage: SeedStorage = new SeedStorage {
       override val pidType: PidType = DOI
       override val firstSeed: Long = properties.properties.getLong("pid-generator.types.doi.firstSeed")
+    }
+    override val formatter: PidFormatter = new PidFormatter {
+      override val length: Int = 7
+      override val illegalChars: Map[Char, Char] = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v')
+      override val namespace: String = properties.properties.getString("pid-generator.types.doi.namespace")
+      override val dashPosition: Int = properties.properties.getInt("pid-generator.types.doi.dashPosition")
     }
   }
 }

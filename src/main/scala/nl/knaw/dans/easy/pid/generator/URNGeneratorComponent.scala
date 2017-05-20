@@ -28,13 +28,15 @@ trait URNGeneratorComponent extends PidGeneratorComponent {
 
   trait URNGenerator extends PidGenerator {
 
-    override val length: Int = 6
-    override val illegalChars: Map[Char, Char] = Map.empty
-    override val namespace: String = properties.properties.getString("pid-generator.types.urn.namespace")
-    override val dashPosition: Int = properties.properties.getInt("pid-generator.types.urn.dashPosition")
     override val seedStorage: SeedStorage = new SeedStorage {
       override val pidType: PidType = URN
       override val firstSeed: Long = properties.properties.getLong("pid-generator.types.urn.firstSeed")
+    }
+    override val formatter: PidFormatter = new PidFormatter {
+      override val length: Int = 6
+      override val illegalChars: Map[Char, Char] = Map.empty
+      override val namespace: String = properties.properties.getString("pid-generator.types.urn.namespace")
+      override val dashPosition: Int = properties.properties.getInt("pid-generator.types.urn.dashPosition")
     }
   }
 }

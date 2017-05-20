@@ -18,10 +18,28 @@ package nl.knaw.dans.easy.pid.generator
 trait PidFormatterComponent {
 
   // not a singleton, so no access point
-  val formatter: PidFormatter
 
   trait PidFormatter {
 
+    private val MAX_RADIX = 36
+
+    val namespace: String
+    val dashPosition: Int
+    val illegalChars: Map[Char, Char]
+    val length: Int
+
+    def format(pid: Long): String = {
+      PidFormatter.format(
+        prefix = namespace,
+        radix = MAX_RADIX - illegalChars.size,
+        len = length,
+        charMap = illegalChars,
+        dashPos = dashPosition
+      )(pid)
+    }
+  }
+
+  object PidFormatter {
     /**
      * Formats a PID using the specs provided in the parameters.
      *
