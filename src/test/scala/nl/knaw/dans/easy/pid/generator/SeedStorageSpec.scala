@@ -24,7 +24,12 @@ import org.scalamock.scalatest.MockFactory
 
 import scala.util.{ Failure, Success }
 
-class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedStorageComponent with DatabaseComponent with DebugEnhancedLogging {
+class SeedStorageSpec extends TestSupportFixture
+  with MockFactory
+  with SeedStorageComponent
+  with DatabaseComponent
+  with DebugEnhancedLogging {
+
   implicit val connection: Connection = mock[Connection]
   override val database: Database = mock[Database]
   val seedStorage: SeedStorage = new SeedStorage {

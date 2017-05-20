@@ -20,9 +20,7 @@ import java.nio.file.{ Files, Path, Paths }
 import org.apache.commons.io.FileUtils
 import org.scalatest.{ FlatSpec, Inside, Matchers }
 
-trait TestSupportFixture extends FlatSpec
-  with Matchers
-  with Inside {
+trait TestSupportFixture extends FlatSpec with Matchers with Inside {
 
   lazy val testDir: Path = {
     val path = Paths.get(s"target/test/${ getClass.getSimpleName }").toAbsolutePath

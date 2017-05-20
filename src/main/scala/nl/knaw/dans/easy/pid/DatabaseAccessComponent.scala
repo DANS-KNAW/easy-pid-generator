@@ -32,7 +32,7 @@ trait DatabaseAccessComponent {
   // singleton component, so access component here
   val databaseAccess: DatabaseAccess
 
-  // TODO candidate for library
+  // TODO candidate for library - copied from easy-bag-index
   trait DatabaseAccess {
 
     type ConnectionPool = DataSource with AutoCloseable

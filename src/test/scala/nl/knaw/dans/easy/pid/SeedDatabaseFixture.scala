@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.nio.file.Files
+import java.nio.file.{ Files, Path }
 import java.sql.Connection
 
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
@@ -31,9 +31,11 @@ trait SeedDatabaseFixture extends TestSupportFixture
 
   implicit var connection: Connection = _
 
+  val databaseFile: Path = testDir.resolve("seed.db")
+
   override val databaseAccess = new DatabaseAccess {
     val dbDriverClassName: String = "org.sqlite.JDBC"
-    val dbUrl: String = s"jdbc:sqlite:${ testDir.resolve("seed.db").toString }"
+    val dbUrl: String = s"jdbc:sqlite:${ databaseFile.toString }"
     val dbUsername: Option[String] = Option.empty[String]
     val dbPassword: Option[String] = Option.empty[String]
 
@@ -43,8 +45,7 @@ trait SeedDatabaseFixture extends TestSupportFixture
       managed(pool.getConnection)
         .flatMap(connection => managed(connection.createStatement))
         .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/seed.sql").toURI)).map(_.mkString))
-        .map { case (statement, query) => statement.executeUpdate(query) }
-        .tried
+        .acquireAndGet { case (statement, query) => statement.executeUpdate(query) }
 
       connection = pool.getConnection
 
@@ -54,13 +55,13 @@ trait SeedDatabaseFixture extends TestSupportFixture
 
   override def beforeEach(): Unit =  {
     super.beforeEach()
+    Files.deleteIfExists(databaseFile)
     databaseAccess.initConnectionPool()
   }
 
   override def afterEach(): Unit = {
     connection.close()
     databaseAccess.closeConnectionPool()
-    Files.deleteIfExists(testDir.resolve("seed.db"))
     super.afterEach()
   }
 }

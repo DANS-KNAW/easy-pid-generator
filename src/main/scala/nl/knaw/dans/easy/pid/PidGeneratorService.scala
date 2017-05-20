@@ -21,7 +21,7 @@ object PidGeneratorService extends DebugEnhancedLogging {
 
   def main(args: Array[String]): Unit = {
     logger.info("Starting PID Generator Service")
-    
+
     val service = new PidServiceDaemon
 
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
