@@ -23,7 +23,7 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import scala.util.{ Failure, Try }
 
 trait SeedStorageComponent {
-  this: DatabaseComponent with DebugEnhancedLogging =>
+  this: SeedStorageComponent.Dependencies with DebugEnhancedLogging =>
 
   // not a singleton, so no access point
 
@@ -52,4 +52,8 @@ trait SeedStorageComponent {
         }
     }
   }
+}
+
+object SeedStorageComponent {
+  type Dependencies = DatabaseComponent
 }

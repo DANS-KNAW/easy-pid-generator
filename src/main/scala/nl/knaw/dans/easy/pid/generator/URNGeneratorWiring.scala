@@ -18,9 +18,7 @@ package nl.knaw.dans.easy.pid.generator
 import nl.knaw.dans.easy.pid.{ PidType, PropertiesComponent, URN }
 
 trait URNGeneratorWiring extends PidGeneratorComponent {
-  this: PropertiesComponent
-    with SeedStorageComponent
-    with PidFormatterComponent =>
+  this: URNGeneratorWiring.Dependencies =>
 
   // singleton component, so access component here
   val urns: URNGenerator
@@ -38,4 +36,8 @@ trait URNGeneratorWiring extends PidGeneratorComponent {
       override val dashPosition: Int = properties.properties.getInt("pid-generator.types.urn.dashPosition")
     }
   }
+}
+
+object URNGeneratorWiring {
+  type Dependencies = PidGeneratorComponent.Dependencies with PropertiesComponent
 }

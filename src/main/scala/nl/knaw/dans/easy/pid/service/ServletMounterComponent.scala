@@ -20,7 +20,7 @@ import javax.servlet.ServletContext
 import org.scalatra.LifeCycle
 
 trait ServletMounterComponent {
-  this: PidServletComponent =>
+  this: ServletMounterComponent.Dependencies =>
 
   // singleton component, so access component here
   val mounter: ServletMounter
@@ -30,4 +30,8 @@ trait ServletMounterComponent {
       context.mount(pidServlet, "/pids")
     }
   }
+}
+
+object ServletMounterComponent {
+  type Dependencies = PidServletComponent
 }

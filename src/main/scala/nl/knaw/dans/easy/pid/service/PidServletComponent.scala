@@ -24,10 +24,7 @@ import org.scalatra._
 import scala.util.Try
 
 trait PidServletComponent {
-  this: DOIGeneratorWiring
-    with URNGeneratorWiring
-    with DatabaseAccessComponent
-    with DebugEnhancedLogging =>
+  this: PidServletComponent.Dependencies with DebugEnhancedLogging =>
 
   // singleton component, so access component here
   val pidServlet: PidServlet
@@ -64,4 +61,8 @@ trait PidServletComponent {
         .getOrElse(respond(databaseAccess.doTransaction { implicit connection => dois.next() }))
     }
   }
+}
+
+object PidServletComponent {
+  type Dependencies = DOIGeneratorWiring with URNGeneratorWiring with DatabaseAccessComponent
 }

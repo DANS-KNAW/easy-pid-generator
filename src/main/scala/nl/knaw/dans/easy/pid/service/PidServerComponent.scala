@@ -24,7 +24,7 @@ import org.scalatra.servlet.ScalatraListener
 import scala.util.Try
 
 trait PidServerComponent {
-  this: ServletMounterComponent with DebugEnhancedLogging =>
+  this: PidServerComponent.Dependencies with DebugEnhancedLogging =>
 
   // singleton component, so access component here
   val server: PidServer
@@ -57,4 +57,8 @@ trait PidServerComponent {
       logger.info("REST pid-generator server stopped.")
     }
   }
+}
+
+object PidServerComponent {
+  type Dependencies = ServletMounterComponent
 }
