@@ -22,7 +22,7 @@ import scala.util.{ Failure, Success }
 
 class URNGeneratorSpec extends SeedDatabaseFixture
   with PropertiesSupportFixture
-  with URNGeneratorComponent
+  with URNGeneratorWiring
   with PropertiesComponent
   with SeedStorageComponent
   with DatabaseComponent

@@ -15,27 +15,27 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.{ DOI, PidType, PropertiesComponent }
+import nl.knaw.dans.easy.pid.{ PidType, PropertiesComponent, URN }
 
-trait DOIGeneratorComponent extends PidGeneratorComponent {
+trait URNGeneratorWiring extends PidGeneratorComponent {
   this: PropertiesComponent
     with SeedStorageComponent
     with PidFormatterComponent =>
 
   // singleton component, so access component here
-  val dois: DOIGenerator
+  val urns: URNGenerator
 
-  trait DOIGenerator extends PidGenerator {
+  trait URNGenerator extends PidGenerator {
 
     override val seedStorage: SeedStorage = new SeedStorage {
-      override val pidType: PidType = DOI
-      override val firstSeed: Long = properties.properties.getLong("pid-generator.types.doi.firstSeed")
+      override val pidType: PidType = URN
+      override val firstSeed: Long = properties.properties.getLong("pid-generator.types.urn.firstSeed")
     }
     override val formatter: PidFormatter = new PidFormatter {
-      override val length: Int = 7
-      override val illegalChars: Map[Char, Char] = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v')
-      override val namespace: String = properties.properties.getString("pid-generator.types.doi.namespace")
-      override val dashPosition: Int = properties.properties.getInt("pid-generator.types.doi.dashPosition")
+      override val length: Int = 6
+      override val illegalChars: Map[Char, Char] = Map.empty
+      override val namespace: String = properties.properties.getString("pid-generator.types.urn.namespace")
+      override val dashPosition: Int = properties.properties.getInt("pid-generator.types.urn.dashPosition")
     }
   }
 }

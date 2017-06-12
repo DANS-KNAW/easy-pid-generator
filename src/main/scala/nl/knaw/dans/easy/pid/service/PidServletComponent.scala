@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid.service
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorComponent, URNGeneratorComponent }
+import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatra._
@@ -24,8 +24,8 @@ import org.scalatra._
 import scala.util.Try
 
 trait PidServletComponent {
-  this: DOIGeneratorComponent
-    with URNGeneratorComponent
+  this: DOIGeneratorWiring
+    with URNGeneratorWiring
     with DatabaseAccessComponent
     with DebugEnhancedLogging =>
 

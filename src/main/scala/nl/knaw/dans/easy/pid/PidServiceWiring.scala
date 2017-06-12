@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.easy.pid.service.{ PidServerComponent, PidServletComponent, ServletMounterComponent }
+import nl.knaw.dans.easy.pid.service.ServiceWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 object PidServiceWiring extends DebugEnhancedLogging
@@ -27,11 +27,9 @@ object PidServiceWiring extends DebugEnhancedLogging
   with DatabaseComponent
   with SeedStorageComponent
   with PidFormatterComponent
-  with DOIGeneratorComponent
-  with URNGeneratorComponent
-  with PidServletComponent
-  with ServletMounterComponent
-  with PidServerComponent {
+  with DOIGeneratorWiring
+  with URNGeneratorWiring
+  with ServiceWiring {
 
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
@@ -45,7 +43,4 @@ object PidServiceWiring extends DebugEnhancedLogging
   override lazy val database: Database = new Database {}
   override lazy val urns: URNGenerator = new URNGenerator {}
   override lazy val dois: DOIGenerator = new DOIGenerator {}
-  override lazy val pidServlet: PidServlet = new PidServlet {}
-  override lazy val mounter: ServletMounter = new ServletMounter {}
-  override lazy val server: PidServer = new PidServer(properties.properties.getInt("pid-generator.daemon.http.port"))
 }

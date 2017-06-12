@@ -22,7 +22,7 @@ import scala.util.{ Failure, Success }
 
 class DOIGeneratorSpec extends SeedDatabaseFixture
   with PropertiesSupportFixture
-  with DOIGeneratorComponent
+  with DOIGeneratorWiring
   with PropertiesComponent
   with SeedStorageComponent
   with DatabaseComponent
