@@ -20,11 +20,7 @@ import nl.knaw.dans.easy.pid.{ DOI, PidType, PropertiesComponent }
 trait DOIGeneratorWiring extends PidGeneratorComponent {
   this: DOIGeneratorWiring.Dependencies =>
 
-  // singleton component, so access component here
-  val dois: DOIGenerator
-
-  trait DOIGenerator extends PidGenerator {
-
+  val doiGenerator: PidGenerator = new PidGenerator {
     override val seedStorage: SeedStorage = new SeedStorage {
       override val pidType: PidType = DOI
       override val firstSeed: Long = properties.properties.getLong("pid-generator.types.doi.firstSeed")

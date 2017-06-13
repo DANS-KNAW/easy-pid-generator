@@ -18,18 +18,18 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.easy.pid.service.ServiceWiring
+import nl.knaw.dans.easy.pid.service.ServerWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-object PidServiceWiring extends DebugEnhancedLogging
-  with PropertiesComponent
-  with DatabaseAccessComponent
-  with DatabaseComponent
-  with SeedStorageComponent
-  with PidFormatterComponent
+object PidServiceWiring extends ServerWiring
   with DOIGeneratorWiring
   with URNGeneratorWiring
-  with ServiceWiring {
+  with PidFormatterComponent
+  with SeedStorageComponent
+  with DatabaseComponent
+  with DatabaseAccessComponent
+  with PropertiesComponent
+  with DebugEnhancedLogging {
 
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
@@ -41,6 +41,4 @@ object PidServiceWiring extends DebugEnhancedLogging
     override val dbPassword: Option[String] = Option(properties.properties.getString("pid-generator.database.password"))
   }
   override lazy val database: Database = new Database {}
-  override lazy val urns: URNGenerator = new URNGenerator {}
-  override lazy val dois: DOIGenerator = new DOIGenerator {}
 }

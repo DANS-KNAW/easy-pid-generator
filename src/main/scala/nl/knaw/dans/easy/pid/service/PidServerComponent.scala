@@ -29,16 +29,18 @@ trait PidServerComponent {
   // singleton component, so access component here
   val server: PidServer
 
-  class PidServer(serverPort: Int) {
-    private val server = new Server(serverPort)
+  trait PidServer {
 
-    new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
-      addEventListener(new ScalatraListener() {
-        override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
-          (mounter.getClass.getSimpleName, mounter)
-        }
+    val serverPort: Int
+
+    private lazy val server = new Server(serverPort) {
+      this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
+        this.addEventListener(new ScalatraListener() {
+          override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
+            (mounter.getClass.getSimpleName, mounter)
+          }
+        })
       })
-      server.setHandler(this)
     }
     logger.info(s"HTTP port is $serverPort")
 
@@ -55,6 +57,12 @@ trait PidServerComponent {
     def destroy(): Try[Unit] = Try {
       server.destroy()
       logger.info("REST pid-generator server stopped.")
+    }
+  }
+
+  object PidServer {
+    def apply(port: Int): PidServer = new PidServer {
+      val serverPort: Int = port
     }
   }
 }

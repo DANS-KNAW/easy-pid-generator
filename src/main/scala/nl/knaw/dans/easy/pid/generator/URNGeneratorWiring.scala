@@ -20,11 +20,7 @@ import nl.knaw.dans.easy.pid.{ PidType, PropertiesComponent, URN }
 trait URNGeneratorWiring extends PidGeneratorComponent {
   this: URNGeneratorWiring.Dependencies =>
 
-  // singleton component, so access component here
-  val urns: URNGenerator
-
-  trait URNGenerator extends PidGenerator {
-
+  val urnGenerator: PidGenerator = new PidGenerator {
     override val seedStorage: SeedStorage = new SeedStorage {
       override val pidType: PidType = URN
       override val firstSeed: Long = properties.properties.getLong("pid-generator.types.urn.firstSeed")

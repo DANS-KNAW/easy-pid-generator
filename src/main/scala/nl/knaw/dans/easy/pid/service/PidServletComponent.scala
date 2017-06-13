@@ -54,11 +54,11 @@ trait PidServletComponent {
     post("/") {
       params.get("type")
         .map {
-          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urns.next() })
-          case "doi" => respond(databaseAccess.doTransaction { implicit connection => dois.next() })
+          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urnGenerator.next() })
+          case "doi" => respond(databaseAccess.doTransaction { implicit connection => doiGenerator.next() })
           case pidType => BadRequest(s"Unknown PID type '$pidType'")
         }
-        .getOrElse(respond(databaseAccess.doTransaction { implicit connection => dois.next() }))
+        .getOrElse(respond(databaseAccess.doTransaction { implicit connection => doiGenerator.next() }))
     }
   }
 }

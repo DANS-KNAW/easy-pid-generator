@@ -17,12 +17,14 @@ package nl.knaw.dans.easy.pid
 
 import java.nio.file.Files
 
+import nl.knaw.dans.easy.pid.generator.DatabaseComponent
 import org.scalatest.BeforeAndAfterEach
 
-import scala.sys.process._
 import scala.util.Success
 
-class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture with BeforeAndAfterEach {
+class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with DatabaseComponent {
+
+  override val database = new Database {}
 
   override def beforeEach(): Unit = {
     super.beforeEach()
@@ -35,13 +37,13 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
   "calling GET /" should "check that the service is up and running" in {
     PidGeneratorService.main(Array.empty)
 
-    call("curl http://localhost:8060/pids") shouldBe "Persistent Identifier Generator running"
+    callService() shouldBe successful
   }
 
   it should "return a 404 when using the incorrect url" in {
     PidGeneratorService.main(Array.empty)
 
-    call("curl http://localhost:8060/") should {
+    callService("") should {
       include ("Error 404 Not Found") and
         include ("HTTP ERROR 404") and
         include ("Problem accessing /. Reason:\n<pre>    Not Found")
@@ -58,7 +60,7 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
     PidGeneratorService.main(Array.empty)
 
     postUrn shouldBe "urn:nbn:nl:ui:13-0000-01"
-    PidServiceWiring.database.getSeed(URN) shouldBe Success(Some(1L))
+    database.getSeed(URN) shouldBe Success(Some(1L))
   }
 
   it should "retrieve the next URN if the service is called twice" in {
@@ -66,17 +68,17 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
 
     postUrn
     postUrn shouldBe "urn:nbn:nl:ui:13-001h-aq"
-    PidServiceWiring.database.getSeed(URN) shouldBe Success(Some(69074L))
+    database.getSeed(URN) shouldBe Success(Some(69074L))
   }
 
   it should "fail if there are no more URN seeds" in {
     val lastSeed = 1752523756L
-    PidServiceWiring.database.initSeed(URN, lastSeed) shouldBe a[Success[_]]
+    database.initSeed(URN, lastSeed) shouldBe a[Success[_]]
 
     PidGeneratorService.main(Array.empty)
 
     postUrn shouldBe "No more urn seeds available."
-    PidServiceWiring.database.getSeed(URN) shouldBe Success(Some(lastSeed))
+    database.getSeed(URN) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
@@ -91,7 +93,7 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
     PidGeneratorService.main(Array.empty)
 
     postDoi shouldBe "10.5072/dans-x6f-kf6x"
-    PidServiceWiring.database.getSeed(DOI) shouldBe Success(Some(1073741824L))
+    database.getSeed(DOI) shouldBe Success(Some(1073741824L))
   }
 
   it should "retrieve the next DOI if the service is called twice" in {
@@ -99,17 +101,17 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
 
     postDoi
     postDoi shouldBe "10.5072/dans-x6f-kf66"
-    PidServiceWiring.database.getSeed(DOI) shouldBe Success(Some(1073741829L))
+    database.getSeed(DOI) shouldBe Success(Some(1073741829L))
   }
 
   it should "fail if there are no more DOI seeds" in {
     val lastSeed = 43171047L
-    PidServiceWiring.database.initSeed(DOI, lastSeed) shouldBe a[Success[_]]
+    database.initSeed(DOI, lastSeed) shouldBe a[Success[_]]
 
     PidGeneratorService.main(Array.empty)
 
     postDoi shouldBe "No more doi seeds available."
-    PidServiceWiring.database.getSeed(DOI) shouldBe Success(Some(lastSeed))
+    database.getSeed(DOI) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
@@ -119,8 +121,4 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
 
     postDoi shouldBe "Error when retrieving previous seed or saving current seed"
   }
-
-  private def call(command: String): String = (command !! ProcessLogger(_ => ())).trim
-  private def postUrn = call("curl -X POST http://localhost:8060/pids?type=urn")
-  private def postDoi = call("curl -X POST http://localhost:8060/pids?type=doi")
 }
