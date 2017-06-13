@@ -21,9 +21,7 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.control.NonFatal
 
-class PidServiceDaemon extends Daemon with DebugEnhancedLogging {
-
-  import PidServiceWiring._
+class PidServiceDaemon extends Daemon with PidServiceWiring with DebugEnhancedLogging {
 
   override def init(context: DaemonContext): Unit = {
     logger.info("Initializing service ...")

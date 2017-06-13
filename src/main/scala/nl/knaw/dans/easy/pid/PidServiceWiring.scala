@@ -21,7 +21,7 @@ import nl.knaw.dans.easy.pid.generator._
 import nl.knaw.dans.easy.pid.service.ServerWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-object PidServiceWiring extends ServerWiring
+trait PidServiceWiring extends ServerWiring
   with DOIGeneratorWiring
   with URNGeneratorWiring
   with PidFormatterComponent
