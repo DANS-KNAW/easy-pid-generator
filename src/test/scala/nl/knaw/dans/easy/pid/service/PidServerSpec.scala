@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid.service
 
+import java.net.ConnectException
+
 import nl.knaw.dans.easy.pid.generator._
 import nl.knaw.dans.easy.pid.{ DatabaseAccessComponent, PropertiesSupportFixture, SeedDatabaseFixture, ServerTestSupportFixture }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
@@ -55,20 +57,20 @@ class PidServerSpec extends PropertiesSupportFixture with SeedDatabaseFixture wi
   it should "not be available when start isn't called" in {
     // no server start
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   "stop" should "terminate the server, such that it is no longer available" in {
     server.start() shouldBe a[Success[_]]
     server.stop() shouldBe a[Success[_]]
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   it should "do nothing when the server isn't started" in {
     server.stop() shouldBe a[Success[_]]
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   it should "do nothing when the server was already stopped" in {
@@ -76,7 +78,7 @@ class PidServerSpec extends PropertiesSupportFixture with SeedDatabaseFixture wi
     server.stop() shouldBe a[Success[_]]
     server.stop() shouldBe a[Success[_]] // calling stop twice
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   "destroy" should "destroy the server when it is already stopped" in {
@@ -84,13 +86,13 @@ class PidServerSpec extends PropertiesSupportFixture with SeedDatabaseFixture wi
     server.stop() shouldBe a[Success[_]]
     server.destroy() shouldBe a[Success[_]]
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   it should "do nothing when the server wasn't started nor stopped" in {
     server.destroy() shouldBe a[Success[_]]
 
-    a[RuntimeException] shouldBe thrownBy(callService())
+    a[ConnectException] shouldBe thrownBy(callService())
   }
 
   it should "fail if the server wasn't already stopped; the service should still be running" in {

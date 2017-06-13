@@ -56,7 +56,7 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
   }
 
   "calling POST /" should "return a 400" in {
-    call("curl -X POST http://localhost:8060/pids/urn") shouldBe "Cannot create PIDs at this URI"
+    callService("pids/urn", "POST") shouldBe "Cannot create PIDs at this URI"
   }
 
   "calling POST for URN" should "retrieve the first URN" in {

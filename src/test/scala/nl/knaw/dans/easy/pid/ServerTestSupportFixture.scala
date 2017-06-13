@@ -15,17 +15,34 @@
  */
 package nl.knaw.dans.easy.pid
 
-import scala.sys.process._
+import java.net.{ HttpURLConnection, URL }
+
+import org.apache.commons.io.IOUtils
+import resource._
 
 trait ServerTestSupportFixture {
 
-  def call(command: String): String = (command !! ProcessLogger(_ => ())).trim
+  def callService(path: String = "pids", method: String = "GET"): String = {
+    new URL(s"http://localhost:8060/$path").openConnection() match {
+      case conn: HttpURLConnection =>
+        managed {
+          conn.setConnectTimeout(1000)
+          conn.setReadTimeout(1000)
+          conn.setRequestMethod(method)
+          conn
+        }
+          .map(_.getResponseCode)
+          .acquireAndGet {
+            case code if code >= 200 && code < 300 => IOUtils.toString(conn.getInputStream)
+            case _ => IOUtils.toString(conn.getErrorStream)
+          }
+      case _ => throw new Exception
+    }
+  }
 
-  def callService(path: String = "pids"): String = call(s"curl http://localhost:8060/$path")
+  def postUrn: String = callService("pids?type=urn", "POST")
 
-  def postUrn: String = call("curl -X POST http://localhost:8060/pids?type=urn")
-
-  def postDoi: String = call("curl -X POST http://localhost:8060/pids?type=doi")
+  def postDoi: String = callService("pids?type=doi", "POST")
 
   def successful: String = "Persistent Identifier Generator running"
 }
