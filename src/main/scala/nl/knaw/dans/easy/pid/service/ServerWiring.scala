@@ -23,9 +23,7 @@ trait ServerWiring extends PidServletComponent with ServletMounterComponent with
 
   override val pidServlet: PidServlet = new PidServlet {}
   override val mounter: ServletMounter = new ServletMounter {}
-  override val server: PidServer = new PidServer {
-    override val serverPort: Int = properties.properties.getInt("pid-generator.daemon.http.port")
-  }
+  override val server: PidServer = new PidServer(properties.properties.getInt("pid-generator.daemon.http.port"))
 }
 
 object ServerWiring {

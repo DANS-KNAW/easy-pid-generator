@@ -29,9 +29,7 @@ trait PidServerComponent {
   // singleton component, so access component here
   val server: PidServer
 
-  trait PidServer {
-
-    val serverPort: Int
+  class PidServer(val serverPort: Int) {
 
     private lazy val server = new Server(serverPort) {
       this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
@@ -57,12 +55,6 @@ trait PidServerComponent {
     def destroy(): Try[Unit] = Try {
       server.destroy()
       logger.info("REST pid-generator server stopped.")
-    }
-  }
-
-  object PidServer {
-    def apply(port: Int): PidServer = new PidServer {
-      val serverPort: Int = port
     }
   }
 }

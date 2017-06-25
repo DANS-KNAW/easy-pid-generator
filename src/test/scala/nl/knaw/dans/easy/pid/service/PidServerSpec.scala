@@ -40,7 +40,7 @@ class PidServerSpec extends PropertiesSupportFixture with SeedDatabaseFixture wi
   val database: Database = mock[Database]
   val pidServlet: PidServlet = new PidServlet {}
   val mounter: ServletMounter = new ServletMounter {}
-  val server: PidServer = PidServer(8060)
+  val server: PidServer = new PidServer(8060)
 
   override def afterEach(): Unit = {
     server.stop() shouldBe a[Success[_]]
