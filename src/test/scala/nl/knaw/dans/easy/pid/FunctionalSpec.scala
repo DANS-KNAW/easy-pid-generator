@@ -48,25 +48,28 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
   }
 
   it should "return a 404 when using the incorrect url" in {
-    callService("") should {
-      include ("Error 404 Not Found") and
-        include ("HTTP ERROR 404") and
-        include ("Problem accessing /. Reason:\n<pre>    Not Found")
+    inside(callService("")) {
+      case (404, body) =>
+        body should {
+          include("Error 404 Not Found") and
+            include("HTTP ERROR 404") and
+            include("Problem accessing /. Reason:\n<pre>    Not Found")
+        }
     }
   }
 
   "calling POST /" should "return a 400" in {
-    callService("pids/urn", "POST") shouldBe "Cannot create PIDs at this URI"
+    callService("pids/urn", "POST") shouldBe (400, "Cannot create PIDs at this URI")
   }
 
   "calling POST for URN" should "retrieve the first URN" in {
-    postUrn shouldBe "urn:nbn:nl:ui:13-0000-01"
+    postUrn shouldBe (200, "urn:nbn:nl:ui:13-0000-01")
     database.getSeed(URN) shouldBe Success(Some(1L))
   }
 
   it should "retrieve the next URN if the service is called twice" in {
     postUrn
-    postUrn shouldBe "urn:nbn:nl:ui:13-001h-aq"
+    postUrn shouldBe (200, "urn:nbn:nl:ui:13-001h-aq")
     database.getSeed(URN) shouldBe Success(Some(69074L))
   }
 
@@ -74,24 +77,24 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
     val lastSeed = 1752523756L
     database.initSeed(URN, lastSeed) shouldBe a[Success[_]]
 
-    postUrn shouldBe "No more urn seeds available."
+    postUrn shouldBe (404, "No more urn seeds available.")
     database.getSeed(URN) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
     Files.delete(databaseFile) // deleting the database so it cannot be connected to
 
-    postUrn shouldBe "Error when retrieving previous seed or saving current seed"
+    postUrn shouldBe (500, "Error when retrieving previous seed or saving current seed")
   }
 
   "calling POST for DOI" should "retrieve the first DOI" in {
-    postDoi shouldBe "10.5072/dans-x6f-kf6x"
+    postDoi shouldBe (200, "10.5072/dans-x6f-kf6x")
     database.getSeed(DOI) shouldBe Success(Some(1073741824L))
   }
 
   it should "retrieve the next DOI if the service is called twice" in {
     postDoi
-    postDoi shouldBe "10.5072/dans-x6f-kf66"
+    postDoi shouldBe (200, "10.5072/dans-x6f-kf66")
     database.getSeed(DOI) shouldBe Success(Some(1073741829L))
   }
 
@@ -99,13 +102,13 @@ class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture w
     val lastSeed = 43171047L
     database.initSeed(DOI, lastSeed) shouldBe a[Success[_]]
 
-    postDoi shouldBe "No more doi seeds available."
+    postDoi shouldBe (404, "No more doi seeds available.")
     database.getSeed(DOI) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
     Files.delete(databaseFile) // deleting the database so it cannot be connected to
 
-    postDoi shouldBe "Error when retrieving previous seed or saving current seed"
+    postDoi shouldBe (500, "Error when retrieving previous seed or saving current seed")
   }
 }

@@ -22,7 +22,7 @@ import resource._
 
 trait ServerTestSupportFixture {
 
-  def callService(path: String = "pids", method: String = "GET"): String = {
+  def callService(path: String = "pids", method: String = "GET"): (Int, String) = {
     new URL(s"http://localhost:8060/$path").openConnection() match {
       case conn: HttpURLConnection =>
         managed {
@@ -33,16 +33,16 @@ trait ServerTestSupportFixture {
         }
           .map(_.getResponseCode)
           .acquireAndGet {
-            case code if code >= 200 && code < 300 => IOUtils.toString(conn.getInputStream)
-            case _ => IOUtils.toString(conn.getErrorStream)
+            case code if code >= 200 && code < 300 => (code, IOUtils.toString(conn.getInputStream))
+            case code => (code, IOUtils.toString(conn.getErrorStream))
           }
       case _ => throw new Exception
     }
   }
 
-  def postUrn: String = callService("pids?type=urn", "POST")
+  def postUrn: (Int, String) = callService("pids?type=urn", "POST")
 
-  def postDoi: String = callService("pids?type=doi", "POST")
+  def postDoi: (Int, String) = callService("pids?type=doi", "POST")
 
-  def successful: String = "Persistent Identifier Generator running"
+  def successful: (Int, String) = (200, "Persistent Identifier Generator running")
 }

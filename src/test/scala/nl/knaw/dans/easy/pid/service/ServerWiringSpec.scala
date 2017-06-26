@@ -55,7 +55,7 @@ class ServerWiringSpec extends PropertiesSupportFixture with SeedDatabaseFixture
 
   "post urn" should "return a next URN" in {
     val urn = "urn:nbn:nl:ui:13-0000-01"
-    postUrn shouldBe urn
+    postUrn shouldBe (200, urn)
 
     inside(database.getSeed(URN)) {
       case Success(Some(seed)) =>
@@ -66,7 +66,7 @@ class ServerWiringSpec extends PropertiesSupportFixture with SeedDatabaseFixture
 
   "post doi" should "return a next DOI" in {
     val doi = "10.5072/dans-x6f-kf6x"
-    postDoi shouldBe doi
+    postDoi shouldBe (200, doi)
 
     inside(database.getSeed(DOI)) {
       case Success(Some(seed)) =>
