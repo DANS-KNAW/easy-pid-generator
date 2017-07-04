@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.easy.pid.service.ServerWiring
+import nl.knaw.dans.easy.pid.server.ServerWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 trait PidServiceWiring extends ServerWiring
