@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.service
 
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
@@ -22,7 +22,7 @@ object PidGeneratorService extends DebugEnhancedLogging {
   def main(args: Array[String]): Unit = {
     logger.info("Starting PID Generator Service")
 
-    val service = new PidServiceDaemon
+    val service = new ServiceStarter
 
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {

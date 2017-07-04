@@ -13,17 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.service
 
 import java.nio.file.Files
 
+import nl.knaw.dans.easy.pid._
 import org.scalatest.{ BeforeAndAfterEach, OneInstancePerTest }
 
 import scala.util.Success
 
-class FunctionalSpec extends SeedDatabaseFixture with ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
+class ServiceStarterSpec extends SeedDatabaseFixture with ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
 
-  private lazy val daemon = new PidServiceDaemon
+  private lazy val daemon = new ServiceStarter
   private lazy val database = daemon.service.database
 
   override def beforeEach(): Unit = {

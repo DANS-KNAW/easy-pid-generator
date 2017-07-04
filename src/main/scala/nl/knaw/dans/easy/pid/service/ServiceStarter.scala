@@ -13,22 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.service
 
-import org.apache.commons.daemon.{ Daemon, DaemonContext }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
 import scala.util.control.NonFatal
 
-class PidServiceDaemon extends Daemon with DebugEnhancedLogging {
+class ServiceStarter extends Daemon with DebugEnhancedLogging {
 
-  var service: PidServiceWiring = _
+  var service: ServiceWiring = _
 
   override def init(context: DaemonContext): Unit = {
     logger.info("Initializing service ...")
 
-    service = new PidServiceWiring {}
+    service = new ServiceWiring {}
 
     logger.info("Service initialized.")
   }

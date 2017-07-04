@@ -13,15 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid
+package nl.knaw.dans.easy.pid.service
 
 import java.nio.file.Paths
 
 import nl.knaw.dans.easy.pid.generator._
 import nl.knaw.dans.easy.pid.server.ServerWiring
+import nl.knaw.dans.easy.pid.{ ConfigurationComponent, DatabaseAccessComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-trait PidServiceWiring extends ServerWiring
+trait ServiceWiring extends ServerWiring
   with DOIGeneratorWiring
   with URNGeneratorWiring
   with PidFormatterComponent
