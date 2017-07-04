@@ -21,9 +21,9 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import scala.util.{ Failure, Success }
 
 class DOIGeneratorSpec extends SeedDatabaseFixture
-  with PropertiesSupportFixture
+  with ConfigurationSupportFixture
   with DOIGeneratorWiring
-  with PropertiesComponent
+  with ConfigurationComponent
   with SeedStorageComponent
   with DatabaseComponent
   with PidFormatterComponent

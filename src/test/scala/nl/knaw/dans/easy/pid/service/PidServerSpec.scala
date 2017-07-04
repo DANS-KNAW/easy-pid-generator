@@ -18,14 +18,14 @@ package nl.knaw.dans.easy.pid.service
 import java.net.ConnectException
 
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.easy.pid.{ DatabaseAccessComponent, PropertiesSupportFixture, SeedDatabaseFixture, ServerTestSupportFixture }
+import nl.knaw.dans.easy.pid.{ DatabaseAccessComponent, ConfigurationSupportFixture, SeedDatabaseFixture, ServerTestSupportFixture }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalamock.scalatest.MockFactory
 import org.scalatest.OneInstancePerTest
 
 import scala.util.{ Failure, Success }
 
-class PidServerSpec extends PropertiesSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with MockFactory with OneInstancePerTest
+class PidServerSpec extends ConfigurationSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with MockFactory with OneInstancePerTest
   with PidServerComponent
   with ServletMounterComponent
   with PidServletComponent

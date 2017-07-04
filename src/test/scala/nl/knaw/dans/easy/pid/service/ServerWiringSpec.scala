@@ -22,7 +22,7 @@ import org.scalatest.OneInstancePerTest
 
 import scala.util.Success
 
-class ServerWiringSpec extends PropertiesSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with OneInstancePerTest
+class ServerWiringSpec extends ConfigurationSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with OneInstancePerTest
   with ServerWiring
   with DOIGeneratorWiring
   with URNGeneratorWiring

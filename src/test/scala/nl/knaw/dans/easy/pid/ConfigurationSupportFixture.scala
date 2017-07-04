@@ -19,9 +19,9 @@ import java.nio.file.{ Files, Paths }
 
 import scala.collection.JavaConverters._
 
-trait PropertiesSupportFixture extends TestSupportFixture with PropertiesComponent {
+trait ConfigurationSupportFixture extends TestSupportFixture with ConfigurationComponent {
 
-  override val properties: GeneralProperties = {
+  override val configuration: Configuration = {
     val versionFile = testDir.resolve("version")
     Files.createFile(versionFile)
     Files.write(versionFile, List("version x.y.z").asJava)
@@ -31,6 +31,6 @@ trait PropertiesSupportFixture extends TestSupportFixture with PropertiesCompone
       Paths.get(getClass.getResource("/debug-config/application.properties").toURI),
       testDir.resolve("cfg/application.properties"))
 
-    GeneralProperties(testDir)
+    Configuration(testDir)
   }
 }

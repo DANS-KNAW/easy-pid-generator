@@ -21,16 +21,16 @@ import org.scalatest.{ BeforeAndAfterEach, OneInstancePerTest }
 
 import scala.util.Success
 
-class FunctionalSpec extends SeedDatabaseFixture with PropertiesSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
+class FunctionalSpec extends SeedDatabaseFixture with ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
 
   private lazy val daemon = new PidServiceDaemon
-  private lazy val database = daemon.database
+  private lazy val database = daemon.service.database
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
-    properties.properties.setProperty("pid-generator.database.url", s"jdbc:sqlite:${ databaseFile.toString }")
-    properties.properties.save(testDir.resolve("cfg/application.properties").toFile)
+    configuration.properties.setProperty("pid-generator.database.url", s"jdbc:sqlite:${ databaseFile.toString }")
+    configuration.properties.save(testDir.resolve("cfg/application.properties").toFile)
     System.setProperty("app.home", testDir.toString)
 
     daemon.init(null)

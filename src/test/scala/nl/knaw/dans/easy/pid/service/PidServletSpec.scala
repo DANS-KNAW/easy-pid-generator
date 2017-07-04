@@ -25,7 +25,7 @@ import org.scalatra.test.scalatest.ScalatraSuite
 
 import scala.util.{ Failure, Success }
 
-class PidServletSpec extends PropertiesSupportFixture
+class PidServletSpec extends ConfigurationSupportFixture
   with SeedDatabaseFixture
   with ScalatraSuite
   with MockFactory

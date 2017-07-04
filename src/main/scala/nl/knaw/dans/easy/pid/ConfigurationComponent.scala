@@ -25,18 +25,18 @@ import scala.io.Source
 /**
  * The GeneralProperties contains the application's version number and properties
  */
-trait PropertiesComponent {
+trait ConfigurationComponent {
 
   // singleton component, so access component here
-  val properties: GeneralProperties
+  val configuration: Configuration
 
-  trait GeneralProperties {
+  trait Configuration {
     def version: String
     def properties: PropertiesConfiguration
   }
 
-  object GeneralProperties {
-    def apply(home: Path): GeneralProperties = new GeneralProperties {
+  object Configuration {
+    def apply(home: Path): Configuration = new Configuration {
       override val version: String = managed(Source.fromFile(home.resolve("version").toFile)).acquireAndGet(_.mkString)
       override val properties = new PropertiesConfiguration(home.resolve("cfg/application.properties").toFile)
     }

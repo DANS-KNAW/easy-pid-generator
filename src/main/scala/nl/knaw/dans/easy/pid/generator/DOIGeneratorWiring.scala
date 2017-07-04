@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.{ DOI, PidType, PropertiesComponent }
+import nl.knaw.dans.easy.pid.{ DOI, PidType, ConfigurationComponent }
 
 trait DOIGeneratorWiring extends PidGeneratorComponent {
   this: DOIGeneratorWiring.Dependencies =>
@@ -23,17 +23,17 @@ trait DOIGeneratorWiring extends PidGeneratorComponent {
   val doiGenerator: PidGenerator = new PidGenerator {
     override val seedStorage: SeedStorage = new SeedStorage {
       override val pidType: PidType = DOI
-      override val firstSeed: Long = properties.properties.getLong("pid-generator.types.doi.firstSeed")
+      override val firstSeed: Long = configuration.properties.getLong("pid-generator.types.doi.firstSeed")
     }
     override val formatter: PidFormatter = new PidFormatter {
       override val length: Int = 7
       override val illegalChars: Map[Char, Char] = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v')
-      override val namespace: String = properties.properties.getString("pid-generator.types.doi.namespace")
-      override val dashPosition: Int = properties.properties.getInt("pid-generator.types.doi.dashPosition")
+      override val namespace: String = configuration.properties.getString("pid-generator.types.doi.namespace")
+      override val dashPosition: Int = configuration.properties.getInt("pid-generator.types.doi.dashPosition")
     }
   }
 }
 
 object DOIGeneratorWiring {
-  type Dependencies = PidGeneratorComponent.Dependencies with PropertiesComponent
+  type Dependencies = PidGeneratorComponent.Dependencies with ConfigurationComponent
 }

@@ -28,17 +28,27 @@ trait PidServiceWiring extends ServerWiring
   with SeedStorageComponent
   with DatabaseComponent
   with DatabaseAccessComponent
-  with PropertiesComponent
+  with ConfigurationComponent
   with DebugEnhancedLogging {
 
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
-  override lazy val properties: GeneralProperties = GeneralProperties(home)
+  override lazy val configuration: Configuration = Configuration(home)
   override lazy val databaseAccess: DatabaseAccess = new DatabaseAccess {
-    override val dbDriverClassName: String = properties.properties.getString("pid-generator.database.driver-class")
-    override val dbUrl: String = properties.properties.getString("pid-generator.database.url")
-    override val dbUsername: Option[String] = Option(properties.properties.getString("pid-generator.database.username"))
-    override val dbPassword: Option[String] = Option(properties.properties.getString("pid-generator.database.password"))
+    override val dbDriverClassName: String = configuration.properties.getString("pid-generator.database.driver-class")
+    override val dbUrl: String = configuration.properties.getString("pid-generator.database.url")
+    override val dbUsername: Option[String] = Option(configuration.properties.getString("pid-generator.database.username"))
+    override val dbPassword: Option[String] = Option(configuration.properties.getString("pid-generator.database.password"))
+
+    private def usernamePasswordCheck: Boolean = {
+      (dbUsername, dbPassword) match {
+        case (Some(_), Some(_)) | (None, None) => true
+        case _ => false
+      }
+    }
+
+    assert(usernamePasswordCheck,
+      "database username and password should either be both defined or not defined")
   }
   override lazy val database: Database = new Database {}
 }

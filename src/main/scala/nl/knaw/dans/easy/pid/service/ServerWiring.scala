@@ -15,21 +15,24 @@
  */
 package nl.knaw.dans.easy.pid.service
 
-import nl.knaw.dans.easy.pid.PropertiesComponent
+import nl.knaw.dans.easy.pid.ConfigurationComponent
+import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 trait ServerWiring extends PidServletComponent with ServletMounterComponent with PidServerComponent {
-  this: ServerWiring.Dependencies =>
+  self: ServerWiring.Dependencies =>
 
   override val pidServlet: PidServlet = new PidServlet {}
   override val mounter: ServletMounter = new ServletMounter {}
-  override val server: PidServer = new PidServer(properties.properties.getInt("pid-generator.daemon.http.port"))
+  override val server: PidServer = new PidServer(configuration.properties.getInt("pid-generator.daemon.http.port"))
 }
 
 object ServerWiring {
   type Dependencies = PidServletComponent.Dependencies
     with ServletMounterComponent.Dependencies
     with PidServerComponent.Dependencies
-    with PropertiesComponent
+    with DOIGeneratorWiring
+    with URNGeneratorWiring
+    with ConfigurationComponent
     with DebugEnhancedLogging
 }
