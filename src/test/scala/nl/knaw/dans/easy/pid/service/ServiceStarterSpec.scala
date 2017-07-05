@@ -16,23 +16,40 @@
 package nl.knaw.dans.easy.pid.service
 
 import java.nio.file.Files
+import java.sql.DriverManager
 
 import nl.knaw.dans.easy.pid._
 import org.scalatest.{ BeforeAndAfterEach, OneInstancePerTest }
+import resource._
 
-import scala.util.Success
+import scala.io.Source
+import scala.util.{ Success, Try }
 
-class ServiceStarterSpec extends SeedDatabaseFixture with ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
+class ServiceStarterSpec extends ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
 
   private lazy val daemon = new ServiceStarter
   private lazy val database = daemon.service.database
+  private lazy val databaseAccess = daemon.service.databaseAccess
+
+  private val databaseFile = testDir.resolve("seed.db")
+  private val configFile = testDir.resolve("cfg/application.properties")
 
   override def beforeEach(): Unit = {
     super.beforeEach()
 
+    // set correct configuration parameters
     configuration.properties.setProperty("pid-generator.database.url", s"jdbc:sqlite:${ databaseFile.toString }")
-    configuration.properties.save(testDir.resolve("cfg/application.properties").toFile)
+    configuration.properties.save(configFile.toFile)
     System.setProperty("app.home", testDir.toString)
+
+    // initialize the database
+    managed(DriverManager.getConnection(s"jdbc:sqlite:${ databaseFile.toString }"))
+      .flatMap(connection => managed(connection.createStatement))
+      .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/seed.sql").toURI)).map(_.mkString))
+      .acquireAndGet { case (statement, query) => statement.executeUpdate(query) }
+
+    configFile.toFile should exist
+    databaseFile.toFile should exist
 
     daemon.init(null)
     daemon.start()
@@ -43,6 +60,9 @@ class ServiceStarterSpec extends SeedDatabaseFixture with ConfigurationSupportFi
     daemon.destroy()
     super.afterEach()
   }
+
+  def initSeed(pidType: PidType, seed: Long): Try[Long] = databaseAccess.doTransaction(implicit connection => database.initSeed(pidType, seed))
+  def querySeed(pidType: PidType): Try[Option[Long]] = databaseAccess.doTransaction(implicit connection => database.getSeed(pidType))
 
   "calling GET /" should "check that the service is up and running" in {
     callService() shouldBe successful
@@ -65,21 +85,21 @@ class ServiceStarterSpec extends SeedDatabaseFixture with ConfigurationSupportFi
 
   "calling POST for URN" should "retrieve the first URN" in {
     postUrn shouldBe (200, "urn:nbn:nl:ui:13-0000-01")
-    database.getSeed(URN) shouldBe Success(Some(1L))
+    querySeed(URN) shouldBe Success(Some(1L))
   }
 
   it should "retrieve the next URN if the service is called twice" in {
     postUrn
     postUrn shouldBe (200, "urn:nbn:nl:ui:13-001h-aq")
-    database.getSeed(URN) shouldBe Success(Some(69074L))
+    querySeed(URN) shouldBe Success(Some(69074L))
   }
 
   it should "fail if there are no more URN seeds" in {
     val lastSeed = 1752523756L
-    database.initSeed(URN, lastSeed) shouldBe a[Success[_]]
+    initSeed(URN, lastSeed) shouldBe a[Success[_]]
 
     postUrn shouldBe (404, "No more urn seeds available.")
-    database.getSeed(URN) shouldBe Success(Some(lastSeed))
+    querySeed(URN) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
@@ -90,21 +110,21 @@ class ServiceStarterSpec extends SeedDatabaseFixture with ConfigurationSupportFi
 
   "calling POST for DOI" should "retrieve the first DOI" in {
     postDoi shouldBe (200, "10.5072/dans-x6f-kf6x")
-    database.getSeed(DOI) shouldBe Success(Some(1073741824L))
+    querySeed(DOI) shouldBe Success(Some(1073741824L))
   }
 
   it should "retrieve the next DOI if the service is called twice" in {
     postDoi
     postDoi shouldBe (200, "10.5072/dans-x6f-kf66")
-    database.getSeed(DOI) shouldBe Success(Some(1073741829L))
+    querySeed(DOI) shouldBe Success(Some(1073741829L))
   }
 
   it should "fail if there are no more DOI seeds" in {
     val lastSeed = 43171047L
-    database.initSeed(DOI, lastSeed) shouldBe a[Success[_]]
+    initSeed(DOI, lastSeed) shouldBe a[Success[_]]
 
     postDoi shouldBe (404, "No more doi seeds available.")
-    database.getSeed(DOI) shouldBe Success(Some(lastSeed))
+    querySeed(DOI) shouldBe Success(Some(lastSeed))
   }
 
   it should "fail if the service cannot connect to the database" in {
