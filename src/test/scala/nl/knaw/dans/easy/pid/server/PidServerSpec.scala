@@ -27,7 +27,6 @@ import scala.util.{ Failure, Success }
 
 class PidServerSpec extends ConfigurationSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with MockFactory with OneInstancePerTest
   with PidServerComponent
-  with ServletMounterComponent
   with PidServletComponent
   with GeneratorWiring
   with SeedStorageComponent
@@ -38,7 +37,6 @@ class PidServerSpec extends ConfigurationSupportFixture with SeedDatabaseFixture
 
   val database: Database = mock[Database]
   val pidServlet: PidServlet = new PidServlet {}
-  val mounter: ServletMounter = new ServletMounter {}
   val server: PidServer = new PidServer(8060)
 
   override def afterEach(): Unit = {

@@ -19,17 +19,15 @@ import nl.knaw.dans.easy.pid.ConfigurationComponent
 import nl.knaw.dans.easy.pid.generator.GeneratorWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
-trait ServerWiring extends PidServletComponent with ServletMounterComponent with PidServerComponent {
+trait ServerWiring extends PidServletComponent with PidServerComponent {
   self: ServerWiring.Dependencies =>
 
   override val pidServlet: PidServlet = new PidServlet {}
-  override val mounter: ServletMounter = new ServletMounter {}
   override val server: PidServer = new PidServer(configuration.properties.getInt("pid-generator.daemon.http.port"))
 }
 
 object ServerWiring {
   type Dependencies = PidServletComponent.Dependencies
-    with ServletMounterComponent.Dependencies
     with PidServerComponent.Dependencies
     with GeneratorWiring.Dependencies
     with ConfigurationComponent

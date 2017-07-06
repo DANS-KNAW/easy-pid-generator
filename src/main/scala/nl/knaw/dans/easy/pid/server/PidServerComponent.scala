@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid.server
 
+import javax.servlet.ServletContext
+
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
@@ -35,7 +37,11 @@ trait PidServerComponent {
       this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
         this.addEventListener(new ScalatraListener() {
           override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
-            (mounter.getClass.getSimpleName, mounter)
+            ("pid-lifecycle", new LifeCycle {
+              override def init(context: ServletContext): Unit = {
+                context.mount(pidServlet, "/pids")
+              }
+            })
           }
         })
       })
@@ -60,5 +66,5 @@ trait PidServerComponent {
 }
 
 object PidServerComponent {
-  type Dependencies = ServletMounterComponent
+  type Dependencies = PidServletComponent
 }
