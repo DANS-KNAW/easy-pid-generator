@@ -25,7 +25,7 @@ import resource._
 import scala.io.Source
 import scala.util.{ Success, Try }
 
-class ServiceStarterSpec extends ConfigurationSupportFixture with TestSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
+class ServiceStarterSpec extends TestSupportFixture with ConfigurationSupportFixture with ServerTestSupportFixture with BeforeAndAfterEach with OneInstancePerTest {
 
   private lazy val daemon = new ServiceStarter
   private lazy val database = daemon.service.database
