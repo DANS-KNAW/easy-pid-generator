@@ -24,8 +24,7 @@ import scala.util.Success
 
 class ServerWiringSpec extends ConfigurationSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with OneInstancePerTest
   with ServerWiring
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with GeneratorWiring
   with SeedStorageComponent
   with DatabaseComponent
   with PidFormatterComponent

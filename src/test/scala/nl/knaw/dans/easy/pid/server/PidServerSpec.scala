@@ -29,8 +29,7 @@ class PidServerSpec extends ConfigurationSupportFixture with SeedDatabaseFixture
   with PidServerComponent
   with ServletMounterComponent
   with PidServletComponent
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with GeneratorWiring
   with SeedStorageComponent
   with DatabaseComponent
   with PidFormatterComponent

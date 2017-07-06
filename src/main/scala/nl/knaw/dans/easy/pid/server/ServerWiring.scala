@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid.server
 
 import nl.knaw.dans.easy.pid.ConfigurationComponent
-import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
+import nl.knaw.dans.easy.pid.generator.GeneratorWiring
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 trait ServerWiring extends PidServletComponent with ServletMounterComponent with PidServerComponent {
@@ -31,8 +31,7 @@ object ServerWiring {
   type Dependencies = PidServletComponent.Dependencies
     with ServletMounterComponent.Dependencies
     with PidServerComponent.Dependencies
-    with DOIGeneratorWiring
-    with URNGeneratorWiring
+    with GeneratorWiring.Dependencies
     with ConfigurationComponent
     with DebugEnhancedLogging
 }

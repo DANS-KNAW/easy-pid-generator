@@ -30,8 +30,7 @@ class PidServletSpec extends ConfigurationSupportFixture
   with ScalatraSuite
   with MockFactory
   with PidServletComponent
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with GeneratorWiring
   with PidFormatterComponent
   with SeedStorageComponent
   with DatabaseComponent
@@ -39,8 +38,8 @@ class PidServletSpec extends ConfigurationSupportFixture
 
   val formatter: PidFormatter = mock[PidFormatter]
   val database: Database = mock[Database]
-  override val doiGenerator: PidGenerator = mock[PidGenerator]
-  override val urnGenerator: PidGenerator = mock[PidGenerator]
+  override val doiGenerator: DOIGenerator = mock[DOIGenerator]
+  override val urnGenerator: URNGenerator = mock[URNGenerator]
   override val pidServlet: PidServlet = new PidServlet {}
 
   addServlet(pidServlet, "/*")

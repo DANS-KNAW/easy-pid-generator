@@ -23,8 +23,7 @@ import nl.knaw.dans.easy.pid.{ ConfigurationComponent, DatabaseAccessComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 trait ServiceWiring extends ServerWiring
-  with DOIGeneratorWiring
-  with URNGeneratorWiring
+  with GeneratorWiring
   with PidFormatterComponent
   with SeedStorageComponent
   with DatabaseComponent
@@ -35,7 +34,7 @@ trait ServiceWiring extends ServerWiring
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
   override lazy val configuration: Configuration = Configuration(home)
-  override lazy val databaseAccess: DatabaseAccess = new DatabaseAccess {
+  override val databaseAccess: DatabaseAccess = new DatabaseAccess {
     override val dbDriverClassName: String = configuration.properties.getString("pid-generator.database.driver-class")
     override val dbUrl: String = configuration.properties.getString("pid-generator.database.url")
     override val dbUsername: Option[String] = Option(configuration.properties.getString("pid-generator.database.username"))
@@ -48,8 +47,8 @@ trait ServiceWiring extends ServerWiring
       }
     }
 
-    assert(usernamePasswordCheck,
+    require(usernamePasswordCheck,
       "database username and password should either be both defined or not defined")
   }
-  override lazy val database: Database = new Database {}
+  override val database: Database = new Database {}
 }

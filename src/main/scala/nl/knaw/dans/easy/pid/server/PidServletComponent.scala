@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid.server
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorWiring, URNGeneratorWiring }
+import nl.knaw.dans.easy.pid.generator.{ DOIGeneratorComponent, URNGeneratorComponent }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatra._
@@ -64,5 +64,5 @@ trait PidServletComponent {
 }
 
 object PidServletComponent {
-  type Dependencies = DOIGeneratorWiring with URNGeneratorWiring with DatabaseAccessComponent
+    type Dependencies = URNGeneratorComponent with DOIGeneratorComponent with DatabaseAccessComponent
 }
