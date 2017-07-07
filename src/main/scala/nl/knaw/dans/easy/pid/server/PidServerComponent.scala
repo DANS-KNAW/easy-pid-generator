@@ -33,7 +33,7 @@ trait PidServerComponent {
 
   class PidServer(val serverPort: Int) {
 
-    private lazy val server = new Server(serverPort) {
+    private val server = new Server(serverPort) {
       this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
         this.addEventListener(new ScalatraListener() {
           override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
@@ -46,6 +46,7 @@ trait PidServerComponent {
         })
       })
     }
+
     logger.info(s"HTTP port is $serverPort")
 
     def start(): Try[Unit] = Try {
