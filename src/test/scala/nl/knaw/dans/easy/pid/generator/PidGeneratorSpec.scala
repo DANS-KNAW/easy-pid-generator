@@ -17,19 +17,18 @@ package nl.knaw.dans.easy.pid.generator
 
 import java.sql.Connection
 
-import nl.knaw.dans.easy.pid.{ RanOutOfSeeds, SeedDatabaseFixture, URN }
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import nl.knaw.dans.easy.pid.{ RanOutOfSeeds, SeedDatabaseFixture, TestSupportFixture, URN }
 import org.scalamock.scalatest.MockFactory
 
 import scala.util.{ Failure, Success }
 
-class PidGeneratorSpec extends SeedDatabaseFixture
+class PidGeneratorSpec extends TestSupportFixture
+  with SeedDatabaseFixture
   with MockFactory
   with PidGeneratorComponent
   with SeedStorageComponent
   with PidFormatterComponent
-  with DatabaseComponent
-  with DebugEnhancedLogging {
+  with DatabaseComponent {
 
   override val database: Database = mock[Database]
   private val seedStore: SeedStorage = mock[SeedStorage]
@@ -44,7 +43,7 @@ class PidGeneratorSpec extends SeedDatabaseFixture
     val formattedPid = "output"
     val nextPid = 96140546L
 
-    (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
+    (seedStore.calculateAndPersist(_: Long => Long)(_: Connection)) expects
       (*, *) once() returning Success(nextPid)
     pidFormatter.format _ expects nextPid once() returning formattedPid
 
@@ -52,7 +51,7 @@ class PidGeneratorSpec extends SeedDatabaseFixture
   }
 
   it should "fail if there is no new PID of the given type anymore" in {
-    (seedStore.calculateAndPersist(_: Long => Option[Long])(_: Connection)) expects
+    (seedStore.calculateAndPersist(_: Long => Long)(_: Connection)) expects
       (*, *) once() returning Failure(RanOutOfSeeds(URN))
     pidFormatter.format _ expects * never()
 

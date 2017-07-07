@@ -41,13 +41,12 @@ trait PidGeneratorComponent {
      * and then return to the first seed. See for proof of this:
      * <a href="http://en.wikipedia.org/wiki/Linear_congruential_generator">this page</a>
      */
-    private def getNextPidNumber(seed: Long): Option[Long] = {
+    private def getNextPidNumber(seed: Long): Long = {
       val factor = 3 * 7 * 11 * 13 * 23 // = 69069
       val increment = 5
       val modulo = math.pow(2, 31).toLong
-      val newSeed = (seed * factor + increment) % modulo
 
-      Option(newSeed).filterNot(seedStorage.firstSeed ==)
+      (seed * factor + increment) % modulo
     }
   }
 }

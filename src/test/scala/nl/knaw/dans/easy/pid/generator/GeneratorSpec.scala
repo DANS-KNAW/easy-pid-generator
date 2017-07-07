@@ -16,11 +16,16 @@
 package nl.knaw.dans.easy.pid.generator
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.{ Failure, Success }
 
-class GeneratorSpec extends SeedDatabaseFixture with ConfigurationSupportFixture with GeneratorWiring with SeedStorageComponent with DatabaseComponent with PidFormatterComponent with DebugEnhancedLogging {
+class GeneratorSpec extends TestSupportFixture
+  with SeedDatabaseFixture
+  with ConfigurationSupportFixture
+  with GeneratorWiring
+  with SeedStorageComponent
+  with DatabaseComponent
+  with PidFormatterComponent {
 
   override val database: Database = new Database {}
 

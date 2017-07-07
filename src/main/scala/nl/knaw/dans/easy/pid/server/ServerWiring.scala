@@ -31,5 +31,4 @@ object ServerWiring {
     with PidServerComponent.Dependencies
     with GeneratorWiring.Dependencies
     with ConfigurationComponent
-    with DebugEnhancedLogging
 }

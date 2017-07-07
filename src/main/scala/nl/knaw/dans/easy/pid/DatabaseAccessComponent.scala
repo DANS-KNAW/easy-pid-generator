@@ -26,8 +26,7 @@ import resource.managed
 import scala.util.control.NonFatal
 import scala.util.{ Failure, Try }
 
-trait DatabaseAccessComponent {
-  this: DebugEnhancedLogging =>
+trait DatabaseAccessComponent extends DebugEnhancedLogging {
 
   // singleton component, so access component here
   val databaseAccess: DatabaseAccess

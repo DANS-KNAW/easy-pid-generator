@@ -17,12 +17,12 @@ package nl.knaw.dans.easy.pid.generator
 
 import java.sql.SQLException
 
-import nl.knaw.dans.easy.pid.{ DOI, SeedDatabaseFixture, URN }
+import nl.knaw.dans.easy.pid.{ DOI, SeedDatabaseFixture, TestSupportFixture, URN }
 import resource.managed
 
 import scala.util.{ Failure, Success }
 
-class DatabaseSpec extends SeedDatabaseFixture with DatabaseComponent {
+class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with DatabaseComponent {
   val database: Database = new Database {}
 
   "getSeed" should "return no seed if the database does not contain the given type" in {

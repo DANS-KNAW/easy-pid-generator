@@ -22,8 +22,8 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.{ Failure, Try }
 
-trait SeedStorageComponent {
-  this: SeedStorageComponent.Dependencies with DebugEnhancedLogging =>
+trait SeedStorageComponent extends DebugEnhancedLogging {
+  this: SeedStorageComponent.Dependencies =>
 
   // not a singleton, so no access point
 
@@ -37,18 +37,18 @@ trait SeedStorageComponent {
      * sure that it is persisted. Returns a Failure if there is no next PID seed or
      * if the new seed could not be persisted
      */
-    def calculateAndPersist(nextPid: Long => Option[Long])(implicit connection: Connection): Try[Long] = {
-      database.getSeed(this.pidType)
+    def calculateAndPersist(nextPid: Long => Long)(implicit connection: Connection): Try[Long] = {
+      database.getSeed(pidType)
         .flatMap {
           case Some(seed) =>
-            nextPid(seed)
-              .map(database.setSeed(this.pidType, _))
-              .getOrElse(Failure(RanOutOfSeeds(this.pidType)))
+            nextPid(seed) match {
+              case `firstSeed` => Failure(RanOutOfSeeds(pidType))
+              case nextSeed => database.setSeed(pidType, nextSeed)
+            }
           case None =>
-            val firstSeed = this.firstSeed
-            logger.warn(s"No previous PID found. This should only happen once. Initializing with initial seed for ${ this.pidType }")
+            logger.warn(s"No previous PID found. This should only happen once. Initializing with initial seed for $pidType")
             logger.info(s"Initializing seed with value $firstSeed")
-            database.initSeed(this.pidType, firstSeed)
+            database.initSeed(pidType, firstSeed)
         }
     }
   }

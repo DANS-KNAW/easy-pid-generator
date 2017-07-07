@@ -17,19 +17,21 @@ package nl.knaw.dans.easy.pid.server
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatest.OneInstancePerTest
 
 import scala.util.Success
 
-class ServerWiringSpec extends ConfigurationSupportFixture with SeedDatabaseFixture with ServerTestSupportFixture with OneInstancePerTest
+class ServerWiringSpec extends TestSupportFixture
+  with ConfigurationSupportFixture
+  with SeedDatabaseFixture
+  with ServerTestSupportFixture
+  with OneInstancePerTest
   with ServerWiring
   with GeneratorWiring
   with SeedStorageComponent
   with DatabaseComponent
   with PidFormatterComponent
-  with DatabaseAccessComponent
-  with DebugEnhancedLogging {
+  with DatabaseAccessComponent {
 
   val database: Database = new Database {}
 

@@ -19,7 +19,8 @@ import java.nio.file.{ Files, Paths }
 
 import scala.collection.JavaConverters._
 
-trait ConfigurationSupportFixture extends TestSupportFixture with ConfigurationComponent {
+trait ConfigurationSupportFixture extends ConfigurationComponent {
+  this: TestSupportFixture =>
 
   override val configuration: Configuration = {
     val versionFile = testDir.resolve("version")

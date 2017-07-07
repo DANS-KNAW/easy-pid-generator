@@ -18,16 +18,13 @@ package nl.knaw.dans.easy.pid
 import java.nio.file.{ Files, Path }
 import java.sql.Connection
 
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatest.BeforeAndAfterEach
 import resource.managed
 
 import scala.io.Source
 
-trait SeedDatabaseFixture extends TestSupportFixture
-  with BeforeAndAfterEach
-  with DatabaseAccessComponent
-  with DebugEnhancedLogging {
+trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponent {
+  this: TestSupportFixture =>
 
   implicit var connection: Connection = _
 

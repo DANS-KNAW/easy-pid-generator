@@ -25,8 +25,8 @@ import org.scalatra.servlet.ScalatraListener
 
 import scala.util.Try
 
-trait PidServerComponent {
-  this: PidServerComponent.Dependencies with DebugEnhancedLogging =>
+trait PidServerComponent extends DebugEnhancedLogging  {
+  this: PidServerComponent.Dependencies =>
 
   // singleton component, so access component here
   val server: PidServer

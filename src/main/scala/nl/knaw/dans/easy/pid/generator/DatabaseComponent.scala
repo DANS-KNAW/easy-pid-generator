@@ -23,8 +23,7 @@ import resource.managed
 
 import scala.util.{ Failure, Success, Try }
 
-trait DatabaseComponent {
-  this: DebugEnhancedLogging =>
+trait DatabaseComponent extends DebugEnhancedLogging {
 
   // singleton component, so access component here
   val database: Database

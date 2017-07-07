@@ -17,18 +17,16 @@ package nl.knaw.dans.easy.pid.generator
 
 import java.sql.Connection
 
-import nl.knaw.dans.easy.pid.RanOutOfSeeds
-import nl.knaw.dans.easy.pid.{ DOI, PidType, TestSupportFixture }
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import nl.knaw.dans.easy.pid.{ DOI, PidType, RanOutOfSeeds, TestSupportFixture }
 import org.scalamock.scalatest.MockFactory
 
+import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
 class SeedStorageSpec extends TestSupportFixture
   with MockFactory
   with SeedStorageComponent
-  with DatabaseComponent
-  with DebugEnhancedLogging {
+  with DatabaseComponent{
 
   implicit val connection: Connection = mock[Connection]
   override val database: Database = mock[Database]
@@ -41,29 +39,25 @@ class SeedStorageSpec extends TestSupportFixture
     val previousPid = 123456L
     val nextPid = 123457L
 
-    def next(pid: Long): Option[Long] = Some(pid + 1)
-
     (database.getSeed(_: PidType)(_: Connection)) expects(DOI, connection) once() returning Success(Some(previousPid))
     (database.initSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, connection) never()
     (database.setSeed(_: PidType, _: Long)(_: Connection)) expects(DOI, nextPid, connection) once() returning Success(nextPid)
 
-    seedStorage.calculateAndPersist(next) should matchPattern { case Success(`nextPid`) => }
+    seedStorage.calculateAndPersist(1 +) should matchPattern { case Success(`nextPid`) => }
   }
 
   it should "fail if there is no next PID" in {
     val previousPid = 123456L
 
-    def next(pid: Long): Option[Long] = Option.empty
-
     (database.getSeed(_: PidType)(_: Connection)) expects(DOI, connection) once() returning Success(Some(previousPid))
     (database.initSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, connection) never()
     (database.setSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, connection) never()
 
-    seedStorage.calculateAndPersist(next) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
+    seedStorage.calculateAndPersist(_ => seedStorage.firstSeed) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
   }
 
   it should "succeed by initializing, persisting and returning the first seed" in {
-    val next = mock[Long => Option[Long]]
+    val next = mock[Long => Long]
     val first = seedStorage.firstSeed
 
     (database.getSeed(_: PidType)(_: Connection)) expects(DOI, connection) once() returning Success(None)

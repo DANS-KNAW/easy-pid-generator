@@ -19,13 +19,13 @@ import java.sql.Connection
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.generator._
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalamock.scalatest.MockFactory
 import org.scalatra.test.scalatest.ScalatraSuite
 
 import scala.util.{ Failure, Success }
 
-class PidServletSpec extends ConfigurationSupportFixture
+class PidServletSpec extends TestSupportFixture
+  with ConfigurationSupportFixture
   with SeedDatabaseFixture
   with ScalatraSuite
   with MockFactory
@@ -33,8 +33,7 @@ class PidServletSpec extends ConfigurationSupportFixture
   with GeneratorWiring
   with PidFormatterComponent
   with SeedStorageComponent
-  with DatabaseComponent
-  with DebugEnhancedLogging {
+  with DatabaseComponent {
 
   val formatter: PidFormatter = mock[PidFormatter]
   val database: Database = mock[Database]

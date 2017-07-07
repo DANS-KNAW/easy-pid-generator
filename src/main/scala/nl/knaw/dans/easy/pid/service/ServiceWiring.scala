@@ -28,8 +28,7 @@ trait ServiceWiring extends ServerWiring
   with SeedStorageComponent
   with DatabaseComponent
   with DatabaseAccessComponent
-  with ConfigurationComponent
-  with DebugEnhancedLogging {
+  with ConfigurationComponent {
 
   private lazy val home = Paths.get(System.getProperty("app.home"))
 
