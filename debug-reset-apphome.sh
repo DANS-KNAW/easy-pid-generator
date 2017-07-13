@@ -23,7 +23,7 @@ cp -r src/main/assembly/dist $APPHOME
 cp src/test/resources/debug-config/* $APPHOME/cfg/
 
 if [ -e $TEMPDIR ]; then
-    mv $TEMPDIR $TEMPDIR-`date  +"%Y-%m-%d@%H:%M:%S"`
+    mv $TEMPDIR $TEMPDIR-$(date  +"%Y-%m-%d@%H:%M:%S")
 fi
 
 mkdir -p $TEMPDIR

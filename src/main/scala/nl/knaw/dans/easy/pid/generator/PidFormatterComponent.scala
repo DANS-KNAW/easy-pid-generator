@@ -21,7 +21,7 @@ trait PidFormatterComponent {
 
   trait PidFormatter {
 
-    private val MAX_RADIX = 36
+    private val maxRadius = 36
 
     val namespace: String
     val dashPosition: Int
@@ -31,7 +31,7 @@ trait PidFormatterComponent {
     def format(pid: Long): String = {
       PidFormatter.format(
         prefix = namespace,
-        radix = MAX_RADIX - illegalChars.size,
+        radix = maxRadius - illegalChars.size,
         len = length,
         charMap = illegalChars,
         dashPos = dashPosition

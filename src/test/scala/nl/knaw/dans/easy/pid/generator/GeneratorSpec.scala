@@ -42,25 +42,25 @@ class GeneratorSpec extends TestSupportFixture
   }
 
   "doi next" should "return the initial DOI when it is never called before and store this DOI in the database" in {
-    val doi = doiGenerator.next()
-    doi shouldBe Success("10.5072/dans-x6f-kf6x")
-
-    inside(database.getSeed(DOI)) {
-      case Success(Some(seed)) =>
-        seed shouldBe 1073741824L
-        doiGenerator.formatter.format(seed) shouldBe doi.get
+    inside(doiGenerator.next()) { case Success(doi) =>
+      doi shouldBe "10.5072/dans-x6f-kf6x"
+      inside(database.getSeed(DOI)) {
+        case Success(Some(seed)) =>
+          seed shouldBe 1073741824L
+          doiGenerator.formatter.format(seed) shouldBe doi
+      }
     }
   }
 
   it should "return the second DOI when it is called for the second PID and store this DOI in the database" in {
     doiGenerator.next() shouldBe a[Success[_]]
-    val doi = doiGenerator.next()
-    doi shouldBe Success("10.5072/dans-x6f-kf66")
-
-    inside(database.getSeed(DOI)) {
-      case Success(Some(seed)) =>
-        seed shouldBe 1073741829L
-        doiGenerator.formatter.format(seed) shouldBe doi.get
+    inside(doiGenerator.next()) { case Success(doi) =>
+      doi shouldBe "10.5072/dans-x6f-kf66"
+      inside(database.getSeed(DOI)) {
+        case Success(Some(seed)) =>
+          seed shouldBe 1073741829L
+          doiGenerator.formatter.format(seed) shouldBe doi
+      }
     }
   }
 
@@ -84,25 +84,25 @@ class GeneratorSpec extends TestSupportFixture
   }
 
   "urn next" should "return the initial URN when it is never called before and store this URN in the database" in {
-    val urn = urnGenerator.next()
-    urn shouldBe Success("urn:nbn:nl:ui:13-0000-01")
-
-    inside(database.getSeed(URN)) {
-      case Success(Some(seed)) =>
-        seed shouldBe 1L
-        urnGenerator.formatter.format(seed) shouldBe urn.get
+    inside(urnGenerator.next()) { case Success(urn) =>
+      urn shouldBe "urn:nbn:nl:ui:13-0000-01"
+      inside(database.getSeed(URN)) {
+        case Success(Some(seed)) =>
+          seed shouldBe 1L
+          urnGenerator.formatter.format(seed) shouldBe urn
+      }
     }
   }
 
   it should "return the second URN when it is called for the second PID and store this URN in the database" in {
     urnGenerator.next() shouldBe a[Success[_]]
-    val urn = urnGenerator.next()
-    urn shouldBe Success("urn:nbn:nl:ui:13-001h-aq")
-
-    inside(database.getSeed(URN)) {
-      case Success(Some(seed)) =>
-        seed shouldBe 69074L
-        urnGenerator.formatter.format(seed) shouldBe urn.get
+    inside(urnGenerator.next()) { case Success(urn) =>
+      urn shouldBe "urn:nbn:nl:ui:13-001h-aq"
+      inside(database.getSeed(URN)) {
+        case Success(Some(seed)) =>
+          seed shouldBe 69074L
+          urnGenerator.formatter.format(seed) shouldBe urn
+      }
     }
   }
 
