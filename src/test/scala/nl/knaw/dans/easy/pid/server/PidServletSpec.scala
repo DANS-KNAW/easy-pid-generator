@@ -27,6 +27,7 @@ import scala.util.{ Failure, Success }
 class PidServletSpec extends TestSupportFixture
   with ConfigurationSupportFixture
   with SeedDatabaseFixture
+  with ServletFixture
   with ScalatraSuite
   with MockFactory
   with PidServletComponent

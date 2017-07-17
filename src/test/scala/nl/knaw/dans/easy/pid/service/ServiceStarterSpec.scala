@@ -77,7 +77,6 @@ class ServiceStarterSpec extends TestSupportFixture
       case (404, body) =>
         body should {
           include("Error 404 Not Found") and
-            include("HTTP ERROR 404") and
             include("Problem accessing /. Reason:\n<pre>    Not Found")
         }
     }
