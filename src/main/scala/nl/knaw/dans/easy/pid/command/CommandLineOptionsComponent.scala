@@ -1,7 +1,7 @@
 package nl.knaw.dans.easy.pid.command
 
 import nl.knaw.dans.easy.pid.ConfigurationComponent
-import org.rogach.scallop.{ ScallopConf, Subcommand }
+import org.rogach.scallop.{ ScallopConf, ScallopOption, Subcommand }
 
 trait CommandLineOptionsComponent {
   this: ConfigurationComponent =>
@@ -24,8 +24,8 @@ trait CommandLineOptionsComponent {
          |Usage:
          |
          |$printedName \\
-         |${_________}  | generate DOI
-         |${_________}  | generate URN
+         |${_________}  | generate --DOI
+         |${_________}  | generate --URN
          |${_________}  | run-service
          |
       |Options:
@@ -34,15 +34,11 @@ trait CommandLineOptionsComponent {
     val generate = new Subcommand("generate") {
       descr("Generate a specified PID")
 
-      val doi = new Subcommand("DOI") {
-        descr("Generate a DOI")
-      }
-      addSubcommand(doi)
+      val doi: ScallopOption[Boolean] = opt[Boolean]("DOI", noshort = true, descr = "Generate a DOI", default = None)
+      val urn: ScallopOption[Boolean] = opt[Boolean]("URN", noshort = true, descr = "Generate a URN", default = None)
 
-      val urn = new Subcommand("URN") {
-        descr("Generate a URN")
-      }
-      addSubcommand(urn)
+      mutuallyExclusive(doi, urn)
+      requireOne(doi, urn)
 
       footer(SUBCOMMAND_SEPARATOR)
     }

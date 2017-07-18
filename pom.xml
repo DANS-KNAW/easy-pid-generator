@@ -36,7 +36,7 @@
     <inceptionYear>2015</inceptionYear>
 
     <properties>
-        <main-class>nl.knaw.dans.easy.pid.service.PidGeneratorService</main-class>
+        <main-class>nl.knaw.dans.easy.pid.command.Command</main-class>
     </properties>
 
     <scm>
@@ -183,36 +183,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>command</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>service</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>exec-maven-plugin</artifactId>
-                        <configuration>
-                            <classpathScope>test</classpathScope>
-                            <mainClass>nl.knaw.dans.easy.pid.service.PidGeneratorService</mainClass>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>

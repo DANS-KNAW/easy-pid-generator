@@ -27,11 +27,11 @@ object Command extends App with CommandLineOptionsComponent with ServiceWiring {
 
   private def runCommandLine: Try[FeedBackMessage] = commandLine.subcommand match {
     case Some(generate @ commandLine.generate) =>
-      generate.subcommand match {
-        case Some(_ @ generate.doi) => databaseAccess.doTransaction { implicit connection => doiGenerator.next() }
-        case Some(_ @ generate.urn) => databaseAccess.doTransaction { implicit connection => urnGenerator.next() }
-        case _ => Failure(new IllegalArgumentException(s"Unknown generate type: ${generate.subcommand}"))
-      }
+      lazy val doi = generate.doi.toOption.map(_ => databaseAccess.doTransaction { implicit connection => doiGenerator.next() })
+      lazy val urn = generate.urn.toOption.map(_ => databaseAccess.doTransaction { implicit connection => urnGenerator.next() })
+      lazy val fail = Failure(new IllegalArgumentException(s"Unknown generate type"))
+
+      doi orElse urn getOrElse fail
     case Some(_ @ commandLine.runService) => runAsService()
     case _ => Failure(new IllegalArgumentException(s"Unknown command: ${commandLine.subcommand}"))
   }
