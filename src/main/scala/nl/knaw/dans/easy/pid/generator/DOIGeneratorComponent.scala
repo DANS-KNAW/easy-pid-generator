@@ -16,13 +16,9 @@
 package nl.knaw.dans.easy.pid.generator
 
 trait DOIGeneratorComponent extends PidGeneratorComponent {
-  this: PidGeneratorComponent.Dependencies =>
+  this: SeedStorageComponent with PidFormatterComponent =>
 
   val doiGenerator: DOIGenerator
 
   trait DOIGenerator extends PidGenerator
-}
-
-object DOIGeneratorComponent {
-  type Dependencies = PidGeneratorComponent.Dependencies
 }

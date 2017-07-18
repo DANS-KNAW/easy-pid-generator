@@ -24,9 +24,8 @@ import org.scalatra._
 import scala.util.Try
 
 trait PidServletComponent extends DebugEnhancedLogging {
-  this: PidServletComponent.Dependencies =>
+  this: URNGeneratorComponent with DOIGeneratorComponent with DatabaseAccessComponent =>
 
-  // singleton component, so access component here
   val pidServlet: PidServlet
 
   trait PidServlet extends ScalatraServlet {
@@ -54,15 +53,11 @@ trait PidServletComponent extends DebugEnhancedLogging {
     post("/") {
       params.get("type")
         .map {
-          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urnGenerator.next() })
           case "doi" => respond(databaseAccess.doTransaction { implicit connection => doiGenerator.next() })
+          case "urn" => respond(databaseAccess.doTransaction { implicit connection => urnGenerator.next() })
           case pidType => BadRequest(s"Unknown PID type '$pidType'")
         }
         .getOrElse(respond(databaseAccess.doTransaction { implicit connection => doiGenerator.next() }))
     }
   }
-}
-
-object PidServletComponent {
-    type Dependencies = URNGeneratorComponent with DOIGeneratorComponent with DatabaseAccessComponent
 }

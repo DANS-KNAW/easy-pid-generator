@@ -29,11 +29,8 @@ class ServerWiringSpec extends TestSupportFixture
   with ServerWiring
   with GeneratorWiring
   with SeedStorageComponent
-  with DatabaseComponent
   with PidFormatterComponent
   with DatabaseAccessComponent {
-
-  val database: Database = new Database {}
 
   override def beforeEach(): Unit = {
     super.beforeEach()

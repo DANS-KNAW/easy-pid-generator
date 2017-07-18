@@ -21,7 +21,7 @@ import scala.language.postfixOps
 import scala.util.Try
 
 trait PidGeneratorComponent {
-  this: PidGeneratorComponent.Dependencies =>
+  this: SeedStorageComponent with PidFormatterComponent =>
 
   // not a singleton, so no access point
 
@@ -49,8 +49,4 @@ trait PidGeneratorComponent {
       (seed * factor + increment) % modulo
     }
   }
-}
-
-object PidGeneratorComponent {
-  type Dependencies = SeedStorageComponent with PidFormatterComponent
 }

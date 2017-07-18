@@ -26,7 +26,7 @@ import scala.util.{ Failure, Success }
 class SeedStorageSpec extends TestSupportFixture
   with MockFactory
   with SeedStorageComponent
-  with DatabaseComponent{
+  with DatabaseComponent {
 
   implicit val connection: Connection = mock[Connection]
   override val database: Database = mock[Database]

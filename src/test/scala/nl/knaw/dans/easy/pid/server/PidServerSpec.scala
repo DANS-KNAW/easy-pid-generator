@@ -32,15 +32,18 @@ class PidServerSpec extends TestSupportFixture
   with OneInstancePerTest
   with PidServerComponent
   with PidServletComponent
-  with GeneratorWiring
+  with URNGeneratorComponent
+  with DOIGeneratorComponent
   with SeedStorageComponent
   with DatabaseComponent
   with PidFormatterComponent
   with DatabaseAccessComponent {
 
-  val database: Database = mock[Database]
-  val pidServlet: PidServlet = new PidServlet {}
-  val server: PidServer = new PidServer(8060)
+  override val database: Database = mock[Database]
+  override val urnGenerator: URNGenerator = mock[URNGenerator]
+  override val doiGenerator: DOIGenerator = mock[DOIGenerator]
+  override val pidServlet: PidServlet = new PidServlet {}
+  override val server: PidServer = new PidServer(8060)
 
   override def afterEach(): Unit = {
     server.stop() shouldBe a[Success[_]]

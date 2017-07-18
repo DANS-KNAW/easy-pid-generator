@@ -28,7 +28,6 @@ import scala.util.{ Failure, Try }
 
 trait DatabaseAccessComponent extends DebugEnhancedLogging {
 
-  // singleton component, so access component here
   val databaseAccess: DatabaseAccess
 
   // TODO candidate for library - copied from easy-bag-index

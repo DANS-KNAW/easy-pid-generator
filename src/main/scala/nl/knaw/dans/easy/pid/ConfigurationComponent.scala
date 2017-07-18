@@ -27,7 +27,6 @@ import scala.io.Source
  */
 trait ConfigurationComponent {
 
-  // singleton component, so access component here
   val configuration: Configuration
 
   trait Configuration {

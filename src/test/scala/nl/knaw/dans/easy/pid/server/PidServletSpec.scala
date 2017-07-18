@@ -31,7 +31,8 @@ class PidServletSpec extends TestSupportFixture
   with ScalatraSuite
   with MockFactory
   with PidServletComponent
-  with GeneratorWiring
+  with URNGeneratorComponent
+  with DOIGeneratorComponent
   with PidFormatterComponent
   with SeedStorageComponent
   with DatabaseComponent {

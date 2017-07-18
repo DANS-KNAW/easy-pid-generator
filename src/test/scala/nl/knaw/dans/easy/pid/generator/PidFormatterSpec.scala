@@ -16,8 +16,8 @@
 package nl.knaw.dans.easy.pid.generator
 
 import org.scalacheck.Gen
-import org.scalatest.{ Matchers, PropSpec }
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatest.{ Matchers, PropSpec }
 
 class PidFormatterSpec extends PropSpec
   with GeneratorDrivenPropertyChecks

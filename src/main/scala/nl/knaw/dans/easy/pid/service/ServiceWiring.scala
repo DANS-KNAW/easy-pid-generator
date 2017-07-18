@@ -20,19 +20,15 @@ import java.nio.file.Paths
 import nl.knaw.dans.easy.pid.generator._
 import nl.knaw.dans.easy.pid.server.ServerWiring
 import nl.knaw.dans.easy.pid.{ ConfigurationComponent, DatabaseAccessComponent }
-import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 trait ServiceWiring extends ServerWiring
   with GeneratorWiring
   with PidFormatterComponent
   with SeedStorageComponent
-  with DatabaseComponent
   with DatabaseAccessComponent
   with ConfigurationComponent {
 
-  private lazy val home = Paths.get(System.getProperty("app.home"))
-
-  override lazy val configuration: Configuration = Configuration(home)
+  override lazy val configuration: Configuration = Configuration(Paths.get(System.getProperty("app.home")))
   override val databaseAccess: DatabaseAccess = new DatabaseAccess {
     override val dbDriverClassName: String = configuration.properties.getString("pid-generator.database.driver-class")
     override val dbUrl: String = configuration.properties.getString("pid-generator.database.url")
@@ -49,5 +45,4 @@ trait ServiceWiring extends ServerWiring
     require(usernamePasswordCheck,
       "database username and password should either be both defined or not defined")
   }
-  override val database: Database = new Database {}
 }

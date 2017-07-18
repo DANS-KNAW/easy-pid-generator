@@ -17,8 +17,10 @@ package nl.knaw.dans.easy.pid.generator
 
 import nl.knaw.dans.easy.pid.{ ConfigurationComponent, DOI, PidType, URN }
 
-trait GeneratorWiring extends URNGeneratorComponent with DOIGeneratorComponent {
-  this: GeneratorWiring.Dependencies =>
+trait GeneratorWiring extends URNGeneratorComponent with DOIGeneratorComponent with DatabaseComponent {
+  this: SeedStorageComponent with PidFormatterComponent with ConfigurationComponent =>
+
+  override val database: Database = new Database {}
 
   override val urnGenerator: URNGenerator = new URNGenerator {
     override val seedStorage: SeedStorage = new SeedStorage {
@@ -45,8 +47,4 @@ trait GeneratorWiring extends URNGeneratorComponent with DOIGeneratorComponent {
       override val dashPosition: Int = configuration.properties.getInt("pid-generator.types.doi.dashPosition")
     }
   }
-}
-
-object GeneratorWiring {
-  type Dependencies = DOIGeneratorComponent.Dependencies with URNGeneratorComponent.Dependencies with ConfigurationComponent
 }
