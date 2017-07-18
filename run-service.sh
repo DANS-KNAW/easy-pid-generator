@@ -16,7 +16,6 @@
 #
 
 
-ARGS=$@
 APPHOME=home
 
 mvn exec:java -Dapp.home=$APPHOME \
