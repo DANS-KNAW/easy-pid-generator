@@ -13,13 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid
 
-package object pid {
+import java.nio.file.{ Files, Paths }
 
-  sealed abstract class PidType(val name: String)
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
+import scala.collection.JavaConverters._
 
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+trait ConfigurationSupportFixture extends ConfigurationComponent {
+  this: TestSupportFixture =>
+
+  override val configuration: Configuration = {
+    val versionFile = testDir.resolve("version")
+    Files.createFile(versionFile)
+    Files.write(versionFile, List("version x.y.z").asJava)
+
+    Files.createDirectory(testDir.resolve("cfg/"))
+    Files.copy(
+      Paths.get(getClass.getResource("/debug-config/application.properties").toURI),
+      testDir.resolve("cfg/application.properties"))
+
+    Configuration(testDir)
+  }
 }

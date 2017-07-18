@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid.server
 
-package object pid {
+import nl.knaw.dans.easy.pid.generator.{ GeneratorWiring, PidFormatterComponent, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.{ ConfigurationComponent, DatabaseAccessComponent }
 
-  sealed abstract class PidType(val name: String)
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
+trait ServerWiring extends PidServletComponent with PidServerComponent with GeneratorWiring {
+  self: SeedStorageComponent with PidFormatterComponent with DatabaseAccessComponent with ConfigurationComponent =>
 
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+  override val pidServlet: PidServlet = new PidServlet {}
+  override val server: PidServer = new PidServer(configuration.properties.getInt("pid-generator.daemon.http.port"))
 }

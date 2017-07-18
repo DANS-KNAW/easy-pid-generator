@@ -13,13 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid
 
-package object pid {
+import java.nio.file.{ Files, Path, Paths }
 
-  sealed abstract class PidType(val name: String)
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
+import org.apache.commons.io.FileUtils
+import org.scalatest.{ FlatSpec, Inside, Matchers }
 
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+trait TestSupportFixture extends FlatSpec with Matchers with Inside {
+
+  lazy val testDir: Path = {
+    val path = Paths.get(s"target/test/${ getClass.getSimpleName }").toAbsolutePath
+    FileUtils.deleteQuietly(path.toFile)
+    Files.createDirectories(path)
+    path
+  }
 }

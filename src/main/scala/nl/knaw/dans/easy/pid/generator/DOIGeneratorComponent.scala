@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid.generator
 
-package object pid {
+trait DOIGeneratorComponent extends PidGeneratorComponent {
+  this: SeedStorageComponent with PidFormatterComponent =>
 
-  sealed abstract class PidType(val name: String)
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
+  val doiGenerator: DOIGenerator
 
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+  trait DOIGenerator extends PidGenerator
 }

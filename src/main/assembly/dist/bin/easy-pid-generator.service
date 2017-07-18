@@ -1,0 +1,11 @@
+[Unit]
+Description=EASY PID Generator Service
+
+[Service]
+ExecStart=/usr/local/easy-pid-generator/bin/easy-pid-generator-service-start
+
+User=easy-pid-generator
+Group=easy-pid-generator
+
+[Install]
+WantedBy=multi-user.target
