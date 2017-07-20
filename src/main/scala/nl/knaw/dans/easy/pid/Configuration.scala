@@ -26,7 +26,8 @@ case class Configuration(version: String, properties: PropertiesConfiguration)
 
 object Configuration {
 
-  def apply(home: Path): Configuration = {
+  def apply(): Configuration = {
+    val home = Paths.get(System.getProperty("app.home"))
     val cfgPath = Seq(
       Paths.get(s"/etc/opt/dans.knaw.nl/easy-pid-generator/"),
       home.resolve("cfg"))
