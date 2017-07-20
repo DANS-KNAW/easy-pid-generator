@@ -15,23 +15,26 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import java.sql.Connection
+import nl.knaw.dans.easy.pid.PidType
+import nl.knaw.dans.easy.pid.seedstorage.SeedStorageComponent
 
-import scala.language.postfixOps
 import scala.util.Try
 
 trait PidGeneratorComponent {
-  this: SeedStorageComponent with PidFormatterComponent =>
+  this: SeedStorageComponent =>
 
-  // not a singleton, so no access point
+  val pidGenerator: PidGenerator
 
-  trait PidGenerator {
+  class PidGenerator(formatters: Map[PidType, PidFormatter]) {
 
-    val seedStorage: SeedStorage
-    val formatter: PidFormatter
-
-    def next()(implicit connection: Connection): Try[String] = {
-      seedStorage.calculateAndPersist(getNextPidNumber).map(formatter.format)
+    /**
+     * Generates the next PID of the specified type.
+     *
+     * @param pidType the type of PID to generate (DOI or URN)
+     * @return the PID
+     */
+    def generate(pidType: PidType): Try[String] = {
+      seedStorage.calculateAndPersist(pidType)(getNextPidNumber).map(formatters(pidType).format)
     }
 
     /**

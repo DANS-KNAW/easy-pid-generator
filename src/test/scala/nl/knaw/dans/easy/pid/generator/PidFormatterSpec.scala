@@ -19,10 +19,7 @@ import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ Matchers, PropSpec }
 
-class PidFormatterSpec extends PropSpec
-  with GeneratorDrivenPropertyChecks
-  with Matchers
-  with PidFormatterComponent {
+class PidFormatterSpec extends PropSpec with GeneratorDrivenPropertyChecks with Matchers {
 
   property("Formatted PID starts with configured prefix") {
     forAll(Gen.posNum[Long], Gen.alphaStr, Gen.choose(2, 36), Gen.choose(5, 10)) {

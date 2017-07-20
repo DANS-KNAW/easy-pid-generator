@@ -15,46 +15,33 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import java.sql.Connection
-
-import nl.knaw.dans.easy.pid.{ RanOutOfSeeds, SeedDatabaseFixture, TestSupportFixture, URN }
+import nl.knaw.dans.easy.pid._
+import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
+import nl.knaw.dans.easy.pid.seedstorage.{ Database, SeedStorageComponent }
 import org.scalamock.scalatest.MockFactory
 
 import scala.util.{ Failure, Success }
 
-class PidGeneratorSpec extends TestSupportFixture
-  with SeedDatabaseFixture
-  with MockFactory
-  with PidGeneratorComponent
-  with SeedStorageComponent
-  with PidFormatterComponent
-  with DatabaseComponent {
+class PidGeneratorSpec extends TestSupportFixture with SeedDatabaseFixture with MockFactory with PidGeneratorComponent with SeedStorageComponent {
+  val database: Database = mock[Database]
+  val formatter: PidFormatter = mock[PidFormatter]
+  override val seedStorage: SeedStorage = mock[SeedStorage]
+  override val pidGenerator: PidGenerator = new PidGenerator(Map(DOI -> formatter))
 
-  override val database: Database = mock[Database]
-  private val seedStore: SeedStorage = mock[SeedStorage]
-  private val pidFormatter = mock[PidFormatter]
-
-  val generator: PidGenerator = new PidGenerator {
-    override val seedStorage: SeedStorage = seedStore
-    override val formatter: PidFormatter = pidFormatter
-  }
-
-  "next" should "calculate the next PID and format it according to the formatter" in {
+  "generate" should "calculate the next PID and format it according to the formatter" in {
     val formattedPid = "output"
     val nextPid = 96140546L
 
-    (seedStore.calculateAndPersist(_: Long => Long)(_: Connection)) expects
-      (*, *) once() returning Success(nextPid)
-    pidFormatter.format _ expects nextPid once() returning formattedPid
+    (seedStorage.calculateAndPersist(_: PidType)(_: Long => Long)) expects (DOI, *) once() returning Success(nextPid)
+    formatter.format _ expects nextPid once() returning formattedPid
 
-    generator.next() should matchPattern { case Success(`formattedPid`) => }
+    pidGenerator.generate(DOI) should matchPattern { case Success(`formattedPid`) => }
   }
 
   it should "fail if there is no new PID of the given type anymore" in {
-    (seedStore.calculateAndPersist(_: Long => Long)(_: Connection)) expects
-      (*, *) once() returning Failure(RanOutOfSeeds(URN))
-    pidFormatter.format _ expects * never()
+    (seedStorage.calculateAndPersist(_: PidType)(_: Long => Long)) expects (DOI, *) once() returning Failure(RanOutOfSeeds(DOI))
+    formatter.format _ expects * never()
 
-    generator.next() should matchPattern { case Failure(RanOutOfSeeds(URN)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
   }
 }
