@@ -15,9 +15,6 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.nio.file.Paths
-
-import nl.knaw.dans.easy.pid.service.{ PidService, PidServlet }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
@@ -49,7 +46,7 @@ object Command extends App with DebugEnhancedLogging {
   app.destroy()
 
   private def runAsService(): Try[FeedBackMessage] = Try {
-    val service = new PidService(configuration.properties.getInt("pid-generator.daemon.http.port"), new PidServlet(app))
+    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), new PidGeneratorServlet(app))
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
         logger.info("Stopping service ...")

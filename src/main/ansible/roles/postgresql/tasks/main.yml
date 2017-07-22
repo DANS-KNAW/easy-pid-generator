@@ -1,0 +1,34 @@
+- name: Install PostGreSQL
+  yum:
+    name: postgresql-server
+  
+- name: Check if PostGreSQL database has been initialized
+  stat:
+    path: "/var/lib/pgsql/data/pg_log"
+  register: pg_log
+  
+- name: Initialize PostGreSQL database
+  command: service postgresql initdb
+  when: not (pg_log.stat.exists|bool)
+  
+- name: Turn on PostGreSQL auto vacuum 1/2
+  lineinfile:
+    dest: "/var/lib/pgsql/data/postgresql.conf"
+    line: "track_counts = on"
+    insertafter: '^#\s*track_counts =.*$'
+- name: Turn on PostGreSQL auto vacuum 2/2
+  lineinfile:
+    dest: "/var/lib/pgsql/data/postgresql.conf"
+    line: "autovacuum = on"
+    insertafter: '^#\s*autovacuum =.*$'
+
+- name: Configure PostGreSQL to accept user/password credentials
+  copy:
+    src: pg_hba.conf
+    dest: "/var/lib/pgsql/data/pg_hba.conf"
+
+- name: Start and enable PostGreSQL
+  service:
+    name: postgresql
+    state: started
+    enabled: yes

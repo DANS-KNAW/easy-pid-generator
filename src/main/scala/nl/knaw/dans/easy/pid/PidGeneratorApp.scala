@@ -18,9 +18,9 @@ package nl.knaw.dans.easy.pid
 import scala.util.Try
 
 /**
+ * Exposes the application's API to the application's driver (e.g. Command or ServiceStarter).
  *
- *
- * @param wiring
+ * @param wiring object that configures and wires together the application's components
  */
 class PidGeneratorApp(wiring: ApplicationWiring) {
 

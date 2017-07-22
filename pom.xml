@@ -19,33 +19,26 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>nl.knaw.dans.shared</groupId>
         <artifactId>dans-scala-prototype</artifactId>
-        <version>1.44</version>
+        <version>1.49</version>
     </parent>
-
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
-    <version>1.x-SNAPSHOT</version>
-
+    <version>1.1.0-SNAPSHOT</version>
     <name>EASY PID Generator Service</name>
     <url>https://github.com/DANS-KNAW/easy-pid-generator</url>
     <description>Service that generates unique Persistent Identifiers on demand. Supported types are URN and DOI</description>
     <inceptionYear>2015</inceptionYear>
-
     <properties>
-        <main-class>nl.knaw.dans.easy.pid.command.Command</main-class>
+        <main-class>nl.knaw.dans.easy.pid.Command</main-class>
     </properties>
-
     <scm>
         <developerConnection>scm:git:https://github.com/DANS-KNAW/easy-pid-generator</developerConnection>
         <tag>HEAD</tag>
     </scm>
-
     <dependencies>
-        <!-- testing -->
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_2.11</artifactId>
@@ -64,8 +57,6 @@
             <groupId>org.scalacheck</groupId>
             <artifactId>scalacheck_2.11</artifactId>
         </dependency>
-
-        <!-- Scala utils-->
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-xml_2.11</artifactId>
@@ -83,8 +74,6 @@
             <artifactId>dans-scala-lib</artifactId>
             <version>1.2</version>
         </dependency>
-
-        <!-- Apache Commons -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
@@ -97,8 +86,6 @@
             <groupId>commons-daemon</groupId>
             <artifactId>commons-daemon</artifactId>
         </dependency>
-
-        <!-- service -->
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-server</artifactId>
@@ -117,14 +104,10 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
         </dependency>
-
-        <!-- logging -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
         </dependency>
-
-        <!-- databases -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
@@ -138,9 +121,9 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.16.1</version>
+            <scope>test</scope>
         </dependency>
     </dependencies>
-
     <repositories>
         <repository>
             <id>DANS</id>
@@ -150,7 +133,6 @@
             <url>http://maven.dans.knaw.nl/</url>
         </repository>
     </repositories>
-
     <pluginRepositories>
         <pluginRepository>
             <id>DANS</id>
@@ -160,7 +142,6 @@
             <url>http://maven.dans.knaw.nl/</url>
         </pluginRepository>
     </pluginRepositories>
-
     <build>
         <plugins>
             <plugin>
@@ -183,4 +164,37 @@
             </plugin>
         </plugins>
     </build>
+    <profiles>
+        <profile>
+            <id>rpm</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <file>
+                    <exists>/usr/local/bin/rpm</exists>
+                </file>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>rpm-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-rpm</id>
+                                <goals>
+                                    <goal>attached-rpm</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <group>Applications/Archiving</group>
+                            <requires combine.children="append">
+                                <require>jsvc</require>
+                            </requires>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>

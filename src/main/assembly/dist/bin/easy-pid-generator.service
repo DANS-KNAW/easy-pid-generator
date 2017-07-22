@@ -2,7 +2,10 @@
 Description=EASY PID Generator Service
 
 [Service]
-ExecStart=/usr/local/easy-pid-generator/bin/easy-pid-generator-service-start
+ExecStart=/bin/java \
+ -Dlogback.configurationFile=/etc/opt/dans.knaw.nl/easy-pid-generator/logback-service.xml \
+ -Dapp.home=/opt/dans.knaw.nl/easy-pid-generator \
+ -jar /opt/dans.knaw.nl/easy-pid-generator/bin/easy-pid-generator.jar run-service
 
 User=easy-pid-generator
 Group=easy-pid-generator

@@ -20,39 +20,40 @@ import nl.knaw.dans.easy.pid.seedstorage.{ Database, DatabaseAccess, SeedStorage
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 /**
- * Intializes and wires together the components of this application.
+ * Initializes and wires together the components of this application.
  *
  * @param configuration the application configuration
  */
-class ApplicationWiring(configuration: Configuration) extends PidGeneratorComponent with SeedStorageComponent with DebugEnhancedLogging {
-  private val firstSeedDoi = configuration.properties.getLong("pid-generator.types.doi.firstSeed")
-  private val namespaceDoi = configuration.properties.getString("pid-generator.types.doi.namespace")
-  private val dashPositionDoi = configuration.properties.getInt("pid-generator.types.doi.dashPosition")
-  private val illegalCharsDoi = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v')
-  private val lengthDoi = 7
+class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLogging
+  with PidGeneratorComponent
+  with SeedStorageComponent {
 
-  private val firstSeedUrn = configuration.properties.getLong("pid-generator.types.urn.firstSeed")
-  private val namespaceUrn = configuration.properties.getString("pid-generator.types.urn.namespace")
-  private val dashPositionUrn = configuration.properties.getInt("pid-generator.types.urn.dashPosition")
-  private val illegalCharsUrn = Map.empty[Char, Char]
-  private val lengthUrn = 6
-
-  private val database = new Database
+  // TODO: Add validation and clear error messages when config is wrong. Or should this go in Configuration?
   val databaseAccess = new DatabaseAccess(
     dbDriverClassName = configuration.properties.getString("pid-generator.database.driver-class"),
     dbUrl = configuration.properties.getString("pid-generator.database.url"),
     dbUsername = Option(configuration.properties.getString("pid-generator.database.username")),
     dbPassword = Option(configuration.properties.getString("pid-generator.database.password"))
   )
+  logger.debug("Initializing database connection...")
   databaseAccess.initConnectionPool()
 
+  logger.debug("Setting up SeedStorage component...")
   override val seedStorage: SeedStorage = SeedStorage(Map(
-    DOI -> firstSeedDoi,
-    URN -> firstSeedUrn
-  ))(database, databaseAccess)
+    DOI -> configuration.properties.getLong("pid-generator.types.doi.firstSeed"),
+    URN -> configuration.properties.getLong("pid-generator.types.urn.firstSeed")
+  ))(new Database, databaseAccess)
 
+  logger.debug("Setting up PidGenerator component...")
   override val pidGenerator: PidGenerator = new PidGenerator(Map(
-    DOI -> PidFormatter(namespaceDoi, dashPositionDoi, illegalCharsDoi, lengthDoi),
-    URN -> PidFormatter(namespaceUrn, dashPositionUrn, illegalCharsUrn, lengthUrn)
-  ))
+    DOI -> PidFormatter(
+      ns = configuration.properties.getString("pid-generator.types.doi.namespace"),
+      dp = configuration.properties.getInt("pid-generator.types.doi.dashPosition"),
+      il = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v'),
+      len = 7),
+    URN -> PidFormatter(
+      ns = configuration.properties.getString("pid-generator.types.urn.namespace"),
+      dp = configuration.properties.getInt("pid-generator.types.urn.dashPosition"),
+      il = Map.empty[Char, Char],
+      len = 6)))
 }
