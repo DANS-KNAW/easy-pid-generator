@@ -46,19 +46,15 @@ object Command extends App with DebugEnhancedLogging {
   app.destroy()
 
   private def runAsService(): Try[FeedBackMessage] = Try {
-    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), new PidGeneratorServlet(app))
+    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
-        logger.info("Stopping service ...")
         service.stop()
-        logger.info("Cleaning up ...")
         service.destroy()
-        logger.info("Service stopped.")
       }
     })
 
     service.start()
-    logger.info("Service started ...")
     Thread.currentThread.join()
     "Service terminated normally."
   }

@@ -25,7 +25,7 @@ import org.scalatra.servlet.ScalatraListener
 
 import scala.util.Try
 
-class PidGeneratorService(val serverPort: Int, pidServlet: PidGeneratorServlet) extends DebugEnhancedLogging {
+class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp) extends DebugEnhancedLogging {
 
   private val server = new Server(serverPort) {
     this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
@@ -33,7 +33,7 @@ class PidGeneratorService(val serverPort: Int, pidServlet: PidGeneratorServlet) 
         override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
           ("pid-lifecycle", new LifeCycle {
             override def init(context: ServletContext): Unit = {
-              context.mount(pidServlet, "/")
+              context.mount(new PidGeneratorServlet(app), "/")
             }
           })
         }

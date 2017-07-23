@@ -26,7 +26,7 @@ class ServiceStarter extends Daemon with DebugEnhancedLogging {
     logger.info("Initializing service...")
     val configuration = Configuration()
     app = new PidGeneratorApp(new ApplicationWiring(configuration))
-    service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), new PidGeneratorServlet(app))
+    service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
     logger.info("Service initialized.")
   }
 
