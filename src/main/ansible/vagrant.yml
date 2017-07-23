@@ -26,6 +26,21 @@
       - tree
       - tmux
 
+  - name: Ensure /etc/ansible/facts.d exists
+    file:
+      path: /etc/ansible/facts.d
+      recurse: yes
+      state: directory
+
+  - name: Copy facts-scripts to server
+    copy:
+      src: conditions.fact
+      dest: /etc/ansible/facts.d/
+      mode: "u+x"
+
+  - name: reload ansible_local
+    setup: filter=ansible_local
+
   - name: Enable Apache HTTP Server
     service:
       name: httpd
@@ -66,18 +81,19 @@
       mode: "755"
 
   - include_role:
-      name: postgresql
-
-  - name: Set up database
-        
-
-  - include_role:
       name: yum-repo
 
   - name: Install package
     yum:
       name: dans.knaw.nl-easy-pid-generator
       state: latest
+
+  - include_role:
+      name: postgresql
+
+  - include_role:
+      name: database
+    when: ansible_local.conditions.database_not_installed
 
   - service:
       name: easy-pid-generator

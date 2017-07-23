@@ -1,0 +1,10 @@
+#!/usr/bin/python
+#
+import os, json
+
+def can_connect_to_postgresql_db(db):
+    return os.system('sudo -u postgres psql -U postgres -c "\q" ' + db) == 0
+
+print json.dumps({
+   'database_not_installed': not can_connect_to_postgresql_db('easy_pid_generator')
+})

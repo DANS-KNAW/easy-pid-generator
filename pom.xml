@@ -191,6 +191,11 @@
                             <requires combine.children="append">
                                 <require>jsvc</require>
                             </requires>
+                            <mappings combine.children="append">
+
+
+
+                            </mappings>
                         </configuration>
                     </plugin>
                 </plugins>

@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 #
 # Copyright (C) 2015 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
 #
@@ -15,16 +14,11 @@
 # limitations under the License.
 #
 
+- name: Create role for service
+  shell: "sudo -u postgres psql -c  \"CREATE ROLE easy_pid_generator WITH LOGIN PASSWORD 'changeme'\""
 
-#include <service.sh>
+- name: Create database
+  shell: "sudo -u postgres psql -c  \"CREATE DATABASE easy_pid_generator OWNER easy_pid_generator\""
 
-NUMBER_OF_INSTALLATIONS=$1
-MODULE_NAME=easy-pid-generator
-INSTALL_DIR=/opt/dans.knaw.nl/$MODULE_NAME
-PHASE="POST-INSTALL"
-
-echo "$PHASE: START (Number of current installations: $NUMBER_OF_INSTALLATIONS)"
-service_install_initd_service_script "$INSTALL_DIR/install/$MODULE_NAME-initd.sh" $MODULE_NAME
-service_install_systemd_unit "$INSTALL_DIR/install/$MODULE_NAME.service" $MODULE_NAME "$INSTALL_DIR/install/override.conf"
-service_create_log_directory $MODULE_NAME
-echo "$PHASE: DONE"
+- name: Create database schema
+  shell: "sudo -u postgres psql easy_pid_generator < /opt/dans.knaw.nl/easy-pid-generator/install/db-tables.sql"
