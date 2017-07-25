@@ -33,7 +33,7 @@ class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp) extends Deb
         override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
           ("pid-lifecycle", new LifeCycle {
             override def init(context: ServletContext): Unit = {
-              context.mount(new PidGeneratorServlet(app), "/")
+              context.mount(new PidGeneratorServlet(app), "/pids")
             }
           })
         }

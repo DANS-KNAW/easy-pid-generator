@@ -49,6 +49,7 @@ object Command extends App with DebugEnhancedLogging {
         case generate @ commandLine.generate => generate.pidType() match {
           case "doi" => app.generate(DOI)
           case "urn" => app.generate(URN)
+          case t => Failure(new IllegalArgumentException(s"Unknown PID type: $t"))
         }
         case commandLine.runService => runAsService(app)
       }
