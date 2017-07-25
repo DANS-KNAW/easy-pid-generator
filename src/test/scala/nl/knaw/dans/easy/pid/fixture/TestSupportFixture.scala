@@ -18,9 +18,9 @@ package nl.knaw.dans.easy.pid.fixture
 import java.nio.file.{ Files, Path, Paths }
 
 import org.apache.commons.io.FileUtils
-import org.scalatest.{ FlatSpec, Inside, Matchers }
+import org.scalatest.{ BeforeAndAfterEach, FlatSpec, Inside, Matchers }
 
-trait TestSupportFixture extends FlatSpec with Matchers with Inside {
+trait TestSupportFixture extends FlatSpec with Matchers with Inside with BeforeAndAfterEach {
 
   lazy val testDir: Path = {
     val path = Paths.get(s"target/test/${ getClass.getSimpleName }").toAbsolutePath

@@ -32,18 +32,21 @@ class ServiceStarter extends Daemon with DebugEnhancedLogging {
 
   override def start(): Unit = {
     logger.info("Starting service...")
-    service.start()
+    app.init()
+      .flatMap(_ => service.start())
+      .unsafeGetOrThrow
     logger.info("Service started.")
   }
 
   override def stop(): Unit = {
     logger.info("Stopping service...")
-    service.stop()
+    service.stop().unsafeGetOrThrow
   }
 
   override def destroy(): Unit = {
     service.destroy()
-    app.destroy()
+      .map(_ => app.close())
+      .unsafeGetOrThrow
     logger.info("Service stopped.")
   }
 }

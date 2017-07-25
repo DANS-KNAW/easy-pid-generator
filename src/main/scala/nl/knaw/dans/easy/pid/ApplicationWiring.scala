@@ -28,7 +28,6 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
   with PidGeneratorComponent
   with SeedStorageComponent {
 
-  // TODO: Add validation and clear error messages when config is wrong. Or should this go in Configuration?
   val databaseAccess = new DatabaseAccess(
     dbDriverClassName = configuration.properties.getString("pid-generator.database.driver-class"),
     dbUrl = configuration.properties.getString("pid-generator.database.url"),
@@ -36,7 +35,6 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
     dbPassword = Option(configuration.properties.getString("pid-generator.database.password"))
   )
   logger.debug("Initializing database connection...")
-  databaseAccess.initConnectionPool()
 
   logger.debug("Setting up SeedStorage component...")
   override val seedStorage: SeedStorage = SeedStorage(Map(

@@ -42,13 +42,6 @@ class PidGeneratorServletSpec extends TestSupportFixture
     }
   }
 
-  "post /*" should "return a failure response, because the url is incorrect" in {
-    post("/foo") {
-      status shouldBe 400
-      body shouldBe "Cannot create PIDs at this URI"
-    }
-  }
-
   "post with URN request" should "return the next URN PID" in {
     (app.generate(_: PidType)) expects URN once() returning Success("urn output")
     post("/", ("type", "urn")) {

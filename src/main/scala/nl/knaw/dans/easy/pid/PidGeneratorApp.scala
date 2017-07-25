@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid
 
+import java.io.Closeable
+
 import scala.util.Try
 
 /**
@@ -22,13 +24,17 @@ import scala.util.Try
  *
  * @param wiring object that configures and wires together the application's components
  */
-class PidGeneratorApp(wiring: ApplicationWiring) {
+class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
 
   def generate(pidType: PidType): Try[String] = {
     wiring.pidGenerator.generate(pidType)
   }
 
-  def destroy(): Try[Unit] = {
-    wiring.databaseAccess.closeConnectionPool()
+  def init(): Try[Unit] = {
+    wiring.databaseAccess.initConnectionPool()
+  }
+
+  override def close(): Unit = {
+    wiring.databaseAccess.closeConnectionPool().unsafeGetOrThrow
   }
 }

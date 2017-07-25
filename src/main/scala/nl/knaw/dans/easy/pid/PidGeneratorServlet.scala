@@ -30,11 +30,6 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
     Ok("Persistent Identifier Generator running")
   }
 
-  // TODO: necessary??? In any case not a "bad request" but rather 404
-  post("/*") {
-    BadRequest("Cannot create PIDs at this URI")
-  }
-
   private def respond(result: Try[String]): ActionResult = {
     result.map(Ok(_))
       .doIfFailure { case e => logger.error(e.getMessage, e) }
