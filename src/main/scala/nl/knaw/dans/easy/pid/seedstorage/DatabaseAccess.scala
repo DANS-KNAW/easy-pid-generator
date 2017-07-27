@@ -43,7 +43,7 @@ class DatabaseAccess(dbDriverClassName: String,
 
   type ConnectionPool = DataSource with AutoCloseable
 
-  private var __pool: ConnectionPool = _
+  private var pool: ConnectionPool = _
 
   protected def createConnectionPool: ConnectionPool = {
     new BasicDataSource {
@@ -55,19 +55,19 @@ class DatabaseAccess(dbDriverClassName: String,
   }
 
   def initConnectionPool(): Try[Unit] = Try {
-    logger.info("Creating database connection ...")
-    __pool = createConnectionPool
+    logger.info("Creating database connection...")
+    pool = createConnectionPool
     logger.info(s"Database connected with URL = $dbUrl, user = $dbUsername, password = ****.")
   }
 
   def closeConnectionPool(): Try[Unit] = Try {
-    logger.info("Closing database connection ...")
-    __pool.close()
+    logger.info("Closing database connection...")
+    pool.close()
     logger.info("Database connection closed.")
   }
 
   def doTransaction[T](actionFunc: Connection => Try[T]): Try[T] = {
-    managed(__pool.getConnection)
+    managed(pool.getConnection)
       .map(connection => {
         connection.setAutoCommit(false)
         val savepoint = connection.setSavepoint()

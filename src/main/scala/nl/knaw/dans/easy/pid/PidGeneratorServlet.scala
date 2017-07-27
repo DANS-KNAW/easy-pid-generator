@@ -22,8 +22,7 @@ import org.scalatra._
 import scala.util.Try
 
 class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with DebugEnhancedLogging {
-
-  logger.info("PID Generator Servlet running ...")
+  logger.info("PID Generator Servlet running...")
 
   get("/") {
     contentType = "text/plain"

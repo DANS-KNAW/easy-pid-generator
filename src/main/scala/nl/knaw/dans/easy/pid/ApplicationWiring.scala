@@ -34,15 +34,14 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
     dbUsername = Option(configuration.properties.getString("pid-generator.database.username")),
     dbPassword = Option(configuration.properties.getString("pid-generator.database.password"))
   )
-  logger.debug("Initializing database connection...")
 
-  logger.debug("Setting up SeedStorage component...")
+  debug("Setting up SeedStorage component...")
   override val seedStorage: SeedStorage = SeedStorage(Map(
     DOI -> configuration.properties.getLong("pid-generator.types.doi.firstSeed"),
     URN -> configuration.properties.getLong("pid-generator.types.urn.firstSeed")
   ))(new Database, databaseAccess)
 
-  logger.debug("Setting up PidGenerator component...")
+  debug("Setting up PidGenerator component...")
   override val pidGenerator: PidGenerator = new PidGenerator(Map(
     DOI -> PidFormatter(
       ns = configuration.properties.getString("pid-generator.types.doi.namespace"),
