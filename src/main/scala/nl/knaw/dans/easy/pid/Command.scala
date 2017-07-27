@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import resource._
 
 import scala.language.reflectiveCalls
 import scala.util.control.NonFatal
@@ -30,27 +31,38 @@ object Command extends App with DebugEnhancedLogging {
     verify()
   }
   val app = new PidGeneratorApp(new ApplicationWiring(configuration))
-  val result: Try[FeedBackMessage] = commandLine.subcommand match {
-    case Some(generate @ commandLine.generate) => generate.pidType() match {
-      case "doi" => app.generate(DOI)
-      case "urn" => app.generate(URN)
-    }
-    case Some(_ @ commandLine.runService) => runAsService()
-    case _ => Failure(new IllegalArgumentException(s"Unknown command: ${ commandLine.subcommand }"))
-  }
 
-  result.doIfSuccess(msg => println(s"OK: $msg"))
+  managed(app)
+    .acquireAndGet(app => {
+      for {
+        _ <- app.init()
+        msg <- runSubcommand(app)
+      } yield msg
+    })
+    .doIfSuccess(msg => println(s"OK: $msg"))
     .doIfFailure { case e => logger.error(e.getMessage, e) }
     .doIfFailure { case NonFatal(e) => println(s"FAILED: ${ e.getMessage }") }
 
-  app.destroy()
+  private def runSubcommand(app: PidGeneratorApp): Try[FeedBackMessage] = {
+    commandLine.subcommand
+      .collect {
+        case generate @ commandLine.generate => generate.pidType() match {
+          case "doi" => app.generate(DOI)
+          case "urn" => app.generate(URN)
+          case t => Failure(new IllegalArgumentException(s"Unknown PID type: $t"))
+        }
+        case commandLine.runService => runAsService(app)
+      }
+      .getOrElse(Failure(new IllegalArgumentException(s"Unknown command: ${ commandLine.subcommand }")))
+  }
 
-  private def runAsService(): Try[FeedBackMessage] = Try {
+  private def runAsService(app: PidGeneratorApp): Try[FeedBackMessage] = Try {
     val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
         service.stop()
         service.destroy()
+        app.close()
       }
     })
 
