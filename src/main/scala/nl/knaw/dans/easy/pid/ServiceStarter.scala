@@ -1,11 +1,11 @@
 /**
- * Copyright (C) 2015-2016 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
+ * Copyright (C) 2015 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *         http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -15,43 +15,36 @@
  */
 package nl.knaw.dans.easy.pid
 
-import nl.knaw.dans.easy.pid.microservice.HazelcastService
-import nl.knaw.dans.easy.pid.rest.RestService
-import org.apache.commons.daemon.{Daemon, DaemonContext}
-import org.slf4j.{Logger, LoggerFactory}
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
-class ServiceStarter extends Daemon with SettingsParser {
-  var log: Logger = _
-  var service: Service = _
+class ServiceStarter extends Daemon with DebugEnhancedLogging {
+  var app: PidGeneratorApp = _
+  var service: PidGeneratorService = _
 
-  override def init(ctx: DaemonContext): Unit = {
-    log = LoggerFactory.getLogger(getClass)
-
-    log.info("Initializing service...")
-
-    implicit val settings = getSettings
-    service = settings.mode match {
-      case Rest => new RestService
-      case Hazelcast => new HazelcastService
-      case unknown => throw new IllegalArgumentException(s"Invalid mode: $unknown. Valid modes are 'rest', 'hazelcast'")
-    }
-
-    log.info("Service initialized.")
+  override def init(context: DaemonContext): Unit = {
+    logger.info("Initializing service...")
+    val configuration = Configuration()
+    app = new PidGeneratorApp(new ApplicationWiring(configuration))
+    service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
+    logger.info("Service initialized.")
   }
 
   override def start(): Unit = {
-    log.info("Starting service...")
-    service.start()
-    log.info("Service started.")
+    logger.info("Starting service...")
+    app.init()
+      .flatMap(_ => service.start())
+      .unsafeGetOrThrow
+    logger.info("Service started.")
   }
 
   override def stop(): Unit = {
-    log.info("Stopping service...")
-    service.stop()
+    logger.info("Stopping service...")
+    service.stop().unsafeGetOrThrow
   }
 
   override def destroy(): Unit = {
-    service.destroy()
-    log.info("Service stopped.")
+    service.destroy().unsafeGetOrThrow
+    logger.info("Service stopped.")
   }
 }

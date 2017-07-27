@@ -1,0 +1,5 @@
+CREATE TABLE seed (
+    type VARCHAR(64) NOT NULL UNIQUE,
+    value BIGINT NOT NULL);
+
+GRANT INSERT, SELECT, UPDATE, DELETE ON seed TO easy_pid_generator;

@@ -13,26 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy
+package nl.knaw.dans.easy.pid
 
-import scala.util.{ Failure, Success, Try }
+import java.io.Closeable
 
-package object pid {
+import scala.util.Try
 
-  sealed abstract class PidType(val name: String)
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
+/**
+ * Exposes the application's API to the application's driver (e.g. Command or ServiceStarter).
+ *
+ * @param wiring object that configures and wires together the application's components
+ */
+class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
 
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+  def generate(pidType: PidType): Try[String] = {
+    wiring.pidGenerator.generate(pidType)
+  }
 
-  // TODO copied from easy-bag-store
-  implicit class TryExtensions2[T](val t: Try[T]) extends AnyVal {
-    // TODO candidate for dans-scala-lib
-    def unsafeGetOrThrow: T = {
-      t match {
-        case Success(value) => value
-        case Failure(throwable) => throw throwable
-      }
-    }
+  def init(): Try[Unit] = {
+    wiring.databaseAccess.initConnectionPool()
+  }
+
+  override def close(): Unit = {
+    wiring.databaseAccess.closeConnectionPool().unsafeGetOrThrow
   }
 }
