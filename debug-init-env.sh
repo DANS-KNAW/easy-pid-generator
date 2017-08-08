@@ -15,8 +15,19 @@
 # limitations under the License.
 #
 
-echo -n "Pre-creating log..."
+set -e # abort when a command fails
+
 TEMPDIR=data
+
+if [ -e ${TEMPDIR} ]; then
+    mv ${TEMPDIR} ${TEMPDIR}-$(date  +"%Y-%m-%d@%H:%M:%S")
+fi
+mkdir ${TEMPDIR}
+
+
+echo -n "creating seed.db..."
 sqlite3 $TEMPDIR/seed.db < src/test/resources/database/seed.sql
+
+echo -n "Pre-creating log..."
 touch $TEMPDIR/easy-pid-generator.log
 echo "OK"
