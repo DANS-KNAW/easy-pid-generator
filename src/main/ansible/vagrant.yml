@@ -16,6 +16,8 @@
 
 - hosts: "test"
   become: yes
+  vars:
+    local_test_vm_base_backend_port: 20140
   roles:
     - dans.local-test-vm-base
     - dans.local-yum-repo
@@ -36,7 +38,7 @@
       dest: /etc/ansible/facts.d/
       mode: "u+x"
 
-  - name: reload ansible_local
+  - name: Reload ansible_local
     setup: filter=ansible_local
 
   - name: Install package
