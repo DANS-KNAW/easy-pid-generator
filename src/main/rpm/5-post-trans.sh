@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-
 #include <service.sh>
 
 MODULE_NAME=easy-pid-generator
