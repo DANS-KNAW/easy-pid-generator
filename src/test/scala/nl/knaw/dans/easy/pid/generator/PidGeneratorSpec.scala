@@ -32,14 +32,14 @@ class PidGeneratorSpec extends TestSupportFixture with MockFactory with PidGener
     val formattedPid = "output"
     val nextPid = 96140546L
 
-    (seedStorage.calculateAndPersist(_: PidType)(_: Long => Long)) expects (DOI, *) once() returning Success(nextPid)
+    (seedStorage.calculateAndPersist(_: PidType)(_: Seed => Seed)) expects (DOI, *) once() returning Success(nextPid)
     formatter.format _ expects nextPid once() returning formattedPid
 
     pidGenerator.generate(DOI) should matchPattern { case Success(`formattedPid`) => }
   }
 
   it should "fail if there is no new PID of the given type anymore" in {
-    (seedStorage.calculateAndPersist(_: PidType)(_: Long => Long)) expects (DOI, *) once() returning Failure(RanOutOfSeeds(DOI))
+    (seedStorage.calculateAndPersist(_: PidType)(_: Seed => Seed)) expects (DOI, *) once() returning Failure(RanOutOfSeeds(DOI))
     formatter.format _ expects * never()
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }

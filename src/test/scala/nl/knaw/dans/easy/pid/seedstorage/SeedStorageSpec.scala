@@ -35,8 +35,8 @@ class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedDatab
     val nextPid = 123457L
 
     (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(previousPid))
-    (database.initSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, *) never()
-    (database.setSeed(_: PidType, _: Long)(_: Connection)) expects(DOI, nextPid, *) once() returning Success(nextPid)
+    (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
+    (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, nextPid, *) once() returning Success(nextPid)
 
     seedStorage.calculateAndPersist(DOI)(1 +) should matchPattern { case Success(`nextPid`) => }
   }
@@ -45,18 +45,18 @@ class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedDatab
     val previousPid = 123456L
 
     (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(previousPid))
-    (database.initSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, *) never()
-    (database.setSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, *) never()
+    (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
+    (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
 
     seedStorage.calculateAndPersist(DOI)(_ => initSeed) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
   }
 
   it should "succeed by initializing, persisting and returning the first seed" in {
-    val next = mock[Long => Long]
+    val next = mock[Seed => Seed]
 
     (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(None)
-    (database.initSeed(_: PidType, _: Long)(_: Connection)) expects(DOI, initSeed, *) once() returning Success(initSeed)
-    (database.setSeed(_: PidType, _: Long)(_: Connection)) expects(*, *, *) never()
+    (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, initSeed, *) once() returning Success(initSeed)
+    (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
     next.apply _ expects * never()
 
     seedStorage.calculateAndPersist(DOI)(next) should matchPattern { case Success(`initSeed`) => }

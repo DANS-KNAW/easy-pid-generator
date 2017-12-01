@@ -29,7 +29,7 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
     Ok("Persistent Identifier Generator running")
   }
 
-  private def respond(result: Try[String]): ActionResult = {
+  private def respond(result: Try[Pid]): ActionResult = {
     result.map(Ok(_))
       .doIfFailure { case e => logger.error(e.getMessage, e) }
       .getOrRecover {

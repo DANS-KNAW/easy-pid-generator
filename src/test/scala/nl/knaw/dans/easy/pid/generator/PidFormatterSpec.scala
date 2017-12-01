@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
+import nl.knaw.dans.easy.pid.Seed
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ Matchers, PropSpec }
@@ -22,8 +23,8 @@ import org.scalatest.{ Matchers, PropSpec }
 class PidFormatterSpec extends PropSpec with GeneratorDrivenPropertyChecks with Matchers {
 
   property("Formatted PID starts with configured prefix") {
-    forAll(Gen.posNum[Long], Gen.alphaStr, Gen.choose(2, 36), Gen.choose(5, 10)) {
-      (pid: Long, prefix: String, radix: Int, len: Int) =>
+    forAll(Gen.posNum[Seed], Gen.alphaStr, Gen.choose(2, 36), Gen.choose(5, 10)) {
+      (pid: Seed, prefix: String, radix: Int, len: Int) =>
         PidFormatter.format(prefix, radix, len, Map.empty[Char, Char], 3)(pid) should startWith(prefix)
     }
   }

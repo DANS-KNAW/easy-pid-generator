@@ -26,7 +26,7 @@ import scala.util.Try
  */
 class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
 
-  def generate(pidType: PidType): Try[String] = {
+  def generate(pidType: PidType): Try[Pid] = {
     wiring.pidGenerator.generate(pidType)
   }
 

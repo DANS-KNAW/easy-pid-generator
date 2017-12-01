@@ -19,6 +19,9 @@ import scala.util.{ Failure, Success, Try }
 
 package object pid {
 
+  type Seed = Long
+  type Pid = String
+
   sealed abstract class PidType(val name: String)
   case object DOI extends PidType("doi")
   case object URN extends PidType("urn")

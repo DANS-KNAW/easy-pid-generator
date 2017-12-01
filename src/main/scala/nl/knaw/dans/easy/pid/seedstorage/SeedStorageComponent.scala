@@ -15,14 +15,14 @@
  */
 package nl.knaw.dans.easy.pid.seedstorage
 
-import nl.knaw.dans.easy.pid.{ PidType, RanOutOfSeeds }
+import nl.knaw.dans.easy.pid.{ PidType, RanOutOfSeeds, Seed }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.{ Failure, Try }
 
 trait SeedStorageComponent extends DebugEnhancedLogging {
 
-  type FirstSeed = Long
+  type FirstSeed = Seed
   val seedStorage: SeedStorage
 
   trait SeedStorage {
@@ -35,7 +35,7 @@ trait SeedStorageComponent extends DebugEnhancedLogging {
      * sure that it is persisted. Returns a Failure if there is no next PID seed or
      * if the new seed could not be persisted
      */
-    def calculateAndPersist(pidType: PidType)(nextPid: Long => Long): Try[Long] = {
+    def calculateAndPersist(pidType: PidType)(nextPid: Seed => Seed): Try[Seed] = {
       databaseAccess.doTransaction(implicit connection => {
         val firstSeed = firstSeedMap(pidType)
         database.getSeed(pidType)

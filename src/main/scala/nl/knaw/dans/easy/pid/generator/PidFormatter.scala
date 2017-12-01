@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
+import nl.knaw.dans.easy.pid.Seed
+
 trait PidFormatter {
   val namespace: String
   val dashPosition: Int
@@ -23,14 +25,14 @@ trait PidFormatter {
 
   private val maxRadius = 36
 
-  def format(pid: Long): String = {
+  def format(seed: Seed): String = {
     PidFormatter.format(
       prefix = namespace,
       radix = maxRadius - illegalChars.size,
       len = length,
       charMap = illegalChars,
       dashPos = dashPosition
-    )(pid)
+    )(seed)
   }
 }
 
@@ -56,16 +58,16 @@ object PidFormatter {
    *                be mapped to chars normally not used with the given radix. The radix
    *                should therefore be sufficiently small to have enough unused chars.
    * @param dashPos position to insert a dash for readability
-   * @param pid     the PID number to format
+   * @param seed    the seed to format
    * @return the formatted PID
    */
-  def format(prefix: String, radix: Int, len: Int, charMap: Map[Char, Char], dashPos: Int)(pid: Long): String =
-    prefix + insertDashAt(dashPos)(convertToString(pid, radix, len, charMap))
+  def format(prefix: String, radix: Int, len: Int, charMap: Map[Char, Char], dashPos: Int)(seed: Seed): String =
+    prefix + insertDashAt(dashPos)(convertToString(seed, radix, len, charMap))
 
-  def convertToString(pid: Long, radix: Int, length: Int, illegalCharMap: Map[Char, Char] = Map()): String = {
+  def convertToString(seed: Seed, radix: Int, length: Int, illegalCharMap: Map[Char, Char] = Map()): String = {
     def padWithZeroes(s: String) = String.format(s"%${ length }s", s).replace(' ', '0')
 
-    padWithZeroes(java.lang.Long.toString(pid, radix).toLowerCase).map(c => illegalCharMap.getOrElse(c, c))
+    padWithZeroes(java.lang.Long.toString(seed, radix).toLowerCase).map(c => illegalCharMap.getOrElse(c, c))
   }
 
   def insertDashAt(i: Int)(s: String): String = {

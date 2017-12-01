@@ -31,7 +31,7 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach {
 
   val databaseFile: Path = testDir.resolve("database.db")
 
-  val databaseAccess = new DatabaseAccess(
+  val databaseAccess: DatabaseAccess = new DatabaseAccess(
     dbDriverClassName = "org.sqlite.JDBC",
     dbUrl = s"jdbc:sqlite:${ databaseFile.toString }",
     dbUsername = Option.empty[String],

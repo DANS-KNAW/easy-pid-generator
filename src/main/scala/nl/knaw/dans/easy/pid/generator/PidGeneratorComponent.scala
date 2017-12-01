@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.PidType
+import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed }
 import nl.knaw.dans.easy.pid.seedstorage.SeedStorageComponent
 
 import scala.util.Try
@@ -33,8 +33,8 @@ trait PidGeneratorComponent {
      * @param pidType the type of PID to generate (DOI or URN)
      * @return the PID
      */
-    def generate(pidType: PidType): Try[String] = {
-      seedStorage.calculateAndPersist(pidType)(getNextPidNumber).map(formatters(pidType).format)
+    def generate(pidType: PidType): Try[Pid] = {
+      seedStorage.calculateAndPersist(pidType)(getNextSeed).map(formatters(pidType).format)
     }
 
     /**
@@ -44,7 +44,7 @@ trait PidGeneratorComponent {
      * and then return to the first seed. See for proof of this:
      * <a href="http://en.wikipedia.org/wiki/Linear_congruential_generator">this page</a>
      */
-    private def getNextPidNumber(seed: Long): Long = {
+    private def getNextSeed(seed: Seed): Seed = {
       val factor = 3 * 7 * 11 * 13 * 23 // = 69069
       val increment = 5
       val modulo = math.pow(2, 31).toLong

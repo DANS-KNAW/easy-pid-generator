@@ -17,12 +17,13 @@ package nl.knaw.dans.easy.pid.fixture
 
 import java.net.{ HttpURLConnection, URL }
 
+import nl.knaw.dans.easy.pid.Pid
 import org.apache.commons.io.IOUtils
 import resource._
 
 trait ServerTestSupportFixture {
 
-  def callService(path: String = "pids", method: String = "GET"): (Int, String) = {
+  def callService(path: String = "pids", method: String = "GET"): (Int, Pid) = {
     new URL(s"http://localhost:8060/$path").openConnection() match {
       case conn: HttpURLConnection =>
         managed {
@@ -40,9 +41,9 @@ trait ServerTestSupportFixture {
     }
   }
 
-  def postUrn: (Int, String) = callService("pids?type=urn", "POST")
+  def postUrn: (Int, Pid) = callService("pids?type=urn", "POST")
 
-  def postDoi: (Int, String) = callService("pids?type=doi", "POST")
+  def postDoi: (Int, Pid) = callService("pids?type=doi", "POST")
 
-  def successful: (Int, String) = (200, "Persistent Identifier Generator running")
+  def successful: (Int, Pid) = (200, "Persistent Identifier Generator running")
 }

@@ -17,7 +17,7 @@ package nl.knaw.dans.easy.pid.seedstorage
 
 import java.sql.{ Connection, SQLException }
 
-import nl.knaw.dans.easy.pid.PidType
+import nl.knaw.dans.easy.pid.{ PidType, Seed }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import resource.managed
 
@@ -25,7 +25,7 @@ import scala.util.{ Failure, Success, Try }
 
 class Database extends DebugEnhancedLogging {
 
-  def getSeed(pidType: PidType)(implicit connection: Connection): Try[Option[Long]] = {
+  def getSeed(pidType: PidType)(implicit connection: Connection): Try[Option[Seed]] = {
     trace(pidType)
 
     val resultSet = for {
@@ -37,7 +37,7 @@ class Database extends DebugEnhancedLogging {
     resultSet.map(Option(_).filter(_.next()).map(_.getLong("value"))).tried
   }
 
-  def initSeed(pidType: PidType, seed: Long)(implicit connection: Connection): Try[Long] = {
+  def initSeed(pidType: PidType, seed: Seed)(implicit connection: Connection): Try[Seed] = {
     trace(pidType, seed)
 
     managed(connection.prepareStatement("INSERT INTO seed (type, value) VALUES (?, ?);"))
@@ -50,7 +50,7 @@ class Database extends DebugEnhancedLogging {
       .map(_ => seed)
   }
 
-  def setSeed(pidType: PidType, seed: Long)(implicit connection: Connection): Try[Long] = {
+  def setSeed(pidType: PidType, seed: Seed)(implicit connection: Connection): Try[Seed] = {
     trace(pidType, seed)
 
     managed(connection.prepareStatement("UPDATE seed SET value=? WHERE type=?;"))
