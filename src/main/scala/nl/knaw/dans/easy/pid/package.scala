@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy
 
+import org.joda.time.format.{ DateTimeFormatter, ISODateTimeFormat }
+
 import scala.util.{ Failure, Success, Try }
 
 package object pid {
@@ -27,6 +29,8 @@ package object pid {
   case object URN extends PidType("urn")
 
   case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
+
+  val dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateTime()
 
   // TODO copied from easy-bag-store
   implicit class TryExtensions2[T](val t: Try[T]) extends AnyVal {

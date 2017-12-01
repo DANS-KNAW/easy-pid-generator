@@ -121,6 +121,16 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.16.1</version>
         </dependency>
+
+        <!-- joda -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-convert</artifactId>
+        </dependency>
     </dependencies>
     <repositories>
         <repository>

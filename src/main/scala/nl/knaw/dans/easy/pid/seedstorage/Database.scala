@@ -17,8 +17,9 @@ package nl.knaw.dans.easy.pid.seedstorage
 
 import java.sql.{ Connection, SQLException }
 
-import nl.knaw.dans.easy.pid.{ PidType, Seed }
+import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed, dateTimeFormatter }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import org.joda.time.DateTime
 import resource.managed
 
 import scala.util.{ Failure, Success, Try }
@@ -34,7 +35,7 @@ class Database extends DebugEnhancedLogging {
       resultSet <- managed(prepStatement.executeQuery())
     } yield resultSet
 
-    resultSet.map(Option(_).filter(_.next()).map(_.getLong("value"))).tried
+    resultSet.map(Option(_).withFilter(_.next()).map(_.getLong("value"))).tried
   }
 
   def initSeed(pidType: PidType, seed: Seed)(implicit connection: Connection): Try[Seed] = {
@@ -64,5 +65,37 @@ class Database extends DebugEnhancedLogging {
         case 0 => Failure(new SQLException(s"Can't update seed for $pidType as it is not yet defined"))
         case _ => Success(seed)
       }
+  }
+
+  def hasPid(pidType: PidType, pid: Pid)(implicit connection: Connection): Try[Option[DateTime]] = {
+    trace(pidType, pid)
+
+    val query = "SELECT created FROM minted WHERE type=? AND value=?;"
+    val resultSet = for {
+      prepStatement <- managed(connection.prepareStatement(query))
+      _ = prepStatement.setString(1, pidType.name)
+      _ = prepStatement.setString(2, pid)
+      resultSet <- managed(prepStatement.executeQuery())
+    } yield resultSet
+
+    resultSet.map {
+      Option(_)
+        .withFilter(_.next())
+        .map(result => DateTime.parse(result.getString("created"), dateTimeFormatter))
+    }.tried
+  }
+
+  def addPid(pidType: PidType, pid: Pid, created: DateTime)(implicit connection: Connection): Try[Unit] = {
+    trace(pidType, pid, created)
+
+    managed(connection.prepareStatement("INSERT INTO minted (type, value, created) VALUES (?, ?, ?);"))
+      .map(prepStatement => {
+        prepStatement.setString(1, pidType.name)
+        prepStatement.setString(2, pid)
+        prepStatement.setString(3, created.toString(dateTimeFormatter))
+        prepStatement.executeUpdate()
+      })
+      .tried
+      .map(_ => ())
   }
 }

@@ -5,8 +5,8 @@ CREATE TABLE seed(
 
 CREATE TABLE minted(
     type VARCHAR(64) NOT NULL,
-    value BIGINT NOT NULL,
-    timestamp VARCHAR(29) NOT NULL,
+    value VARCHAR(64) NOT NULL,
+    created VARCHAR(29) NOT NULL,
     PRIMARY KEY (type, value));
 
 GRANT INSERT, SELECT, UPDATE ON seed TO easy_pid_generator;
