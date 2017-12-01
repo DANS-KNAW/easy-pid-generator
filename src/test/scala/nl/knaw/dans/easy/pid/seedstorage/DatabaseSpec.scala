@@ -47,7 +47,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture {
     database.initSeed(DOI, 654321L) shouldBe a[Success[_]]
     inside(database.initSeed(DOI, 123456L)) {
       case Failure(e: SQLException) =>
-        e should have message "[SQLITE_CONSTRAINT_UNIQUE]  A UNIQUE constraint failed (UNIQUE constraint failed: seed.type)"
+        e should have message "[SQLITE_CONSTRAINT_PRIMARYKEY]  A PRIMARY KEY constraint failed (UNIQUE constraint failed: seed.type)"
     }
   }
 
