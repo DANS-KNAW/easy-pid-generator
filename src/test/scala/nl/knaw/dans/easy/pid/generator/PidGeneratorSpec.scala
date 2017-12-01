@@ -17,14 +17,15 @@ package nl.knaw.dans.easy.pid.generator
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.fixture.TestSupportFixture
-import nl.knaw.dans.easy.pid.seedstorage.{ Database, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.seedstorage.{ Database, DatabaseAccessComponent, SeedStorageComponent }
 import org.scalamock.scalatest.MockFactory
 
 import scala.util.{ Failure, Success }
 
-class PidGeneratorSpec extends TestSupportFixture with MockFactory with PidGeneratorComponent with SeedStorageComponent {
+class PidGeneratorSpec extends TestSupportFixture with MockFactory with PidGeneratorComponent with SeedStorageComponent with DatabaseAccessComponent {
   val database: Database = mock[Database]
   val formatter: PidFormatter = mock[PidFormatter]
+  override val databaseAccess: DatabaseAccess = mock[DatabaseAccess]
   override val seedStorage: SeedStorage = mock[SeedStorage]
   override val pidGenerator: PidGenerator = new PidGenerator(Map(DOI -> formatter))
 

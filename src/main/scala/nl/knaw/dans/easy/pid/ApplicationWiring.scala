@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.generator.{ PidFormatter, PidGeneratorComponent }
-import nl.knaw.dans.easy.pid.seedstorage.{ Database, DatabaseAccess, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.seedstorage.{ Database, DatabaseAccessComponent, SeedStorageComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 /**
@@ -25,21 +25,23 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
  * @param configuration the application configuration
  */
 class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLogging
+  with DatabaseAccessComponent
   with PidGeneratorComponent
   with SeedStorageComponent {
 
-  val databaseAccess = new DatabaseAccess(
-    dbDriverClassName = configuration.properties.getString("pid-generator.database.driver-class"),
-    dbUrl = configuration.properties.getString("pid-generator.database.url"),
-    dbUsername = Option(configuration.properties.getString("pid-generator.database.username")),
-    dbPassword = Option(configuration.properties.getString("pid-generator.database.password"))
+  debug("Setting up DatabaseAccess component...")
+  override val databaseAccess = DatabaseAccess(
+    driverClassName = configuration.properties.getString("pid-generator.database.driver-class"),
+    url = configuration.properties.getString("pid-generator.database.url"),
+    username = Option(configuration.properties.getString("pid-generator.database.username")),
+    password = Option(configuration.properties.getString("pid-generator.database.password"))
   )
 
   debug("Setting up SeedStorage component...")
   override val seedStorage: SeedStorage = SeedStorage(Map(
     DOI -> configuration.properties.getLong("pid-generator.types.doi.firstSeed"),
     URN -> configuration.properties.getLong("pid-generator.types.urn.firstSeed")
-  ))(new Database, databaseAccess)
+  ))(new Database)
 
   debug("Setting up PidGenerator component...")
   override val pidGenerator: PidGenerator = new PidGenerator(Map(

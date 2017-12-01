@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, ServletFixture, TestSupportFixture }
+import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, ServletFixture, TestSupportFixture }
 import org.scalamock.scalatest.MockFactory
 import org.scalatra.test.scalatest.ScalatraSuite
 
@@ -23,7 +23,6 @@ import scala.util.{ Failure, Success }
 
 class PidGeneratorServletSpec extends TestSupportFixture
   with ConfigurationSupportFixture
-  with SeedDatabaseFixture
   with ServletFixture
   with ScalatraSuite
   with MockFactory {

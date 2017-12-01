@@ -21,6 +21,7 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import scala.util.{ Failure, Try }
 
 trait SeedStorageComponent extends DebugEnhancedLogging {
+  this: DatabaseAccessComponent =>
 
   type FirstSeed = Seed
   val seedStorage: SeedStorage
@@ -28,7 +29,6 @@ trait SeedStorageComponent extends DebugEnhancedLogging {
   trait SeedStorage {
     val firstSeedMap: Map[PidType, FirstSeed]
     val database: Database
-    val databaseAccess: DatabaseAccess
 
     /**
      * Calculates the next PID seed from the previously stored one and makes
@@ -55,11 +55,10 @@ trait SeedStorageComponent extends DebugEnhancedLogging {
   }
 
   object SeedStorage {
-    def apply(firstSeeds: Map[PidType, FirstSeed])(db: Database, dbAccess: DatabaseAccess): SeedStorage = {
+    def apply(firstSeeds: Map[PidType, FirstSeed])(db: Database): SeedStorage = {
       new SeedStorage {
         val firstSeedMap: Map[PidType, FirstSeed] = firstSeeds
         val database: Database = db
-        val databaseAccess: DatabaseAccess = dbAccess
       }
     }
   }

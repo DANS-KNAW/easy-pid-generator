@@ -24,11 +24,12 @@ import org.scalamock.scalatest.MockFactory
 import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
+// TODO use DatabaseAccess mock instead
 class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedDatabaseFixture with SeedStorageComponent {
 
   val database: Database = mock[Database]
   val initSeed = 654321L
-  val seedStorage: SeedStorage = SeedStorage(Map(DOI -> initSeed))(database, databaseAccess)
+  override val seedStorage: SeedStorage = SeedStorage(Map(DOI -> initSeed))(database)
 
   "calculateAndPersist" should "succeed by returning the next PID after persisting this new one" in {
     val previousPid = 123456L
