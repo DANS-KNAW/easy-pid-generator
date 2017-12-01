@@ -32,7 +32,7 @@ trait ConfigurationSupportFixture {
   def getApplicationProperties: String = {
     s"""
       |pid-generator.database.driver-class=org.sqlite.JDBC
-      |pid-generator.database.url=jdbc:sqlite:$testDir/seed.db
+      |pid-generator.database.url=jdbc:sqlite:$testDir/database.db
       |#pid-generator.database.username=sqlite-doesn't-need-a-username
       |#pid-generator.database.password=sqlite-doesn't-need-a-password
       |

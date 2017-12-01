@@ -29,7 +29,7 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach {
 
   implicit var connection: Connection = _
 
-  val databaseFile: Path = testDir.resolve("seed.db")
+  val databaseFile: Path = testDir.resolve("database.db")
 
   val databaseAccess = new DatabaseAccess(
     dbDriverClassName = "org.sqlite.JDBC",
@@ -41,7 +41,7 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach {
 
       managed(pool.getConnection)
         .flatMap(connection => managed(connection.createStatement))
-        .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/seed.sql").toURI)).map(_.mkString))
+        .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/database.sql").toURI)).map(_.mkString))
         .acquireAndGet { case (statement, query) => statement.executeUpdate(query) }
 
       connection = pool.getConnection
