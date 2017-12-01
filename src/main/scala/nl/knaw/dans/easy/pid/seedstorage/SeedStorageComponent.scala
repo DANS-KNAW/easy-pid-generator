@@ -15,50 +15,51 @@
  */
 package nl.knaw.dans.easy.pid.seedstorage
 
+import java.sql.Connection
+
 import nl.knaw.dans.easy.pid.{ PidType, RanOutOfSeeds, Seed }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.{ Failure, Try }
 
+@deprecated
 trait SeedStorageComponent extends DebugEnhancedLogging {
-  this: DatabaseAccessComponent =>
+  this: DatabaseComponent =>
 
   type FirstSeed = Seed
   val seedStorage: SeedStorage
 
+  @deprecated
   trait SeedStorage {
     val firstSeedMap: Map[PidType, FirstSeed]
-    val database: Database
 
     /**
      * Calculates the next PID seed from the previously stored one and makes
      * sure that it is persisted. Returns a Failure if there is no next PID seed or
      * if the new seed could not be persisted
      */
-    def calculateAndPersist(pidType: PidType)(nextPid: Seed => Seed): Try[Seed] = {
-      databaseAccess.doTransaction(implicit connection => {
-        val firstSeed = firstSeedMap(pidType)
-        database.getSeed(pidType)
-          .flatMap {
-            case Some(seed) =>
-              nextPid(seed) match {
-                case `firstSeed` => Failure(RanOutOfSeeds(pidType))
-                case nextSeed => database.setSeed(pidType, nextSeed)
-              }
-            case None =>
-              logger.warn(s"No previous PID found. This should only happen once. Initializing with initial seed for $pidType")
-              logger.info(s"Initializing seed with value $firstSeed")
-              database.initSeed(pidType, firstSeed)
-          }
-      })
+    def calculateAndPersist(pidType: PidType)(nextPid: Seed => Seed)(implicit connection: Connection): Try[Seed] = {
+      val firstSeed = firstSeedMap(pidType)
+      database.getSeed(pidType)
+        .flatMap {
+          case Some(seed) =>
+            nextPid(seed) match {
+              case `firstSeed` => Failure(RanOutOfSeeds(pidType))
+              case nextSeed => database.setSeed(pidType, nextSeed).map(_ => nextSeed)
+            }
+          case None =>
+            logger.warn(s"No previous PID found. This should only happen once. Initializing with initial seed for $pidType")
+            logger.info(s"Initializing seed with value $firstSeed")
+            database.initSeed(pidType, firstSeed).map(_ => firstSeed)
+        }
     }
   }
 
+  @deprecated
   object SeedStorage {
-    def apply(firstSeeds: Map[PidType, FirstSeed])(db: Database): SeedStorage = {
+    def apply(firstSeeds: Map[PidType, FirstSeed]): SeedStorage = {
       new SeedStorage {
-        val firstSeedMap: Map[PidType, FirstSeed] = firstSeeds
-        val database: Database = db
+        override val firstSeedMap: Map[PidType, FirstSeed] = firstSeeds
       }
     }
   }

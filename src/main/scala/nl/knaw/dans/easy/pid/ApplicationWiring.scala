@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.generator.{ PidFormatter, PidGeneratorComponent }
-import nl.knaw.dans.easy.pid.seedstorage.{ Database, DatabaseAccessComponent, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent, SeedStorageComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 /**
@@ -27,7 +27,8 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLogging
   with DatabaseAccessComponent
   with PidGeneratorComponent
-  with SeedStorageComponent {
+  with SeedStorageComponent
+  with DatabaseComponent {
 
   debug("Setting up DatabaseAccess component...")
   override val databaseAccess = DatabaseAccess(
@@ -37,11 +38,13 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
     password = Option(configuration.properties.getString("pid-generator.database.password"))
   )
 
+  override val database: Database = new Database {}
+
   debug("Setting up SeedStorage component...")
   override val seedStorage: SeedStorage = SeedStorage(Map(
     DOI -> configuration.properties.getLong("pid-generator.types.doi.firstSeed"),
     URN -> configuration.properties.getLong("pid-generator.types.urn.firstSeed")
-  ))(new Database)
+  ))
 
   debug("Setting up PidGenerator component...")
   override val pidGenerator: PidGenerator = new PidGenerator(Map(

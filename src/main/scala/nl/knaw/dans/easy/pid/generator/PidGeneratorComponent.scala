@@ -15,17 +15,38 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed }
-import nl.knaw.dans.easy.pid.seedstorage.SeedStorageComponent
+import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed, dateTimeFormatter }
+import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent, SeedStorageComponent }
+import org.joda.time.DateTime
 
-import scala.util.Try
+import scala.util.{ Failure, Try }
 
 trait PidGeneratorComponent {
-  this: SeedStorageComponent =>
+  this: SeedStorageComponent with DatabaseComponent with DatabaseAccessComponent =>
 
   val pidGenerator: PidGenerator
 
   class PidGenerator(formatters: Map[PidType, PidFormatter]) {
+
+    def generate2(pidType: PidType): Try[Pid] = {
+      databaseAccess.doTransaction(implicit connection => {
+        database.getSeed(pidType)
+          .flatMap {
+            case Some(seed) =>
+              val nextSeed = getNextSeed(seed)
+              val pid = formatters(pidType).format(nextSeed)
+              database.hasPid(pidType, pid)
+                .flatMap {
+                  case Some(timestamp) => Failure(new Exception(s"Duplicate $pidType detected: $pid. This $pidType was already minted on ${ timestamp.toString(dateTimeFormatter) }. The seed for this $pidType was $nextSeed."))
+                  case None =>
+                    database.setSeed(pidType, nextSeed)
+                      .flatMap(_ => database.addPid(pidType, pid, DateTime.now()))
+                      .map(_ => pid)
+                }
+            case None => Failure(new Exception(s"The pid generator is not yet initialized. There is not seed available for minting a $pidType."))
+          }
+      })
+    }
 
     /**
      * Generates the next PID of the specified type.
@@ -33,8 +54,12 @@ trait PidGeneratorComponent {
      * @param pidType the type of PID to generate (DOI or URN)
      * @return the PID
      */
+    @deprecated
     def generate(pidType: PidType): Try[Pid] = {
-      seedStorage.calculateAndPersist(pidType)(getNextSeed).map(formatters(pidType).format)
+      databaseAccess.doTransaction(implicit connection => {
+        seedStorage.calculateAndPersist(pidType)(getNextSeed)
+          .map(formatters(pidType).format)
+      })
     }
 
     /**

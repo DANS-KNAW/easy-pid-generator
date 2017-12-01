@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
-import nl.knaw.dans.easy.pid.seedstorage.Database
+import nl.knaw.dans.easy.pid.seedstorage.DatabaseComponent
 import org.scalatest.OneInstancePerTest
 
 import scala.util.{ Failure, Success }
@@ -24,9 +24,10 @@ import scala.util.{ Failure, Success }
 class PidGeneratorAppSpec extends TestSupportFixture
   with OneInstancePerTest
   with SeedDatabaseFixture
-  with ConfigurationSupportFixture {
+  with ConfigurationSupportFixture
+  with DatabaseComponent {
 
-  val database = new Database
+  override val database: Database = new Database {}
   val app = new PidGeneratorApp(new ApplicationWiring(configuration))
 
   override def beforeEach(): Unit = {

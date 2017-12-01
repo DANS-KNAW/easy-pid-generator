@@ -24,8 +24,8 @@ import resource.managed
 
 import scala.util.{ Failure, Success }
 
-class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture {
-  val database: Database = new Database
+class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with DatabaseComponent {
+  override val database: Database = new Database {}
 
   "getSeed" should "return no seed if the database does not contain the given type" in {
     database.getSeed(URN) should matchPattern { case Success(None) => }
@@ -39,7 +39,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture {
   }
 
   "initSeed" should "insert the given seed and type into the database and return the same seed" in {
-    database.initSeed(DOI, 654321L) should matchPattern { case Success(654321L) => }
+    database.initSeed(DOI, 654321L) shouldBe a[Success[_]]
 
     database.getSeed(DOI) should matchPattern { case Success(Some(654321L)) => }
   }
@@ -62,7 +62,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture {
 
   it should "succeed if the seed type is already in the database, change the seed to the new value and return the new value" in {
     database.initSeed(URN, 123456L) shouldBe a[Success[_]]
-    database.setSeed(URN, 654321L) should matchPattern { case Success(654321L) => }
+    database.setSeed(URN, 654321L) shouldBe a[Success[_]]
     database.getSeed(URN) should matchPattern { case Success(Some(654321L)) => }
   }
 
