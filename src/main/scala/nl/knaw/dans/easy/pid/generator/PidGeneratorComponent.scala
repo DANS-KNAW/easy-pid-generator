@@ -18,19 +18,25 @@ package nl.knaw.dans.easy.pid.generator
 import java.sql.{ Connection, SQLException }
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent }
 import org.joda.time.DateTime
 
 import scala.util.{ Failure, Try }
 
 // TODO rename to PidManager, with generate(PidType): Try[Pid] and initialize(PidType, Seed): Try[Unit]
 trait PidGeneratorComponent {
-  this: SeedStorageComponent with DatabaseComponent with DatabaseAccessComponent =>
+  this: DatabaseComponent with DatabaseAccessComponent =>
 
   val pidGenerator: PidGenerator
 
   class PidGenerator(formatters: Map[PidType, PidFormatter]) {
 
+    /**
+     * Generates the next PID of the specified type.
+     *
+     * @param pidType the type of PID to generate (DOI or URN)
+     * @return the PID
+     */
     @throws[DatabaseException]("when the database fails")
     @throws[SeedNotInitialized]("when the seed is not yet initialized")
     @throws[DuplicatePid]("when the pid was already minted before")
@@ -53,20 +59,6 @@ trait PidGeneratorComponent {
         .recoverWith {
           case e: SQLException => Failure(DatabaseException(e))
         }
-    }
-
-    /**
-     * Generates the next PID of the specified type.
-     *
-     * @param pidType the type of PID to generate (DOI or URN)
-     * @return the PID
-     */
-    @deprecated
-    def generate(pidType: PidType): Try[Pid] = {
-      databaseAccess.doTransaction(implicit connection => {
-        seedStorage.calculateAndPersist(pidType)(getNextSeed)
-          .map(formatters(pidType).format)
-      })
     }
 
     /**

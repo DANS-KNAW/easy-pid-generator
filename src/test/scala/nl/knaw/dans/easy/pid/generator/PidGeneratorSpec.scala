@@ -19,7 +19,7 @@ import java.sql.{ Connection, SQLException }
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
-import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseComponent, SeedStorageComponent }
+import nl.knaw.dans.easy.pid.seedstorage.DatabaseComponent
 import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
 
@@ -29,12 +29,10 @@ class PidGeneratorSpec extends TestSupportFixture
   with MockFactory
   with SeedDatabaseFixture
   with PidGeneratorComponent
-  with SeedStorageComponent
   with DatabaseComponent {
 
   val database: Database = mock[Database]
   val formatter: PidFormatter = mock[PidFormatter]
-  override val seedStorage: SeedStorage = mock[SeedStorage]
   override val pidGenerator: PidGenerator = new PidGenerator(Map(DOI -> formatter))
 
   "generate2" should "return a new Pid with a given PidType, while calculating/storing the next seed and storing the new Pid" in {
@@ -132,22 +130,5 @@ class PidGeneratorSpec extends TestSupportFixture
     }
 
     pidGenerator.generate2(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
-  }
-
-  "generate" should "calculate the next PID and format it according to the formatter" ignore {
-    val formattedPid = "output"
-    val nextPid = 96140546L
-
-    (seedStorage.calculateAndPersist(_: PidType)(_: Seed => Seed)(_: Connection)) expects (DOI, *, *) once() returning Success(nextPid)
-    formatter.format _ expects nextPid once() returning formattedPid
-
-    pidGenerator.generate(DOI) should matchPattern { case Success(`formattedPid`) => }
-  }
-
-  it should "fail when there is no new PID of the given type anymore" ignore {
-    (seedStorage.calculateAndPersist(_: PidType)(_: Seed => Seed)(_: Connection)) expects (DOI, *, *) once() returning Failure(RanOutOfSeeds(DOI))
-    formatter.format _ expects * never()
-
-    pidGenerator.generate(DOI) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
   }
 }
