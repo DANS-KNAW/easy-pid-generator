@@ -20,10 +20,13 @@ import java.sql.Connection
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
 import org.scalamock.scalatest.MockFactory
+import org.scalatest.Ignore
 
 import scala.language.postfixOps
 import scala.util.{ Failure, Success }
 
+@deprecated
+@Ignore
 class SeedStorageSpec extends TestSupportFixture with MockFactory with SeedDatabaseFixture with SeedStorageComponent with DatabaseComponent {
 
   val initSeed = 654321L

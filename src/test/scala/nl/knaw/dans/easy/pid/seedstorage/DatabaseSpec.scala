@@ -56,7 +56,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.getSeed(URN) should matchPattern { case Success(None) => }
     inside(database.setSeed(URN, 654321L)) {
       case Failure(e: SQLException) =>
-        e should have message "Can't update seed for URN as it is not yet defined"
+        e should have message "Can't update seed for urn as it is not yet defined"
     }
   }
 

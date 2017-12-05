@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.seedstorage.DatabaseComponent
+import org.joda.time.DateTime
 import org.scalatest.OneInstancePerTest
 
 import scala.util.{ Failure, Success }
@@ -40,43 +41,59 @@ class PidGeneratorAppSpec extends TestSupportFixture
     super.afterEach()
   }
 
-  "generate(doi)" should "return the initial DOI when it is never called before and store this DOI in the database" in {
-    app.generate(DOI) should matchPattern { case Success("10.5072/dans-x6f-kf6x") => }
-    database.getSeed(DOI) should matchPattern { case Success(Some(1073741824L)) => }
-  }
+  "generate(doi)" should "return the next DOI and store it in the database as well" in {
+    val seed = 1073741824L
+    val doi = "10.5072/dans-x6f-kf66"
 
-  it should "return the second DOI when it is called for the second PID and store this DOI in the database" in {
-    app.generate(DOI)
+    // init seed
+    // TODO use library call later
+    database.initSeed(DOI, seed) shouldBe a[Success[_]]
 
-    app.generate(DOI) should matchPattern { case Success("10.5072/dans-x6f-kf66") => }
+    // generate DOI
+    app.generate(DOI) should matchPattern { case Success(`doi`) => }
+
+    // test that the next seed and new DOI are stored in the database
     database.getSeed(DOI) should matchPattern { case Success(Some(1073741829L)) => }
+    database.hasPid(DOI, doi) shouldBe a[Success[_]]
   }
 
-  it should "fail when the seed in the database is the last seed available and leave the database unchanged" in {
-    val endSeed = 43171047L
-    database.initSeed(DOI, endSeed)
-
-    app.generate(DOI) should matchPattern { case Failure(RanOutOfSeeds(DOI)) => }
-    database.getSeed(DOI) should matchPattern { case Success(Some(`endSeed`)) => }
+  it should "fail when the DOI's seed has never been initialized" in {
+    app.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
   }
 
-  "generate(urn)" should "return the initial URN when it is never called before and store this URN in the database" in {
-    app.generate(URN) should matchPattern { case Success("urn:nbn:nl:ui:13-0000-01") => }
-    database.getSeed(URN) should matchPattern { case Success(Some(1L)) => }
+  it should "fail when the DOI already exists" in {
+    val seed = 1073741824L
+    val doi = "10.5072/dans-x6f-kf66"
+    val timestamp = DateTime.now
+
+    // init seed
+    // TODO use library call later
+    database.initSeed(DOI, seed) shouldBe a[Success[_]]
+    database.addPid(DOI, doi, timestamp) shouldBe a[Success[_]]
+
+    // generate DOI
+    app.generate(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, 1073741829L, `doi`, `timestamp`)) => }
+
+    // test the seed is not updated
+    database.getSeed(DOI) should matchPattern { case Success(Some(`seed`)) => }
   }
 
-  it should "return the second URN when it is called for the second PID and store this URN in the database" in {
-    app.generate(URN)
+  it should "generate the second DOI" in {
+    val seed = 1073741824L
+    val doi1 = "10.5072/dans-x6f-kf66"
+    val doi2 = "10.5072/dans-x6g-x2hb"
 
-    app.generate(URN) should matchPattern { case Success("urn:nbn:nl:ui:13-001h-aq") => }
-    database.getSeed(URN) should matchPattern { case Success(Some(69074L)) => }
-  }
+    // init seed
+    // TODO use library call later
+    database.initSeed(DOI, seed) shouldBe a[Success[_]]
 
-  it should "fail when the seed in the database is the last seed available and leave the database unchanged" in {
-    val endSeed = 1752523756L
-    database.initSeed(URN, endSeed)
+    // generate DOI
+    app.generate(DOI) should matchPattern { case Success(`doi1`) => }
+    app.generate(DOI) should matchPattern { case Success(`doi2`) => }
 
-    app.generate(URN) should matchPattern { case Failure(RanOutOfSeeds(URN)) => }
-    database.getSeed(URN) should matchPattern { case Success(Some(`endSeed`)) => }
+    // test that the next seed and new DOI are stored in the database
+    database.getSeed(DOI) should matchPattern { case Success(Some(1074087174)) => }
+    database.hasPid(DOI, doi1) shouldBe a[Success[_]]
+    database.hasPid(DOI, doi2) shouldBe a[Success[_]]
   }
 }

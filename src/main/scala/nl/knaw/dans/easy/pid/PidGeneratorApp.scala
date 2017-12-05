@@ -26,8 +26,10 @@ import scala.util.Try
  */
 class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
 
+  def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
+
   def generate(pidType: PidType): Try[Pid] = {
-    wiring.pidGenerator.generate(pidType)
+    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidGenerator.generate2(pidType))
   }
 
   def init(): Try[Unit] = {

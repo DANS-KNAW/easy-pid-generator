@@ -15,12 +15,15 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed, dateTimeFormatter }
+import java.sql.{ Connection, SQLException }
+
+import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent, SeedStorageComponent }
 import org.joda.time.DateTime
 
 import scala.util.{ Failure, Try }
 
+// TODO rename to PidManager, with generate(PidType): Try[Pid] and initialize(PidType, Seed): Try[Unit]
 trait PidGeneratorComponent {
   this: SeedStorageComponent with DatabaseComponent with DatabaseAccessComponent =>
 
@@ -28,24 +31,28 @@ trait PidGeneratorComponent {
 
   class PidGenerator(formatters: Map[PidType, PidFormatter]) {
 
-    def generate2(pidType: PidType): Try[Pid] = {
-      databaseAccess.doTransaction(implicit connection => {
-        database.getSeed(pidType)
-          .flatMap {
-            case Some(seed) =>
-              val nextSeed = getNextSeed(seed)
-              val pid = formatters(pidType).format(nextSeed)
-              database.hasPid(pidType, pid)
-                .flatMap {
-                  case Some(timestamp) => Failure(new Exception(s"Duplicate $pidType detected: $pid. This $pidType was already minted on ${ timestamp.toString(dateTimeFormatter) }. The seed for this $pidType was $nextSeed."))
-                  case None =>
-                    database.setSeed(pidType, nextSeed)
-                      .flatMap(_ => database.addPid(pidType, pid, DateTime.now()))
-                      .map(_ => pid)
-                }
-            case None => Failure(new Exception(s"The pid generator is not yet initialized. There is not seed available for minting a $pidType."))
-          }
-      })
+    @throws[DatabaseException]("when the database fails")
+    @throws[SeedNotInitialized]("when the seed is not yet initialized")
+    @throws[DuplicatePid]("when the pid was already minted before")
+    def generate2(pidType: PidType)(implicit connection: Connection): Try[Pid] = {
+      database.getSeed(pidType)
+        .flatMap {
+          case Some(seed) =>
+            val nextSeed = getNextSeed(seed)
+            val pid = formatters(pidType).format(nextSeed)
+            database.hasPid(pidType, pid)
+              .flatMap {
+                case Some(timestamp) => Failure(DuplicatePid(pidType, seed, nextSeed, pid, timestamp))
+                case None =>
+                  database.setSeed(pidType, nextSeed)
+                    .flatMap(_ => database.addPid(pidType, pid, DateTime.now()))
+                    .map(_ => pid)
+              }
+          case None => Failure(SeedNotInitialized(pidType))
+        }
+        .recoverWith {
+          case e: SQLException => Failure(DatabaseException(e))
+        }
     }
 
     /**

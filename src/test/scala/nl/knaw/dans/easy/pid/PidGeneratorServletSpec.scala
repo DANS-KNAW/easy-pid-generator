@@ -16,6 +16,7 @@
 package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, ServletFixture, TestSupportFixture }
+import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
 import org.scalatra.test.scalatest.ScalatraSuite
 
@@ -27,7 +28,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   with ScalatraSuite
   with MockFactory {
 
-  class MockedPidGeneratorApp extends PidGeneratorApp(null)
+  class MockedPidGeneratorApp extends PidGeneratorApp(null: ApplicationWiring)
 
   val app: PidGeneratorApp = mock[MockedPidGeneratorApp]
   val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app)
@@ -41,30 +42,6 @@ class PidGeneratorServletSpec extends TestSupportFixture
     }
   }
 
-  "post with URN request" should "return the next URN PID" in {
-    (app.generate(_: PidType)) expects URN once() returning Success("urn output")
-    post("/", ("type", "urn")) {
-      status shouldBe 200
-      body shouldBe "urn output"
-    }
-  }
-
-  it should "return a failure if the generator ran out of seeds" in {
-    (app.generate(_: PidType)) expects URN once() returning Failure(RanOutOfSeeds(URN))
-    post("/", ("type", "urn")) {
-      status shouldBe 404
-      body shouldBe "No more urn seeds available."
-    }
-  }
-
-  it should "return a failure if the generator failed unexpectedly" in {
-    (app.generate(_: PidType)) expects URN once() returning Failure(new Exception("unexpected failure"))
-    post("/", ("type", "urn")) {
-      status shouldBe 500
-      body shouldBe "Error when retrieving previous seed or saving current seed"
-    }
-  }
-
   "post with DOI request" should "return the next DOI PID" in {
     (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
     post("/", ("type", "doi")) {
@@ -73,19 +50,35 @@ class PidGeneratorServletSpec extends TestSupportFixture
     }
   }
 
-  it should "return a failure if the generator ran out of seeds" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(RanOutOfSeeds(DOI))
+  it should "return a 500 when the database connection fails suddenly" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(DatabaseException(new Exception("test")))
     post("/", ("type", "doi")) {
-      status shouldBe 404
-      body shouldBe "No more doi seeds available."
+      status shouldBe 500
+      body should include("database connection failed")
     }
   }
 
-  it should "return a failure if the generator failed unexpectedly" in {
+  it should "return a 500 when the generator is not initialized" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(SeedNotInitialized(DOI))
+    post("/", ("type", "doi")) {
+      status shouldBe 500
+      body should include("not yet initialized")
+    }
+  }
+
+  it should "return a 500 when the generator encounters a duplicate Pid" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(DuplicatePid(DOI, 1L, 2L, "testpid", new DateTime(1992, 7, 30, 16, 1)))
+    post("/", ("type", "doi")) {
+      status shouldBe 500
+      body should include("Duplicate doi detected: testpid.")
+    }
+  }
+
+  it should "return a 500 when the generator failed unexpectedly" in {
     (app.generate(_: PidType)) expects DOI once() returning Failure(new Exception("unexpected failure"))
     post("/", ("type", "doi")) {
       status shouldBe 500
-      body shouldBe "Error when retrieving previous seed or saving current seed"
+      body shouldBe "Error when generating the next doi: unexpected failure"
     }
   }
 
@@ -97,10 +90,9 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   "post with no request type" should "default to requesting a DOI" in {
-    (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
     post("/") {
-      status shouldBe 200
-      body shouldBe "doi output"
+      status shouldBe 400
+      body should include("No Pid type specified")
     }
   }
 }

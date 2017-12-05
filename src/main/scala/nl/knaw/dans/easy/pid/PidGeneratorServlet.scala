@@ -29,22 +29,25 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
     Ok("Persistent Identifier Generator running")
   }
 
-  private def respond(result: Try[Pid]): ActionResult = {
-    result.map(Ok(_))
+  private def respond(pidType: PidType)(calculateResult: PidType => Try[Pid]): ActionResult = {
+    calculateResult(pidType).map(Ok(_))
       .doIfFailure { case e => logger.error(e.getMessage, e) }
       .getOrRecover {
         case e: RanOutOfSeeds => NotFound(e.getMessage)
-        case _ => InternalServerError("Error when retrieving previous seed or saving current seed")
+        case e: DatabaseException => InternalServerError(e.getMessage)
+        case e: SeedNotInitialized => InternalServerError(e.getMessage)
+        case e: DuplicatePid => InternalServerError(e.getMessage)
+        case e => InternalServerError(s"Error when generating the next $pidType: ${ e.getMessage }")
       }
   }
 
   post("/") {
     params.get("type")
       .map {
-        case "doi" => respond(app.generate(DOI))
-        case "urn" => respond(app.generate(URN))
+        case "doi" => respond(DOI)(app.generate)
+        case "urn" => respond(URN)(app.generate)
         case pidType => BadRequest(s"Unknown PID type '$pidType'")
       }
-      .getOrElse(respond(app.generate(DOI)))
+      .getOrElse(BadRequest("No Pid type specified, either choose 'doi' or 'urn'"))
   }
 }
