@@ -40,11 +40,11 @@ class PidManagerSpec extends TestSupportFixture
     val pid = "da_pid"
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(seed))
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(seed))
       formatter.format _ expects nextSeed once() returning pid
-      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Success(None)
-      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects (DOI, nextSeed, *) once() returning Success(())
-      (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects (DOI, pid, *, *) once() returning Success(())
+      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(None)
+      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, nextSeed, *) once() returning Success(())
+      (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects(DOI, pid, *, *) once() returning Success(())
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Success(`pid`) => }
@@ -54,7 +54,7 @@ class PidManagerSpec extends TestSupportFixture
     val e = new SQLException("msg")
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Failure(e)
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Failure(e)
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
@@ -62,7 +62,7 @@ class PidManagerSpec extends TestSupportFixture
 
   it should "fail immediately when the seed was retrieved successfully, but was None" in {
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(None)
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(None)
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
@@ -75,9 +75,9 @@ class PidManagerSpec extends TestSupportFixture
     val e = new SQLException("msg")
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(seed))
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(seed))
       formatter.format _ expects nextSeed once() returning pid
-      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Failure(e)
+      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Failure(e)
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
@@ -90,9 +90,9 @@ class PidManagerSpec extends TestSupportFixture
     val timestamp = new DateTime(1992, 7, 30, 16, 1, 2)
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(seed))
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(seed))
       formatter.format _ expects nextSeed once() returning pid
-      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Success(Some(timestamp))
+      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(Some(timestamp))
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, `nextSeed`, `pid`, `timestamp`)) => }
@@ -105,10 +105,10 @@ class PidManagerSpec extends TestSupportFixture
     val e = new SQLException("msg")
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(seed))
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(seed))
       formatter.format _ expects nextSeed once() returning pid
-      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Success(None)
-      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects (DOI, nextSeed, *) once() returning Failure(e)
+      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(None)
+      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, nextSeed, *) once() returning Failure(e)
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
@@ -121,11 +121,11 @@ class PidManagerSpec extends TestSupportFixture
     val e = new SQLException("msg")
 
     inSequence {
-      (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(Some(seed))
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(seed))
       formatter.format _ expects nextSeed once() returning pid
-      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Success(None)
-      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects (DOI, nextSeed, *) once() returning Success(())
-      (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects (DOI, pid, *, *) once() returning Failure(e)
+      (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(None)
+      (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, nextSeed, *) once() returning Success(())
+      (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects(DOI, pid, *, *) once() returning Failure(e)
     }
 
     pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
