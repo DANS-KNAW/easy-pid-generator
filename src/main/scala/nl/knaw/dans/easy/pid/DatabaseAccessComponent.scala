@@ -26,11 +26,11 @@ import resource.managed
 import scala.util.control.NonFatal
 import scala.util.{ Failure, Try }
 
-trait DatabaseAccessComponent {
+trait DatabaseAccessComponent extends DebugEnhancedLogging {
 
   val databaseAccess: DatabaseAccess
 
-  trait DatabaseAccess extends DebugEnhancedLogging {
+  trait DatabaseAccess {
 
     val dbDriverClassName: String
     val dbUrl: String

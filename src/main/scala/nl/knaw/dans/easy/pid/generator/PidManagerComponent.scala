@@ -18,6 +18,7 @@ package nl.knaw.dans.easy.pid.generator
 import java.sql.{ Connection, SQLException }
 
 import nl.knaw.dans.easy.pid._
+import nl.knaw.dans.lib.error._
 import org.joda.time.DateTime
 
 import scala.util.{ Failure, Try }
@@ -54,6 +55,7 @@ trait PidManagerComponent {
         .recoverWith {
           case e: SQLException => Failure(DatabaseException(e))
         }
+        .doIfSuccess(pid => logger.info(s"Minted a new $pidType: $pid"))
     }
 
     /**

@@ -24,11 +24,11 @@ import resource.managed
 
 import scala.util.{ Failure, Success, Try }
 
-trait DatabaseComponent {
+trait DatabaseComponent extends DebugEnhancedLogging {
 
   val database: Database
 
-  trait Database extends DebugEnhancedLogging {
+  trait Database {
 
     def getSeed(pidType: PidType)(implicit connection: Connection): Try[Option[Seed]] = {
       trace(pidType)
