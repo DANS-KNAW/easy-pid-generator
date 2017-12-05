@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import nl.knaw.dans.easy.pid.generator.{ PidFormatter, PidGeneratorComponent }
+import nl.knaw.dans.easy.pid.generator.{ PidFormatter, PidManagerComponent }
 import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
@@ -26,7 +26,7 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
  */
 class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLogging
   with DatabaseAccessComponent
-  with PidGeneratorComponent
+  with PidManagerComponent
   with DatabaseComponent {
 
   debug("Setting up DatabaseAccess component...")
@@ -46,7 +46,7 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
 //  ))
 
   debug("Setting up PidGenerator component...")
-  override val pidGenerator: PidGenerator = new PidGenerator(Map(
+  override val pidGenerator: PidManager = new PidManager(Map(
     DOI -> PidFormatter(
       ns = configuration.properties.getString("pid-generator.types.doi.namespace"),
       dp = configuration.properties.getInt("pid-generator.types.doi.dashPosition"),

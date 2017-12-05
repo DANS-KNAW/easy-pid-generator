@@ -23,13 +23,12 @@ import org.joda.time.DateTime
 
 import scala.util.{ Failure, Try }
 
-// TODO rename to PidManager, with generate(PidType): Try[Pid] and initialize(PidType, Seed): Try[Unit]
-trait PidGeneratorComponent {
+trait PidManagerComponent {
   this: DatabaseComponent with DatabaseAccessComponent =>
 
-  val pidGenerator: PidGenerator
+  val pidGenerator: PidManager
 
-  class PidGenerator(formatters: Map[PidType, PidFormatter]) {
+  class PidManager(formatters: Map[PidType, PidFormatter]) {
 
     /**
      * Generates the next PID of the specified type.
@@ -37,10 +36,7 @@ trait PidGeneratorComponent {
      * @param pidType the type of PID to generate (DOI or URN)
      * @return the PID
      */
-    @throws[DatabaseException]("when the database fails")
-    @throws[SeedNotInitialized]("when the seed is not yet initialized")
-    @throws[DuplicatePid]("when the pid was already minted before")
-    def generate2(pidType: PidType)(implicit connection: Connection): Try[Pid] = {
+    def generate(pidType: PidType)(implicit connection: Connection): Try[Pid] = {
       database.getSeed(pidType)
         .flatMap {
           case Some(seed) =>
@@ -75,5 +71,8 @@ trait PidGeneratorComponent {
 
       (seed * factor + increment) % modulo
     }
+
+    // TODO to be implemented
+    def initialize(pidType: PidType)(implicit connection: Connection): Try[Unit] = ???
   }
 }

@@ -29,7 +29,7 @@ class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
   def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
 
   def generate(pidType: PidType): Try[Pid] = {
-    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidGenerator.generate2(pidType))
+    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidGenerator.generate(pidType))
   }
 
   def init(): Try[Unit] = {

@@ -35,9 +35,6 @@ package object pid {
   case class SeedNotInitialized(pidType: PidType) extends Exception(s"The pid generator is not yet initialized. There is no seed available for minting a $pidType.")
   case class DuplicatePid(pidType: PidType, previousSeed: Seed, seed: Seed, pid: Pid, timestamp: DateTime) extends Exception(s"Duplicate $pidType detected: $pid. This $pidType was already minted on ${ timestamp.toString(dateTimeFormatter) }. The seed for this $pidType was $seed; the previous seed was $previousSeed.")
 
-  // TODO deprecate!
-  case class RanOutOfSeeds(pidType: PidType) extends Exception(s"No more ${ pidType.name } seeds available.")
-
   val dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateTime()
 
   // TODO copied from easy-bag-store

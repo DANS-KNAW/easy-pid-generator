@@ -25,17 +25,17 @@ import org.scalamock.scalatest.MockFactory
 
 import scala.util.{ Failure, Success }
 
-class PidGeneratorSpec extends TestSupportFixture
+class PidManagerSpec extends TestSupportFixture
   with MockFactory
   with SeedDatabaseFixture
-  with PidGeneratorComponent
+  with PidManagerComponent
   with DatabaseComponent {
 
-  val database: Database = mock[Database]
+  override val database: Database = mock[Database]
   val formatter: PidFormatter = mock[PidFormatter]
-  override val pidGenerator: PidGenerator = new PidGenerator(Map(DOI -> formatter))
+  override val pidGenerator: PidManager = new PidManager(Map(DOI -> formatter))
 
-  "generate2" should "return a new Pid with a given PidType, while calculating/storing the next seed and storing the new Pid" in {
+  "generate" should "return a new Pid with a given PidType, while calculating/storing the next seed and storing the new Pid" in {
     val seed = 123456L
     val nextSeed = 2084531525L
     val pid = "da_pid"
@@ -48,7 +48,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects (DOI, pid, *, *) once() returning Success(())
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Success(`pid`) => }
+    pidGenerator.generate(DOI) should matchPattern { case Success(`pid`) => }
   }
 
   it should "fail immediately when the seed could not be retrieved, without doing any other queries or calculations" in {
@@ -58,7 +58,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail immediately when the seed was retrieved successfully, but was None" in {
@@ -66,7 +66,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.getSeed(_: PidType)(_: Connection)) expects (DOI, *) once() returning Success(None)
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
   }
 
   it should "fail when the Pid existence check fails" in {
@@ -81,7 +81,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail when the newly calculated Pid already exists, without storing the new seed" in {
@@ -96,7 +96,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects (DOI, pid, *) once() returning Success(Some(timestamp))
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, `nextSeed`, `pid`, `timestamp`)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, `nextSeed`, `pid`, `timestamp`)) => }
   }
 
   it should "fail when the new seed could not be stored properly, without storing the newly generated Pid" in {
@@ -112,7 +112,7 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects (DOI, nextSeed, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail when the newly generated Pid could not be stored" in {
@@ -129,6 +129,6 @@ class PidGeneratorSpec extends TestSupportFixture
       (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects (DOI, pid, *, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate2(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 }
