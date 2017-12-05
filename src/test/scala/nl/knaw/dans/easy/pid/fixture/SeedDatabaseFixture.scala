@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.pid.fixture
 import java.nio.file.{ Files, Path }
 import java.sql.Connection
 
-import nl.knaw.dans.easy.pid.seedstorage.DatabaseAccessComponent
+import nl.knaw.dans.easy.pid.DatabaseAccessComponent
 import org.scalatest.BeforeAndAfterEach
 import resource.managed
 

@@ -15,8 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import nl.knaw.dans.easy.pid.generator.{ PidFormatter, PidManagerComponent }
-import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent }
+import nl.knaw.dans.easy.pid.generator.{ DatabaseComponent, PidFormatter, PidManagerComponent }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 /**

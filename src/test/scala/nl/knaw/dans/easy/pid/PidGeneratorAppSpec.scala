@@ -16,7 +16,7 @@
 package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
-import nl.knaw.dans.easy.pid.seedstorage.DatabaseComponent
+import nl.knaw.dans.easy.pid.generator.DatabaseComponent
 import org.joda.time.DateTime
 import org.scalatest.OneInstancePerTest
 

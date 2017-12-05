@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid.seedstorage
+package nl.knaw.dans.easy.pid
 
 import java.sql.Connection
 import javax.sql.DataSource

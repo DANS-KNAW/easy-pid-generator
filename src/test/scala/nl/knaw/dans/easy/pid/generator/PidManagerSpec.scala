@@ -19,7 +19,6 @@ import java.sql.{ Connection, SQLException }
 
 import nl.knaw.dans.easy.pid._
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
-import nl.knaw.dans.easy.pid.seedstorage.DatabaseComponent
 import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
 

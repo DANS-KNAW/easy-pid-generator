@@ -18,7 +18,6 @@ package nl.knaw.dans.easy.pid.generator
 import java.sql.{ Connection, SQLException }
 
 import nl.knaw.dans.easy.pid._
-import nl.knaw.dans.easy.pid.seedstorage.{ DatabaseAccessComponent, DatabaseComponent }
 import org.joda.time.DateTime
 
 import scala.util.{ Failure, Try }
