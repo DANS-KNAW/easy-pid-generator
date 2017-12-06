@@ -17,6 +17,9 @@ package nl.knaw.dans.easy.pid
 
 import java.io.Closeable
 
+import nl.knaw.dans.lib.error._
+import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+
 import scala.util.Try
 
 /**
@@ -24,16 +27,18 @@ import scala.util.Try
  *
  * @param wiring object that configures and wires together the application's components
  */
-class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable {
+class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnhancedLogging {
 
   def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
 
   def generate(pidType: PidType): Try[Pid] = {
     wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.generate(pidType))
+      .doIfSuccess(pid => logger.info(s"Minted a new $pidType: $pid"))
   }
 
   def initialize(pidType: PidType, seed: Seed): Try[Unit] = {
     wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.initialize(pidType, seed))
+      .doIfSuccess(_ => logger.info(s"Pid type $pidType is seeded with $seed"))
   }
 
   def init(): Try[Unit] = {
