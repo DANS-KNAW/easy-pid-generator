@@ -25,16 +25,14 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
   private val SUBCOMMAND_SEPARATOR = "---\n"
   val description = "Generate a Persistent Identifier (DOI or URN)"
   val synopsis =
-    s"""
-       |  $printedName generate {doi|urn}
+    s"""  $printedName generate {doi|urn}
        |  $printedName initialize {doi|urn} <seed>
        |  $printedName run-service
        """.stripMargin
 
   version(s"$printedName v${ configuration.version }")
   banner(
-    s"""
-       |  $description
+    s"""$description
        |
        |Usage:
        |
