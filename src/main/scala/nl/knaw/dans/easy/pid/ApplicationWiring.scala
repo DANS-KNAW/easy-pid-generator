@@ -38,12 +38,6 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
 
   override val database: Database = new Database {}
 
-//  debug("Setting up SeedStorage component...")
-//  override val seedStorage: SeedStorage = SeedStorage(Map(
-//    DOI -> configuration.properties.getLong("pid-generator.types.doi.firstSeed"),
-//    URN -> configuration.properties.getLong("pid-generator.types.urn.firstSeed")
-//  ))
-
   debug("Setting up PidGenerator component...")
   override val pidManager: PidManager = new PidManager(Map(
     DOI -> PidFormatter(
