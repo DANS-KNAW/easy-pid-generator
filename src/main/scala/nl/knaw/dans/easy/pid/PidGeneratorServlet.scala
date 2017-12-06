@@ -33,7 +33,7 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
     calculateResult(pidType).map(Created(_))
       .doIfFailure { case e => logger.error(e.getMessage, e) }
       .getOrRecover {
-        case e: SeedNotInitialized => InternalServerError(e.getMessage)
+        case e: PidNotInitialized => InternalServerError(e.getMessage)
         case e: DuplicatePid => InternalServerError(e.getMessage)
         case e: DatabaseException => InternalServerError(e.getMessage)
         case e => InternalServerError(s"Error while generating the next $pidType: ${ e.getMessage }")

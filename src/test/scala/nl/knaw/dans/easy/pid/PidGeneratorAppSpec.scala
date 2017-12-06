@@ -58,7 +58,7 @@ class PidGeneratorAppSpec extends TestSupportFixture
   }
 
   it should "fail when the DOI's seed has never been initialized" in {
-    app.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
+    app.generate(DOI) should matchPattern { case Failure(PidNotInitialized(DOI)) => }
   }
 
   it should "fail when the DOI already exists" in {

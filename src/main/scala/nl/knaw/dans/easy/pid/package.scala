@@ -41,7 +41,7 @@ package object pid {
   case object URN extends PidType("urn")
 
   case class DatabaseException(cause: Throwable) extends Exception(s"The database connection failed; cause: ${ cause.getMessage }", cause)
-  case class SeedNotInitialized(pidType: PidType) extends Exception(s"The pid generator is not yet initialized. There is no seed available for minting a $pidType.")
+  case class PidNotInitialized(pidType: PidType) extends Exception(s"The pid generator is not yet initialized. There is no seed available for minting a $pidType.")
   case class PidAlreadyInitialized(pidType: PidType, currentSeed: Seed) extends Exception(s"The pid generator is already initialized for a $pidType. The current seed is $currentSeed.")
   case class DuplicatePid(pidType: PidType, previousSeed: Seed, seed: Seed, pid: Pid, timestamp: DateTime) extends Exception(s"Duplicate $pidType detected: $pid. This $pidType was already minted on ${ timestamp.toString(dateTimeFormatter) }. The seed for this $pidType was $seed; the previous seed was $previousSeed.")
 

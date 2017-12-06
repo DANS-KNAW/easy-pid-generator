@@ -65,7 +65,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(None)
     }
 
-    pidManager.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(PidNotInitialized(DOI)) => }
   }
 
   it should "fail when the Pid existence check fails" in {

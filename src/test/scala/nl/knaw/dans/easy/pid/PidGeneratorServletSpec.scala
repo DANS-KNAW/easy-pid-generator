@@ -61,7 +61,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   it should "return a 500 when the generator is not initialized" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(SeedNotInitialized(DOI))
+    (app.generate(_: PidType)) expects DOI once() returning Failure(PidNotInitialized(DOI))
     post("/create", ("type", "doi")) {
       status shouldBe 500
       body should include("not yet initialized")

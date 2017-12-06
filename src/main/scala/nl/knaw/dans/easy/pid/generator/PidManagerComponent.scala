@@ -50,7 +50,7 @@ trait PidManagerComponent {
                     .flatMap(_ => database.addPid(pidType, pid, DateTime.now()))
                     .map(_ => pid)
               }
-          case None => Failure(SeedNotInitialized(pidType))
+          case None => Failure(PidNotInitialized(pidType))
         }
         .recoverWith {
           case e: SQLException => Failure(DatabaseException(e))
