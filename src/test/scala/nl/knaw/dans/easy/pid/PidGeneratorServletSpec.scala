@@ -33,14 +33,14 @@ class PidGeneratorServletSpec extends TestSupportFixture
   class MockedPidGeneratorApp extends PidGeneratorApp(null: ApplicationWiring)
 
   val app: PidGeneratorApp = mock[MockedPidGeneratorApp]
-  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app)
+  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app, configuration)
 
   addServlet(pidServlet, "/*")
 
   "get /" should "return the message that the service is running" in {
     get("/") {
       status shouldBe 200
-      body shouldBe "Persistent Identifier Generator running"
+      body shouldBe "Persistent Identifier Generator running (v1.0.0-UNITTEST)"
     }
   }
 

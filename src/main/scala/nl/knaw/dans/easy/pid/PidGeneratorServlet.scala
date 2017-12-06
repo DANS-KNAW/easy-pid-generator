@@ -21,12 +21,12 @@ import org.scalatra._
 
 import scala.util.{ Failure, Success, Try }
 
-class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with DebugEnhancedLogging {
+class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) extends ScalatraServlet with DebugEnhancedLogging {
   logger.info("PID Generator Servlet running...")
 
   get("/") {
     contentType = "text/plain"
-    Ok("Persistent Identifier Generator running")
+    Ok(s"Persistent Identifier Generator running (v${ configuration.version })")
   }
 
   // POST /create?type={doi|urn}
