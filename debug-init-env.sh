@@ -17,6 +17,6 @@
 
 echo -n "Pre-creating log and database..."
 TEMPDIR=data
-sqlite3 $TEMPDIR/seed.db < src/test/resources/database/database.sql
+sqlite3 $TEMPDIR/database.db < src/test/resources/database/database.sql
 touch $TEMPDIR/easy-pid-generator.log
 echo "OK"
