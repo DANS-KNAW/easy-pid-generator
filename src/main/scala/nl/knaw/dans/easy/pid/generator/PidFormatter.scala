@@ -65,19 +65,11 @@ object PidFormatter {
     prefix + insertDashAt(dashPos)(convertToString(seed, radix, len, charMap))
 
   def convertToString(seed: Seed, radix: Int, length: Int, illegalCharMap: Map[Char, Char] = Map()): String = {
-    /**
-     * Inserts 0's in front of the given `String s` such that the resulting `String` has the specified length.
-     * If the length of the `String` is equal to or greater than the specified length, the output will be equal to the original input.
-     *
-     * Example: `padWithZeroes("abc")` with `length = 5` returns `"00abc"`
-     *
-     * @param s the `String` to be formatted
-     * @return the formatted `String`, padded with 0's.
-     */
-    def padWithZeroes(s: String) = String.format(s"%${ length }s", s).replace(' ', '0')
-
     // formats the seed in base `radix`, pads it with 0's and removes any illegal characters
-    padWithZeroes(java.lang.Long.toString(seed, radix).toLowerCase).map(c => illegalCharMap.getOrElse(c, c))
+    s"%${ length }s"
+      .format(java.lang.Long.toString(seed, radix).toLowerCase)
+      .replace(' ', '0')
+      .map(c => illegalCharMap.getOrElse(c, c))
   }
 
   def insertDashAt(i: Int)(s: String): String = {
