@@ -18,24 +18,30 @@ package nl.knaw.dans.easy.pid
 import org.rogach.scallop.{ ScallopConf, ScallopOption, Subcommand, ValueConverter, singleArgConverter }
 
 class CommandLineOptions(args: Array[String], configuration: Configuration) extends ScallopConf(args) {
+
   appendDefaultToDescription = true
   editBuilder(_.setHelpWidth(110))
-
   printedName = "easy-pid-generator"
   private val SUBCOMMAND_SEPARATOR = "---\n"
-  version(s"$printedName v${ configuration.version }")
+  val description = "Generate a Persistent Identifier (DOI or URN)"
+  val synopsis =
+    s"""
+       |  $printedName generate {doi|urn}
+       |  $printedName initialize {doi|urn} <seed>
+       |  $printedName run-service
+       """.stripMargin
 
+  version(s"$printedName v${ configuration.version }")
   banner(
     s"""
-       |Generate a PID (DOI or URN)
+       |  $description
        |
        |Usage:
        |
-       |$printedName generate {doi|urn}
-       |$printedName run-service
+       |$synopsis
        |
        |Options:
-    """.stripMargin)
+       |""".stripMargin)
 
   private implicit val pidParser: ValueConverter[PidType] = singleArgConverter(
     PidType.parse(_).getOrElse(throw new IllegalArgumentException("only 'doi' or 'urn' allowed")),
@@ -68,4 +74,5 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
   addSubcommand(runService)
 
   footer("")
+  verify()
 }

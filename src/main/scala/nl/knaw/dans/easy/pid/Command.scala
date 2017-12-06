@@ -29,9 +29,7 @@ object Command extends App with DebugEnhancedLogging {
   type FeedBackMessage = String
 
   val configuration = Configuration(Paths.get(System.getProperty("app.home")))
-  val commandLine: CommandLineOptions = new CommandLineOptions(args, configuration) {
-    verify()
-  }
+  val commandLine: CommandLineOptions = new CommandLineOptions(args, configuration)
   val app = new PidGeneratorApp(configuration)
 
   managed(app)
