@@ -26,7 +26,7 @@ import scala.util.{ Failure, Try }
 trait PidManagerComponent {
   this: DatabaseComponent with DatabaseAccessComponent =>
 
-  val pidGenerator: PidManager
+  val pidManager: PidManager
 
   class PidManager(formatters: Map[PidType, PidFormatter]) {
 
@@ -73,7 +73,15 @@ trait PidManagerComponent {
       (seed * factor + increment) % modulo
     }
 
-    // TODO to be implemented
-    def initialize(pidType: PidType)(implicit connection: Connection): Try[Unit] = ???
+    def initialize(pidType: PidType, seed: Seed)(implicit connection: Connection): Try[Unit] = {
+      database.getSeed(pidType)
+        .flatMap {
+          case Some(currentSeed) => Failure(PidAlreadyInitialized(pidType, currentSeed))
+          case None => database.initSeed(pidType, seed)
+        }
+        .recoverWith {
+          case e: SQLException => Failure(DatabaseException(e))
+        }
+    }
   }
 }

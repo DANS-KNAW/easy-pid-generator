@@ -96,4 +96,26 @@ class PidGeneratorAppSpec extends TestSupportFixture
     database.hasPid(DOI, doi1) shouldBe a[Success[_]]
     database.hasPid(DOI, doi2) shouldBe a[Success[_]]
   }
+
+  "initialize" should "set a seed in the database" in {
+    val seed = 1073741824L
+
+    // initialize seed
+    app.initialize(DOI, seed) shouldBe a[Success[_]]
+
+    // test that seed is in the database
+    database.getSeed(DOI) should matchPattern { case Success(Some(`seed`)) => }
+  }
+
+  it should "fail when the seed is already set" in {
+    val seed = 1073741824L
+    val otherSeed = 4281473701L
+
+    // initialize seed twice
+    app.initialize(DOI, seed) shouldBe a[Success[_]]
+    app.initialize(DOI, otherSeed) should matchPattern { case Failure(PidAlreadyInitialized(DOI, `seed`)) => }
+
+    // test that the original seed still stands
+    database.getSeed(DOI) should matchPattern { case Success(Some(`seed`)) => }
+  }
 }

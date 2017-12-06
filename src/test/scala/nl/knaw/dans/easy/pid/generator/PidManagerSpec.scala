@@ -32,7 +32,7 @@ class PidManagerSpec extends TestSupportFixture
 
   override val database: Database = mock[Database]
   val formatter: PidFormatter = mock[PidFormatter]
-  override val pidGenerator: PidManager = new PidManager(Map(DOI -> formatter))
+  override val pidManager: PidManager = new PidManager(Map(DOI -> formatter))
 
   "generate" should "return a new Pid with a given PidType, while calculating/storing the next seed and storing the new Pid" in {
     val seed = 123456L
@@ -47,7 +47,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects(DOI, pid, *, *) once() returning Success(())
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Success(`pid`) => }
+    pidManager.generate(DOI) should matchPattern { case Success(`pid`) => }
   }
 
   it should "fail immediately when the seed could not be retrieved, without doing any other queries or calculations" in {
@@ -57,7 +57,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail immediately when the seed was retrieved successfully, but was None" in {
@@ -65,7 +65,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(None)
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(SeedNotInitialized(DOI)) => }
   }
 
   it should "fail when the Pid existence check fails" in {
@@ -80,7 +80,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail when the newly calculated Pid already exists, without storing the new seed" in {
@@ -95,7 +95,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(Some(timestamp))
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, `nextSeed`, `pid`, `timestamp`)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(DuplicatePid(DOI, `seed`, `nextSeed`, `pid`, `timestamp`)) => }
   }
 
   it should "fail when the new seed could not be stored properly, without storing the newly generated Pid" in {
@@ -111,7 +111,7 @@ class PidManagerSpec extends TestSupportFixture
       (database.setSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, nextSeed, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 
   it should "fail when the newly generated Pid could not be stored" in {
@@ -128,6 +128,53 @@ class PidManagerSpec extends TestSupportFixture
       (database.addPid(_: PidType, _: Pid, _: DateTime)(_: Connection)) expects(DOI, pid, *, *) once() returning Failure(e)
     }
 
-    pidGenerator.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+    pidManager.generate(DOI) should matchPattern { case Failure(DatabaseException(`e`)) => }
+  }
+
+  "initialize" should "set the initial seed in the database when it isn't set already" in {
+    val seed = 123456L
+
+    inSequence {
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(None)
+      (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, seed, *) once() returning Success(())
+    }
+
+    pidManager.initialize(DOI, seed) shouldBe a[Success[_]]
+  }
+
+  it should "fail when the seed is already set" in {
+    val seed = 123456L
+    val otherSeed = 654321L
+
+    inSequence {
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(Some(otherSeed))
+      (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
+    }
+
+    pidManager.initialize(DOI, seed) should matchPattern { case Failure(PidAlreadyInitialized(DOI, `otherSeed`)) => }
+  }
+
+  it should "fail when the database connection fails unexpectedly for getSeed" in {
+    val e = new SQLException("msg")
+    val seed = 123456L
+
+    inSequence {
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Failure(e)
+      (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(*, *, *) never()
+    }
+
+    pidManager.initialize(DOI, seed) should matchPattern { case Failure(DatabaseException(`e`)) => }
+  }
+
+  it should "fail when the database connection fails unexpectedly for initSeed" in {
+    val e = new SQLException("msg")
+    val seed = 123456L
+
+    inSequence {
+      (database.getSeed(_: PidType)(_: Connection)) expects(DOI, *) once() returning Success(None)
+      (database.initSeed(_: PidType, _: Seed)(_: Connection)) expects(DOI, seed, *) once() returning Failure(e)
+    }
+
+    pidManager.initialize(DOI, seed) should matchPattern { case Failure(DatabaseException(`e`)) => }
   }
 }

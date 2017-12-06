@@ -45,7 +45,7 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
 //  ))
 
   debug("Setting up PidGenerator component...")
-  override val pidGenerator: PidManager = new PidManager(Map(
+  override val pidManager: PidManager = new PidManager(Map(
     DOI -> PidFormatter(
       ns = configuration.properties.getString("pid-generator.types.doi.namespace"),
       dp = configuration.properties.getInt("pid-generator.types.doi.dashPosition"),
