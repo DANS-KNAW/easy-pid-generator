@@ -29,21 +29,18 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
     Ok("Persistent Identifier Generator running")
   }
 
-  private def respond(calculateResult: PidType => Try[Pid])(pidType: PidType): ActionResult = {
-    calculateResult(pidType).map(Created(_))
-      .doIfFailure { case e => logger.error(e.getMessage, e) }
-      .getOrRecover {
-        case e: PidNotInitialized => InternalServerError(e.getMessage)
-        case e: DuplicatePid => InternalServerError(e.getMessage)
-        case e: DatabaseException => InternalServerError(e.getMessage)
-        case e => InternalServerError(s"Error while generating the next $pidType: ${ e.getMessage }")
-      }
-  }
-
   // POST /create?type={doi|urn}
   post("/create") {
     params.get("type").flatMap(PidType.parse)
-      .map(respond(app.generate))
+      .map(pidType => app.generate(pidType)
+        .map(Created(_))
+        .doIfFailure { case e => logger.error(e.getMessage, e) }
+        .getOrRecover {
+          case e: PidNotInitialized => InternalServerError(e.getMessage)
+          case e: DuplicatePid => InternalServerError(e.getMessage)
+          case e: DatabaseException => InternalServerError(e.getMessage)
+          case e => InternalServerError(s"Error while generating the next $pidType: ${ e.getMessage }")
+        })
       .getOrElse(BadRequest("No or unknown Pid type specified, either choose 'doi' or 'urn'"))
   }
 
@@ -58,7 +55,7 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
           case e: DatabaseException => InternalServerError(e.getMessage)
           case e => InternalServerError(s"Error while seeding $pidType: ${ e.getMessage }")
         }
-      case (_, Some(Failure(e))) => BadRequest("The seed is not an integer value")
+      case (_, Some(Failure(_))) => BadRequest("The seed is not an integer value")
       case (_, _) => BadRequest("Usage: POST /init?type={doi|urn}&seed={...}")
     }
   }
