@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import org.rogach.scallop.{ ScallopConf, ScallopOption, Subcommand }
+import org.rogach.scallop.{ ScallopConf, ScallopOption, Subcommand, ValueConverter, singleArgConverter }
 
 class CommandLineOptions(args: Array[String], configuration: Configuration) extends ScallopConf(args) {
   appendDefaultToDescription = true
@@ -37,12 +37,29 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
        |Options:
     """.stripMargin)
 
+  private implicit val pidParser: ValueConverter[PidType] = singleArgConverter(
+    PidType.parse(_).getOrElse(throw new IllegalArgumentException("only 'doi' or 'urn' allowed")),
+    {
+      case e: IllegalArgumentException => Left(e.getMessage)
+    })
+
   val generate = new Subcommand("generate") {
     descr("Generate a specified PID")
-    val pidType: ScallopOption[String] = trailArg(name = "pid-type", required = true)
+    val pidType: ScallopOption[PidType] = trailArg(name = "pid-type", required = true,
+      descr = "The type of PID to be generated, either 'doi' or 'urn'")
     footer(SUBCOMMAND_SEPARATOR)
   }
   addSubcommand(generate)
+
+  val initialize = new Subcommand("initialize") {
+    descr("Initialize a specified PID with a seed")
+    val pidType: ScallopOption[PidType] = trailArg(name = "pid-type", required = true,
+      descr = "The type of PID to be generated, either 'doi' or 'urn'")
+    val seed: ScallopOption[Long] = trailArg(name = "seed", required = true,
+      descr = "The seed to use for this initialization")
+    footer(SUBCOMMAND_SEPARATOR)
+  }
+  addSubcommand(initialize)
 
   val runService = new Subcommand("run-service") {
     descr("Starts the EASY Pid Generator as a daemon that services HTTP requests")

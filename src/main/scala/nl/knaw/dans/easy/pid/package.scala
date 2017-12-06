@@ -28,6 +28,15 @@ package object pid {
   sealed abstract class PidType(val name: String) {
     override def toString: String = name
   }
+  object PidType {
+    def parse(name: String): Option[PidType] = {
+      name match {
+        case "doi" => Some(DOI)
+        case "urn" => Some(URN)
+        case _ => None
+      }
+    }
+  }
   case object DOI extends PidType("doi")
   case object URN extends PidType("urn")
 

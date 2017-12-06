@@ -42,14 +42,14 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
 
   // POST /create?type={doi|urn}
   post("/create") {
-    params.get("type").flatMap(parsePid)
+    params.get("type").flatMap(PidType.parse)
       .map(respond(app.generate))
       .getOrElse(BadRequest("No or unknown Pid type specified, either choose 'doi' or 'urn'"))
   }
 
   // POST /init?type={doi|urn}&seed={...}
   post("/init") {
-    (params.get("type").flatMap(parsePid), params.get("seed").map(s => Try { s.toLong })) match {
+    (params.get("type").flatMap(PidType.parse), params.get("seed").map(s => Try { s.toLong })) match {
       case (Some(pidType), Some(Success(seed))) => app.initialize(pidType, seed)
         .map(_ => Created(s"Pid type $pidType is seeded with $seed"))
         .doIfFailure { case e => logger.error(e.getMessage, e) }
@@ -60,14 +60,6 @@ class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with Deb
         }
       case (_, Some(Failure(e))) => BadRequest("The seed is not an integer value")
       case (_, _) => BadRequest("Usage: POST /init?type={doi|urn}&seed={...}")
-    }
-  }
-
-  private def parsePid(pid: String): Option[PidType] = {
-    pid match {
-      case "doi" => Some(DOI)
-      case "urn" => Some(URN)
-      case _ => None
     }
   }
 }

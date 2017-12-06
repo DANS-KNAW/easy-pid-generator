@@ -48,11 +48,12 @@ object Command extends App with DebugEnhancedLogging {
   private def runSubcommand(app: PidGeneratorApp): Try[FeedBackMessage] = {
     commandLine.subcommand
       .collect {
-        case generate @ commandLine.generate => generate.pidType() match {
-          case "doi" => app.generate(DOI)
-          case "urn" => app.generate(URN)
-          case t => Failure(new IllegalArgumentException(s"Unknown PID type: $t"))
-        }
+        case generate @ commandLine.generate => app.generate(generate.pidType())
+        case init @ commandLine.initialize =>
+          val pidType = init.pidType()
+          val seed = init.seed()
+          app.initialize(pidType, seed)
+            .map(_ => s"Pid type $pidType is seeded with $seed")
         case commandLine.runService => runAsService(app)
       }
       .getOrElse(Failure(new IllegalArgumentException(s"Unknown command: ${ commandLine.subcommand }")))
