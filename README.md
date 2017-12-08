@@ -94,4 +94,4 @@ EXAMPLES
 
     curl http://test.dans.knaw.nl:20140/
     curl http://test.dans.knaw.nl:20140/create?type=doi
-    curl http://test.dans.knaw.nl:20140/init?type=doi&seed=
+    curl http://test.dans.knaw.nl:20140/init?type=doi&seed=1073741824
