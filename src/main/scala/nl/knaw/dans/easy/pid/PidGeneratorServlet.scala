@@ -34,7 +34,6 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
     params.get("type").flatMap(PidType.parse)
       .map(pidType => app.generate(pidType)
         .map(Created(_))
-        .doIfFailure { case e => logger.error(e.getMessage, e) }
         .getOrRecover {
           case e: PidNotInitialized => InternalServerError(e.getMessage)
           case e: DuplicatePid => InternalServerError(e.getMessage)
@@ -49,7 +48,6 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
     (params.get("type").flatMap(PidType.parse), params.get("seed").map(s => Try { s.toLong })) match {
       case (Some(pidType), Some(Success(seed))) => app.initialize(pidType, seed)
         .map(_ => Created(s"Pid type $pidType is seeded with $seed"))
-        .doIfFailure { case e => logger.error(e.getMessage, e) }
         .getOrRecover {
           case e: PidAlreadyInitialized => Conflict(e.getMessage)
           case e: DatabaseException => InternalServerError(e.getMessage)
