@@ -41,3 +41,57 @@ ARGUMENTS
     Subcommand: run-service - Starts the EASY Pid Generator as a daemon that services HTTP requests
           --help   Show help message
     ---
+
+
+HTTP service
+------------
+
+When started with the subcommand `run-service` a REST API becomes available.
+
+### GET (service status)
+_URI:_ `http://test.dans.knaw.nl:20140/`
+
+Return a simple message to indicate that the service is up and running
+
+#### Response body
+a short message indicating the service is up and running
+
+#### Response statuses
+`200 OK` - service is up and running
+
+
+### POST (generate new PID)
+_URI:_ `http://test.dans.knaw.nl:20140/create?type={doi|urn}`
+
+Generates and mints a new PID of the kind specified by `type`
+
+#### Response body
+the generated PID
+
+#### Response statuses
+`201 Created` - operation successful<br>
+`400 Bad Request` - `type` must be either `doi` or `urn`<br>
+`500 Internal Server Error` - server internal error, try later and if problem persists please contact us
+
+
+### POST (initialize the generator for a certain kind of PID)
+_URI:_ `http://test.dans.knaw.nl:20140/init?type={doi|urn}&seed={s}` where {s} is a (64-bit) integer seed
+
+Initializes a certain kind of PID with a seed, such that new PIDs of this kind can be generated
+
+#### Response body
+a message to confirm a successful initialization
+
+#### Response statuses
+`201 Created` - operation successful<br>
+`400 Bad Request` - `type` must be either `doi` or `urn`, `seed` must be a (64-bit) integer<br>
+`409 Confict` - this kind of PID is already initialized<br>
+`500 Internal Server Error` - server internal error, try later and if problem persists please contact us
+
+
+EXAMPLES
+--------
+
+    curl http://test.dans.knaw.nl:20140/
+    curl http://test.dans.knaw.nl:20140/create?type=doi
+    curl http://test.dans.knaw.nl:20140/init?type=doi&seed=
