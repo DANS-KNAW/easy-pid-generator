@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid
 
+import java.nio.file.Paths
+
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
@@ -24,9 +26,10 @@ class ServiceStarter extends Daemon with DebugEnhancedLogging {
 
   override def init(context: DaemonContext): Unit = {
     logger.info("Initializing service...")
-    val configuration = Configuration()
-    app = new PidGeneratorApp(new ApplicationWiring(configuration))
-    service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
+    val configuration = Configuration(Paths.get(System.getProperty("app.home")))
+    app = new PidGeneratorApp(configuration)
+    service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app,
+      "/" -> new PidGeneratorServlet(app, configuration))
     logger.info("Service initialized.")
   }
 

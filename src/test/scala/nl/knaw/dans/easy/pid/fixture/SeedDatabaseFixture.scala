@@ -18,30 +18,31 @@ package nl.knaw.dans.easy.pid.fixture
 import java.nio.file.{ Files, Path }
 import java.sql.Connection
 
-import nl.knaw.dans.easy.pid.seedstorage.DatabaseAccess
+import nl.knaw.dans.easy.pid.DatabaseAccessComponent
 import org.scalatest.BeforeAndAfterEach
 import resource.managed
 
 import scala.io.Source
 
-trait SeedDatabaseFixture extends BeforeAndAfterEach {
+trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponent {
   this: TestSupportFixture =>
 
   implicit var connection: Connection = _
 
-  val databaseFile: Path = testDir.resolve("seed.db")
+  val databaseFile: Path = testDir.resolve("database.db")
 
-  val databaseAccess = new DatabaseAccess(
-    dbDriverClassName = "org.sqlite.JDBC",
-    dbUrl = s"jdbc:sqlite:${ databaseFile.toString }",
-    dbUsername = Option.empty[String],
-    dbPassword = Option.empty[String]) {
+  override val databaseAccess: DatabaseAccess = new DatabaseAccess {
+    override val dbDriverClassName = "org.sqlite.JDBC"
+    override val dbUrl = s"jdbc:sqlite:${ databaseFile.toString }"
+    override val dbUsername = Option.empty[String]
+    override val dbPassword = Option.empty[String]
+
     override def createConnectionPool: ConnectionPool = {
       val pool = super.createConnectionPool
 
       managed(pool.getConnection)
         .flatMap(connection => managed(connection.createStatement))
-        .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/seed.sql").toURI)).map(_.mkString))
+        .and(managed(Source.fromFile(getClass.getClassLoader.getResource("database/database.sql").toURI)).map(_.mkString))
         .acquireAndGet { case (statement, query) => statement.executeUpdate(query) }
 
       connection = pool.getConnection

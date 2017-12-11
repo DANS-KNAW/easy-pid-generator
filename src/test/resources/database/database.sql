@@ -12,5 +12,6 @@ CREATE TABLE minted(
     FOREIGN KEY (type) REFERENCES seed (type)
 );
 
-GRANT INSERT, SELECT, UPDATE ON seed TO easy_pid_generator;
-GRANT INSERT, SELECT ON minted TO easy_pid_generator;
+-- to ensure the foreign key constraint is respected,
+-- SQLite wants to have the following explicitly stated
+PRAGMA foreign_keys = ON;

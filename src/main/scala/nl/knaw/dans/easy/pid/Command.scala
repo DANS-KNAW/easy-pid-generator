@@ -15,6 +15,8 @@
  */
 package nl.knaw.dans.easy.pid
 
+import java.nio.file.Paths
+
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import resource._
@@ -26,11 +28,9 @@ import scala.util.{ Failure, Try }
 object Command extends App with DebugEnhancedLogging {
   type FeedBackMessage = String
 
-  val configuration = Configuration()
-  val commandLine: CommandLineOptions = new CommandLineOptions(args, configuration) {
-    verify()
-  }
-  val app = new PidGeneratorApp(new ApplicationWiring(configuration))
+  val configuration = Configuration(Paths.get(System.getProperty("app.home")))
+  val commandLine: CommandLineOptions = new CommandLineOptions(args, configuration)
+  val app = new PidGeneratorApp(configuration)
 
   managed(app)
     .acquireAndGet(app => {
@@ -46,18 +46,20 @@ object Command extends App with DebugEnhancedLogging {
   private def runSubcommand(app: PidGeneratorApp): Try[FeedBackMessage] = {
     commandLine.subcommand
       .collect {
-        case generate @ commandLine.generate => generate.pidType() match {
-          case "doi" => app.generate(DOI)
-          case "urn" => app.generate(URN)
-          case t => Failure(new IllegalArgumentException(s"Unknown PID type: $t"))
-        }
+        case generate @ commandLine.generate => app.generate(generate.pidType())
+        case init @ commandLine.initialize =>
+          val pidType = init.pidType()
+          val seed = init.seed()
+          app.initialize(pidType, seed)
+            .map(_ => s"Pid type $pidType is seeded with $seed")
         case commandLine.runService => runAsService(app)
       }
       .getOrElse(Failure(new IllegalArgumentException(s"Unknown command: ${ commandLine.subcommand }")))
   }
 
   private def runAsService(app: PidGeneratorApp): Try[FeedBackMessage] = Try {
-    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app)
+    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app,
+      "/" -> new PidGeneratorServlet(app, configuration))
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
         service.stop()

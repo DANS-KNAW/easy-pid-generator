@@ -31,21 +31,21 @@ trait ConfigurationSupportFixture {
 
   def getApplicationProperties: String = {
     s"""
-      |pid-generator.database.driver-class=org.sqlite.JDBC
-      |pid-generator.database.url=jdbc:sqlite:$testDir/seed.db
-      |#pid-generator.database.username=sqlite-doesn't-need-a-username
-      |#pid-generator.database.password=sqlite-doesn't-need-a-password
-      |
-      |pid-generator.daemon.http.port=8060
-      |
-      |pid-generator.types.urn.namespace=urn:nbn:nl:ui:13-
-      |pid-generator.types.urn.dashPosition=4
-      |pid-generator.types.urn.firstSeed=1
-      |
-      |pid-generator.types.doi.namespace=10.5072/dans-
-      |pid-generator.types.doi.dashPosition=3
-      |pid-generator.types.doi.firstSeed=1073741824
-      |
+       |pid-generator.database.driver-class=org.sqlite.JDBC
+       |pid-generator.database.url=jdbc:sqlite:$testDir/database.db
+       |#pid-generator.database.username=sqlite-doesn't-need-a-username
+       |#pid-generator.database.password=sqlite-doesn't-need-a-password
+       |
+       |pid-generator.daemon.http.port=8060
+       |
+       |pid-generator.types.urn.namespace=urn:nbn:nl:ui:13-
+       |pid-generator.types.urn.dashPosition=4
+       |pid-generator.types.urn.firstSeed=1
+       |
+       |pid-generator.types.doi.namespace=10.5072/dans-
+       |pid-generator.types.doi.dashPosition=3
+       |pid-generator.types.doi.firstSeed=1073741824
+       |
     """.stripMargin
   }
 }

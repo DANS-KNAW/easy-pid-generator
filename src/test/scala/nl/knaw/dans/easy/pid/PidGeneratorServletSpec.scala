@@ -15,7 +15,10 @@
  */
 package nl.knaw.dans.easy.pid
 
-import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, ServletFixture, TestSupportFixture }
+import java.sql.SQLException
+
+import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, ServletFixture, TestSupportFixture }
+import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
 import org.scalatra.test.scalatest.ScalatraSuite
 
@@ -23,85 +26,151 @@ import scala.util.{ Failure, Success }
 
 class PidGeneratorServletSpec extends TestSupportFixture
   with ConfigurationSupportFixture
-  with SeedDatabaseFixture
   with ServletFixture
   with ScalatraSuite
   with MockFactory {
 
-  class MockedPidGeneratorApp extends PidGeneratorApp(null)
+  class MockedPidGeneratorApp extends PidGeneratorApp(null: ApplicationWiring)
 
   val app: PidGeneratorApp = mock[MockedPidGeneratorApp]
-  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app)
+  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app, configuration)
 
   addServlet(pidServlet, "/*")
 
   "get /" should "return the message that the service is running" in {
     get("/") {
       status shouldBe 200
-      body shouldBe "Persistent Identifier Generator running"
+      body shouldBe "Persistent Identifier Generator running (v1.0.0-UNITTEST)"
     }
   }
 
-  "post with URN request" should "return the next URN PID" in {
-    (app.generate(_: PidType)) expects URN once() returning Success("urn output")
-    post("/", ("type", "urn")) {
-      status shouldBe 200
-      body shouldBe "urn output"
-    }
-  }
-
-  it should "return a failure if the generator ran out of seeds" in {
-    (app.generate(_: PidType)) expects URN once() returning Failure(RanOutOfSeeds(URN))
-    post("/", ("type", "urn")) {
-      status shouldBe 404
-      body shouldBe "No more urn seeds available."
-    }
-  }
-
-  it should "return a failure if the generator failed unexpectedly" in {
-    (app.generate(_: PidType)) expects URN once() returning Failure(new Exception("unexpected failure"))
-    post("/", ("type", "urn")) {
-      status shouldBe 500
-      body shouldBe "Error when retrieving previous seed or saving current seed"
-    }
-  }
-
-  "post with DOI request" should "return the next DOI PID" in {
+  "POST /create?type=doi" should "return the next DOI PID" in {
     (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
-    post("/", ("type", "doi")) {
-      status shouldBe 200
+    post("/create", ("type", "doi")) {
+      status shouldBe 201
       body shouldBe "doi output"
     }
   }
 
-  it should "return a failure if the generator ran out of seeds" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(RanOutOfSeeds(DOI))
-    post("/", ("type", "doi")) {
-      status shouldBe 404
-      body shouldBe "No more doi seeds available."
+  it should "return a 500 when the database connection fails suddenly" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(DatabaseException(new Exception("test")))
+    post("/create", ("type", "doi")) {
+      status shouldBe 500
+      body should include("database connection failed")
     }
   }
 
-  it should "return a failure if the generator failed unexpectedly" in {
+  it should "return a 500 when the generator is not initialized" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(PidNotInitialized(DOI))
+    post("/create", ("type", "doi")) {
+      status shouldBe 500
+      body should include("not yet initialized")
+    }
+  }
+
+  it should "return a 500 when the generator encounters a duplicate Pid" in {
+    (app.generate(_: PidType)) expects DOI once() returning Failure(DuplicatePid(DOI, 1L, 2L, "testpid", new DateTime(1992, 7, 30, 16, 1)))
+    post("/create", ("type", "doi")) {
+      status shouldBe 500
+      body should include("Duplicate doi detected: testpid.")
+    }
+  }
+
+  it should "return a 500 when the generator failed unexpectedly" in {
     (app.generate(_: PidType)) expects DOI once() returning Failure(new Exception("unexpected failure"))
-    post("/", ("type", "doi")) {
+    post("/create", ("type", "doi")) {
       status shouldBe 500
-      body shouldBe "Error when retrieving previous seed or saving current seed"
+      body shouldBe "Error while generating the next doi: unexpected failure"
     }
   }
 
-  "post with an unknown type" should "return a 400 error" in {
-    post("/", ("type", "unknown")) {
+  "POST /create?type=unknown" should "return a 400 error" in {
+    post("/create", ("type", "unknown")) {
       status shouldBe 400
-      body shouldBe "Unknown PID type 'unknown'"
+      body should startWith("No or unknown Pid type specified")
     }
   }
 
-  "post with no request type" should "default to requesting a DOI" in {
-    (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
-    post("/") {
-      status shouldBe 200
-      body shouldBe "doi output"
+  "POST /create" should "fail because no type was specified" in {
+    post("/create") {
+      status shouldBe 400
+      body should startWith("No or unknown Pid type specified")
+    }
+  }
+
+  "POST /init?type=doi&seed=123456" should "return a 201 when the DOI is set correctly" in {
+    val seed = 123456L
+    app.initialize _ expects(DOI, seed) once() returning Success(())
+
+    post("/init", "type" -> "doi", "seed" -> seed.toString) {
+      status shouldBe 201
+      body shouldBe s"Pid type doi is seeded with $seed"
+    }
+  }
+
+  it should "return a 409 when the DOI is already seeded" in {
+    val seed = 123456L
+    val otherSeed = 654321L
+    app.initialize _ expects(DOI, seed) once() returning Failure(PidAlreadyInitialized(DOI, otherSeed))
+
+    post("/init", "type" -> "doi", "seed" -> seed.toString) {
+      status shouldBe 409
+      body should include(s"already initialized for a doi")
+    }
+  }
+
+  it should "return a 500 when the database connection fails unexpectedly" in {
+    val seed = 123456L
+    app.initialize _ expects(DOI, seed) once() returning Failure(DatabaseException(new SQLException("err")))
+
+    post("/init", "type" -> "doi", "seed" -> seed.toString) {
+      status shouldBe 500
+      body shouldBe "The database connection failed; cause: err"
+    }
+  }
+
+  "POST /init?type=doi&seed=abc" should "return a 400 since the seed is not an integer value" in {
+    app.initialize _ expects(*, *) never()
+
+    post("/init", "type" -> "doi", "seed" -> "abc") {
+      status shouldBe 400
+      body shouldBe "The seed is not an integer value"
+    }
+  }
+
+  "POST /init?type=doi" should "return a 400 since the seed is not provided" in {
+    app.initialize _ expects(*, *) never()
+
+    post("/init", "type" -> "doi") {
+      status shouldBe 400
+      body shouldBe "Usage: POST /init?type={doi|urn}&seed={...}"
+    }
+  }
+
+  "POST /init?type=unknown" should "return a 400 since the type is not DOI or URN" in {
+    app.initialize _ expects(*, *) never()
+
+    post("/init", "type" -> "unknown") {
+      status shouldBe 400
+      body shouldBe "Usage: POST /init?type={doi|urn}&seed={...}"
+    }
+  }
+
+  "POST /init?seed=123456" should "return a 400 since the type is not provided" in {
+    app.initialize _ expects(*, *) never()
+
+    post("/init", "seed" -> "123456") {
+      status shouldBe 400
+      body shouldBe "Usage: POST /init?type={doi|urn}&seed={...}"
+    }
+  }
+
+  "POST /init" should "return a 400 since both type and seed are not provided" in {
+    app.initialize _ expects(*, *) never()
+
+    post("/init") {
+      status shouldBe 400
+      body shouldBe "Usage: POST /init?type={doi|urn}&seed={...}"
     }
   }
 }

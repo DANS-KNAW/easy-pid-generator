@@ -19,32 +19,42 @@ import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.scalatra._
 
-import scala.util.Try
+import scala.util.{ Failure, Success, Try }
 
-class PidGeneratorServlet(app: PidGeneratorApp) extends ScalatraServlet with DebugEnhancedLogging {
+class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) extends ScalatraServlet with DebugEnhancedLogging {
   logger.info("PID Generator Servlet running...")
 
   get("/") {
     contentType = "text/plain"
-    Ok("Persistent Identifier Generator running")
+    Ok(s"Persistent Identifier Generator running (v${ configuration.version })")
   }
 
-  private def respond(result: Try[String]): ActionResult = {
-    result.map(Ok(_))
-      .doIfFailure { case e => logger.error(e.getMessage, e) }
-      .getOrRecover {
-        case e: RanOutOfSeeds => NotFound(e.getMessage)
-        case _ => InternalServerError("Error when retrieving previous seed or saving current seed")
-      }
+  // POST /create?type={doi|urn}
+  post("/create") {
+    params.get("type").flatMap(PidType.parse)
+      .map(pidType => app.generate(pidType)
+        .map(Created(_))
+        .getOrRecover {
+          case e: PidNotInitialized => InternalServerError(e.getMessage)
+          case e: DuplicatePid => InternalServerError(e.getMessage)
+          case e: DatabaseException => InternalServerError(e.getMessage)
+          case e => InternalServerError(s"Error while generating the next $pidType: ${ e.getMessage }")
+        })
+      .getOrElse(BadRequest("No or unknown Pid type specified, either choose 'doi' or 'urn'"))
   }
 
-  post("/") {
-    params.get("type")
-      .map {
-        case "doi" => respond(app.generate(DOI))
-        case "urn" => respond(app.generate(URN))
-        case pidType => BadRequest(s"Unknown PID type '$pidType'")
-      }
-      .getOrElse(respond(app.generate(DOI)))
+  // POST /init?type={doi|urn}&seed={...}
+  post("/init") {
+    (params.get("type").flatMap(PidType.parse), params.get("seed").map(s => Try { s.toLong })) match {
+      case (Some(pidType), Some(Success(seed))) => app.initialize(pidType, seed)
+        .map(_ => Created(s"Pid type $pidType is seeded with $seed"))
+        .getOrRecover {
+          case e: PidAlreadyInitialized => Conflict(e.getMessage)
+          case e: DatabaseException => InternalServerError(e.getMessage)
+          case e => InternalServerError(s"Error while seeding $pidType: ${ e.getMessage }")
+        }
+      case (_, Some(Failure(_))) => BadRequest("The seed is not an integer value")
+      case (_, _) => BadRequest("Usage: POST /init?type={doi|urn}&seed={...}")
+    }
   }
 }

@@ -15,20 +15,39 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
+import nl.knaw.dans.easy.pid.Seed
 import org.scalacheck.Gen
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scalatest.{ Matchers, PropSpec }
 
+import scala.language.postfixOps
+
 class PidFormatterSpec extends PropSpec with GeneratorDrivenPropertyChecks with Matchers {
 
+  def genMap(n: Int): Gen[Map[Char, Char]] = {
+    Gen.mapOf(for {
+      a <- Gen.alphaChar
+      b <- Gen.alphaChar
+    } yield a -> b).map(_.take(n))
+  }
+
   property("Formatted PID starts with configured prefix") {
-    forAll(Gen.posNum[Long], Gen.alphaStr, Gen.choose(2, 36), Gen.choose(5, 10)) {
-      (pid: Long, prefix: String, radix: Int, len: Int) =>
+    forAll(Gen.posNum[Seed], Gen.alphaStr, Gen.choose(2, 36), Gen.choose(5, 10)) {
+      (pid: Seed, prefix: String, radix: Int, len: Int) =>
         PidFormatter.format(prefix, radix, len, Map.empty[Char, Char], 3)(pid) should startWith(prefix)
     }
   }
 
-  // TODO: Test more properties of format
+  property("If the seed is converted correctly, it should start with a number of 0's") {
+    forAll(Gen.posNum[Seed], Gen.choose(2, 36), Gen.choose(5, 10), genMap(4)) {
+      (seed: Seed, radix: Int, len: Int, charMap: Map[Char, Char]) => {
+        val radixedSeedLength = java.lang.Long.toString(seed, radix).length
+        whenever(radixedSeedLength < len && !charMap.contains('0')) {
+          PidFormatter.convertToString(seed, radix, len, charMap) should startWith("0" * (radixedSeedLength - len))
+        }
+      }
+    }
+  }
 
   property("insertDashAt inserts dash at given index") {
     forAll(Gen.alphaStr, Gen.posNum[Int]) { (s: String, i: Int) =>

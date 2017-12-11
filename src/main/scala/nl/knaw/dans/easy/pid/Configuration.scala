@@ -26,8 +26,7 @@ case class Configuration(version: String, properties: PropertiesConfiguration)
 
 object Configuration {
 
-  def apply(): Configuration = {
-    val home = Paths.get(System.getProperty("app.home"))
+  def apply(home: Path): Configuration = {
     val cfgPath = Seq(
       Paths.get(s"/etc/opt/dans.knaw.nl/easy-pid-generator/"),
       home.resolve("cfg"))
@@ -35,7 +34,7 @@ object Configuration {
       .getOrElse { throw new IllegalStateException("No configuration directory found") }
 
     new Configuration(
-      version = managed(Source.fromFile(home.resolve("bin/version").toFile)).acquireAndGet(_.mkString),
+      version = managed(Source.fromFile(home.resolve("bin/version").toFile)).acquireAndGet(_.mkString).stripLineEnd,
       properties = new PropertiesConfiguration(cfgPath.resolve("application.properties").toFile)
     )
   }

@@ -20,12 +20,12 @@ import javax.servlet.ServletContext
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.eclipse.jetty.server.Server
 import org.eclipse.jetty.servlet.ServletContextHandler
-import org.scalatra.LifeCycle
+import org.scalatra.{ LifeCycle, ScalatraServlet }
 import org.scalatra.servlet.ScalatraListener
 
 import scala.util.Try
 
-class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp) extends DebugEnhancedLogging {
+class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp, servlets: (String, ScalatraServlet)*) extends DebugEnhancedLogging {
 
   private val server = new Server(serverPort) {
     this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {
@@ -33,7 +33,9 @@ class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp) extends Deb
         override def probeForCycleClass(classLoader: ClassLoader): (String, LifeCycle) = {
           ("pid-lifecycle", new LifeCycle {
             override def init(context: ServletContext): Unit = {
-              context.mount(new PidGeneratorServlet(app), "/")
+              for ((path, servlet) <- servlets) {
+                context.mount(servlet, path)
+              }
             }
           })
         }

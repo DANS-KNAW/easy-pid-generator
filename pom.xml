@@ -25,10 +25,10 @@
     </parent>
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>EASY PID Generator Service</name>
     <url>https://github.com/DANS-KNAW/easy-pid-generator</url>
-    <description>Service that generates unique Persistent Identifiers on demand. Supported types are URN and DOI</description>
+    <description>Generate a Persistent Identifier (DOI or URN)</description>
     <inceptionYear>2015</inceptionYear>
     <properties>
         <main-class>nl.knaw.dans.easy.pid.Command</main-class>
@@ -120,6 +120,21 @@
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.16.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scalaj</groupId>
+            <artifactId>scalaj-http_2.11</artifactId>
+        </dependency>
+
+        <!-- joda -->
+        <dependency>
+            <groupId>joda-time</groupId>
+            <artifactId>joda-time</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.joda</groupId>
+            <artifactId>joda-convert</artifactId>
         </dependency>
     </dependencies>
     <repositories>
