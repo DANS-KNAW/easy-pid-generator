@@ -122,6 +122,11 @@
             <version>3.16.1</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.scalaj</groupId>
+            <artifactId>scalaj-http_2.11</artifactId>
+        </dependency>
+
         <!-- joda -->
         <dependency>
             <groupId>joda-time</groupId>

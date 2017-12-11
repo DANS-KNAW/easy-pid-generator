@@ -32,24 +32,28 @@ class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnh
   def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
 
   def generate(pidType: PidType): Try[Pid] = {
-    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.generate(pidType))
-      .doIfSuccess(pid => logger.info(s"Minted a new $pidType: $pid"))
-      .doIfFailure {
-        case e: PidNotInitialized => logger.info(e.getMessage)
-        case e: DuplicatePid => logger.info(e.getMessage)
-        case e: DatabaseException => logger.error(e.getMessage, e)
-        case e => logger.error(e.getMessage, e)
-      }
+    synchronized {
+      wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.generate(pidType))
+        .doIfSuccess(pid => logger.info(s"Minted a new $pidType: $pid"))
+        .doIfFailure {
+          case e: PidNotInitialized => logger.info(e.getMessage)
+          case e: DuplicatePid => logger.info(e.getMessage)
+          case e: DatabaseException => logger.error(e.getMessage, e)
+          case e => logger.error(e.getMessage, e)
+        }
+    }
   }
 
   def initialize(pidType: PidType, seed: Seed): Try[Unit] = {
-    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.initialize(pidType, seed))
-      .doIfSuccess(_ => logger.info(s"Pid type $pidType is seeded with $seed"))
-      .doIfFailure {
-        case e: PidAlreadyInitialized => logger.info(e.getMessage)
-        case e: DatabaseException => logger.error(e.getMessage, e)
-        case e => logger.error(e.getMessage, e)
-      }
+    synchronized {
+      wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.initialize(pidType, seed))
+        .doIfSuccess(_ => logger.info(s"Pid type $pidType is seeded with $seed"))
+        .doIfFailure {
+          case e: PidAlreadyInitialized => logger.info(e.getMessage)
+          case e: DatabaseException => logger.error(e.getMessage, e)
+          case e => logger.error(e.getMessage, e)
+        }
+    }
   }
 
   def init(): Try[Unit] = {
