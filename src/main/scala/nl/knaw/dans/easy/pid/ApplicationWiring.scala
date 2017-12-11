@@ -38,7 +38,7 @@ class ApplicationWiring(configuration: Configuration) extends DebugEnhancedLoggi
 
   override val database: Database = new Database {}
 
-  debug("Setting up PidGenerator component...")
+  debug("Setting up PidManager component...")
   override val pidManager: PidManager = new PidManager(Map(
     DOI -> PidFormatter(
       ns = configuration.properties.getString("pid-generator.types.doi.namespace"),
