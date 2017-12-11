@@ -15,11 +15,15 @@
  */
 package nl.knaw.dans.easy.pid
 
+import java.util.concurrent.{ ConcurrentHashMap, CountDownLatch, Executors }
+
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.generator.DatabaseComponent
 import org.joda.time.DateTime
 
-import scala.util.{ Failure, Success }
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.util.{ Failure, Success, Try }
 
 class PidGeneratorAppSpec extends TestSupportFixture
   with SeedDatabaseFixture
@@ -93,6 +97,33 @@ class PidGeneratorAppSpec extends TestSupportFixture
     database.getSeed(DOI) should matchPattern { case Success(Some(1074087174)) => }
     database.hasPid(DOI, doi1) shouldBe a[Success[_]]
     database.hasPid(DOI, doi2) shouldBe a[Success[_]]
+  }
+
+  it should "manage concurrency correctly" in {
+    app.initialize(DOI, 123456)
+
+    def test(name: String, start: CountDownLatch, done: CountDownLatch, results: mutable.Map[String, Try[Pid]]): Runnable = new Runnable {
+      def run(): Unit = {
+        start.await()
+        results.put(name, app.generate(DOI))
+        done.countDown()
+      }
+    }
+
+    val n = 10
+    val ex = Executors.newFixedThreadPool(10)
+    val start = new CountDownLatch(1)
+    val done = new CountDownLatch(n)
+    val results = new ConcurrentHashMap[String, Try[Pid]]().asScala
+
+    for (i <- 1 to n) {
+      ex.execute { test(s"test$i", start, done, results) }
+    }
+    start.countDown()
+    done.await()
+
+    results.keys should contain theSameElementsAs (1 to n).map(i => s"test$i")
+    all(results.values).shouldBe(a[Success[_]])
   }
 
   "initialize" should "set a seed in the database" in {
