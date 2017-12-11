@@ -18,12 +18,10 @@ package nl.knaw.dans.easy.pid
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.generator.DatabaseComponent
 import org.joda.time.DateTime
-import org.scalatest.OneInstancePerTest
 
 import scala.util.{ Failure, Success }
 
 class PidGeneratorAppSpec extends TestSupportFixture
-  with OneInstancePerTest
   with SeedDatabaseFixture
   with ConfigurationSupportFixture
   with DatabaseComponent {
