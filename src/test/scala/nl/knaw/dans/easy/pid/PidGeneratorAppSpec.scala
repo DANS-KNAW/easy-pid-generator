@@ -64,7 +64,7 @@ class PidGeneratorAppSpec extends TestSupportFixture
   it should "fail when the DOI already exists" in {
     val seed = 1073741824L
     val doi = "10.5072/dans-x6f-kf66"
-    val timestamp = DateTime.now
+    val timestamp = DateTime.now(timeZone)
 
     // init seed
     // TODO use library call later

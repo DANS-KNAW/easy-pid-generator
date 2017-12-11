@@ -46,7 +46,7 @@ trait PidManagerComponent {
                 case Some(timestamp) => Failure(DuplicatePid(pidType, seed, nextSeed, pid, timestamp))
                 case None =>
                   database.setSeed(pidType, nextSeed)
-                    .flatMap(_ => database.addPid(pidType, pid, DateTime.now()))
+                    .flatMap(_ => database.addPid(pidType, pid, DateTime.now(timeZone)))
                     .map(_ => pid)
               }
           case None => Failure(PidNotInitialized(pidType))

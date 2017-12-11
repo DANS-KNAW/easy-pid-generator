@@ -17,7 +17,7 @@ package nl.knaw.dans.easy.pid.generator
 
 import java.sql.{ Connection, SQLException }
 
-import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed, dateTimeFormatter }
+import nl.knaw.dans.easy.pid.{ Pid, PidType, Seed, _ }
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.joda.time.DateTime
 import resource.managed
@@ -32,7 +32,6 @@ trait DatabaseComponent extends DebugEnhancedLogging {
 
     def getSeed(pidType: PidType)(implicit connection: Connection): Try[Option[Seed]] = {
       trace(pidType)
-
       val resultSet = for {
         prepStatement <- managed(connection.prepareStatement("SELECT value FROM seed WHERE type=?;"))
         _ = prepStatement.setString(1, pidType.name)
@@ -85,7 +84,7 @@ trait DatabaseComponent extends DebugEnhancedLogging {
       resultSet.map {
         Option(_)
           .withFilter(_.next())
-          .map(result => DateTime.parse(result.getString("created"), dateTimeFormatter))
+          .map(result => new DateTime(result.getTimestamp("created", timeZone), timeZone))
       }.tried
     }
 
@@ -96,7 +95,7 @@ trait DatabaseComponent extends DebugEnhancedLogging {
         .map(prepStatement => {
           prepStatement.setString(1, pidType.name)
           prepStatement.setString(2, pid)
-          prepStatement.setString(3, created.toString(dateTimeFormatter))
+          prepStatement.setTimestamp(3, created, timeZone)
           prepStatement.executeUpdate()
         })
         .tried

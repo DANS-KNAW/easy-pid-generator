@@ -7,7 +7,7 @@ CREATE TABLE seed(
 CREATE TABLE minted(
     type VARCHAR(64) NOT NULL,
     value VARCHAR(64) NOT NULL,
-    created TIMESTAMP NOT NULL,
+    created TIMESTAMP WITH TIME ZONE NOT NULL,
     PRIMARY KEY (type, value),
     FOREIGN KEY (type) REFERENCES seed (type)
 );

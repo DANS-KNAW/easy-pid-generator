@@ -18,7 +18,7 @@ package nl.knaw.dans.easy.pid.generator
 import java.sql.SQLException
 
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
-import nl.knaw.dans.easy.pid.{ DOI, PidType, URN, dateTimeFormatter }
+import nl.knaw.dans.easy.pid.{ DOI, PidType, URN, timeZone }
 import org.joda.time.DateTime
 import resource.managed
 
@@ -82,10 +82,10 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
   it should "return the related timestamp if the requested PID is already in the database" in {
     val pid = "testpid"
-    val created = new DateTime(1992, 7, 30, 16, 2)
+    val created = new DateTime(1992, 7, 30, 16, 2, timeZone)
     initSeed(URN)
 
-    managed(connection.prepareStatement(s"INSERT INTO minted (type, value, created) VALUES ('urn', '$pid', '${ created.toString(dateTimeFormatter) }');"))
+    managed(connection.prepareStatement(s"INSERT INTO minted (type, value, created) VALUES ('urn', '$pid', '${ created.getMillis }');"))
       .foreach(_.executeUpdate())
 
     database.hasPid(URN, pid) should matchPattern { case Success(Some(`created`)) => }
@@ -93,7 +93,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
   "addPid" should "insert the given pid, type and timestamp into the database" in {
     val pid = "testpid"
-    val created = new DateTime(1992, 7, 30, 16, 2)
+    val created = new DateTime(1992, 7, 30, 16, 2, timeZone)
     initSeed(DOI)
 
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
@@ -103,7 +103,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
   it should "succeed if different pids are added with the same type" in {
     val pid = "testpid"
-    val created1 = new DateTime(1992, 7, 30, 16, 2)
+    val created1 = new DateTime(1992, 7, 30, 16, 2, timeZone)
     val created2 = created1.plusDays(1)
     initSeed(DOI)
 
@@ -116,7 +116,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
   it should "fail to insert the given pid, type and timestamp when the generator isn't seeded with this type" in {
     val pid = "testpid"
-    val created = new DateTime(1992, 7, 30, 16, 2)
+    val created = new DateTime(1992, 7, 30, 16, 2, timeZone)
 
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>

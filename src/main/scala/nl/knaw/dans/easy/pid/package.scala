@@ -15,9 +15,13 @@
  */
 package nl.knaw.dans.easy
 
-import org.joda.time.DateTime
-import org.joda.time.format.{ DateTimeFormatter, ISODateTimeFormat }
+import java.sql.Timestamp
+import java.util.Calendar
 
+import org.joda.time.format.{ DateTimeFormatter, ISODateTimeFormat }
+import org.joda.time.{ DateTime, DateTimeZone }
+
+import scala.language.implicitConversions
 import scala.util.{ Failure, Success, Try }
 
 package object pid {
@@ -46,6 +50,11 @@ package object pid {
   case class DuplicatePid(pidType: PidType, previousSeed: Seed, seed: Seed, pid: Pid, timestamp: DateTime) extends Exception(s"Duplicate $pidType detected: $pid. This $pidType was already minted on ${ timestamp.toString(dateTimeFormatter) }. The seed for this $pidType was $seed; the previous seed was $previousSeed.")
 
   val dateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateTime()
+  val timeZone: DateTimeZone = DateTimeZone.UTC
+  implicit def timeZoneToCalendar(timeZone: DateTimeZone): Calendar = {
+    Calendar.getInstance(timeZone.toTimeZone)
+  }
+  implicit def dateTimeToTimestamp(dt: DateTime): Timestamp = new Timestamp(dt.getMillis)
 
   // TODO copied from easy-bag-store
   implicit class TryExtensions2[T](val t: Try[T]) extends AnyVal {
