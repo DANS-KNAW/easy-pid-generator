@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid
 
 import java.util.concurrent.{ ConcurrentHashMap, CountDownLatch, Executors }
 
+import nl.knaw.dans.lib.error.TryExtensions
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.generator.DatabaseComponent
 import org.joda.time.DateTime
