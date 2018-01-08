@@ -21,7 +21,7 @@
     <parent>
         <groupId>nl.knaw.dans.shared</groupId>
         <artifactId>dans-scala-prototype</artifactId>
-        <version>1.62</version>
+        <version>1.64</version>
     </parent>
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
@@ -40,38 +40,35 @@
     <dependencies>
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_2.11</artifactId>
+            <artifactId>scalatest_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scalamock</groupId>
-            <artifactId>scalamock-scalatest-support_2.11</artifactId>
+            <artifactId>scalamock-scalatest-support_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scalatra</groupId>
-            <artifactId>scalatra-scalatest_2.11</artifactId>
-            <version>2.5.0</version>
-            <scope>test</scope>
+            <artifactId>scalatra-scalatest_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scalacheck</groupId>
-            <artifactId>scalacheck_2.11</artifactId>
+            <artifactId>scalacheck_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.scala-lang.modules</groupId>
-            <artifactId>scala-xml_2.11</artifactId>
+            <artifactId>scala-xml_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>com.jsuereth</groupId>
-            <artifactId>scala-arm_2.11</artifactId>
+            <artifactId>scala-arm_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>org.rogach</groupId>
-            <artifactId>scallop_2.11</artifactId>
+            <artifactId>scallop_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>nl.knaw.dans.lib</groupId>
-            <artifactId>dans-scala-lib</artifactId>
-            <version>1.2</version>
+            <artifactId>dans-scala-lib_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -95,8 +92,7 @@
         </dependency>
         <dependency>
             <groupId>org.scalatra</groupId>
-            <artifactId>scalatra_2.11</artifactId>
-            <version>2.5.0</version>
+            <artifactId>scalatra_2.12</artifactId>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
@@ -110,7 +106,6 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-dbcp2</artifactId>
-            <version>2.1.1</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -119,12 +114,11 @@
         <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
-            <version>3.16.1</version>
         </dependency>
 
         <dependency>
             <groupId>org.scalaj</groupId>
-            <artifactId>scalaj-http_2.11</artifactId>
+            <artifactId>scalaj-http_2.12</artifactId>
         </dependency>
 
         <!-- joda -->

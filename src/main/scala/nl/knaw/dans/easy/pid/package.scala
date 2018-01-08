@@ -22,7 +22,6 @@ import org.joda.time.format.{ DateTimeFormatter, ISODateTimeFormat }
 import org.joda.time.{ DateTime, DateTimeZone }
 
 import scala.language.implicitConversions
-import scala.util.{ Failure, Success, Try }
 
 package object pid {
 
@@ -55,15 +54,4 @@ package object pid {
     Calendar.getInstance(timeZone.toTimeZone)
   }
   implicit def dateTimeToTimestamp(dt: DateTime): Timestamp = new Timestamp(dt.getMillis)
-
-  // TODO copied from easy-bag-store
-  implicit class TryExtensions2[T](val t: Try[T]) extends AnyVal {
-    // TODO candidate for dans-scala-lib
-    def unsafeGetOrThrow: T = {
-      t match {
-        case Success(value) => value
-        case Failure(throwable) => throw throwable
-      }
-    }
-  }
 }

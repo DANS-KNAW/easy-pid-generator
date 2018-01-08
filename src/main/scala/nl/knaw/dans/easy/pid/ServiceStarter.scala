@@ -17,6 +17,7 @@ package nl.knaw.dans.easy.pid
 
 import java.nio.file.Paths
 
+import nl.knaw.dans.lib.error.TryExtensions
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import org.apache.commons.daemon.{ Daemon, DaemonContext }
 
