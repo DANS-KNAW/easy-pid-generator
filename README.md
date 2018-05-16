@@ -20,18 +20,18 @@ ARGUMENTS
 ---------
 
     Options:
-      --help      Show help message
-      --version   Show version of this program
+      -h, --help      Show help message
+      -v, --version   Show version of this program
     
     Subcommand: generate - Generate a specified PID
-          --help   Show help message
+       -h, --help   Show help message
     
      trailing arguments:
       pid-type (required)   The type of PID to be generated, either 'doi' or 'urn'
     ---
     
     Subcommand: initialize - Initialize a specified PID with a seed
-          --help   Show help message
+       -h, --help   Show help message
     
      trailing arguments:
       pid-type (required)   The type of PID to be generated, either 'doi' or 'urn'
@@ -39,7 +39,7 @@ ARGUMENTS
     ---
     
     Subcommand: run-service - Starts the EASY Pid Generator as a daemon that services HTTP requests
-          --help   Show help message
+       -h, --help   Show help message
     ---
 
 
