@@ -19,4 +19,4 @@
 - src: https://github.com/DANS-KNAW/dans.local-test-vm-base
   version: v3.0.0
 - src: https://github.com/DANS-KNAW/dans.postgresql
-  version: v1.0.1
+  version: v1.1.1
