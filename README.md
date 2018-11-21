@@ -69,6 +69,20 @@ a short message indicating the service is up and running
 `200 OK` - service is up and running
 
 
+### GET (check existence of PID)
+_URI:_ `http://test.dans.knaw.nl:20140/{doi|urn}/{pid}`
+
+Checks if the given PID is already minted
+
+#### Response body
+when the PID was already minted - nothing
+when the PID was not yet minted - a short message indicating this fact
+
+#### Response statuses
+`204 No Content` - PID was already minted
+`404 Not Found` - PID was not yet minted
+
+
 ### POST (generate new PID)
 _URI:_ `http://test.dans.knaw.nl:20140/create?type={doi|urn}`
 
