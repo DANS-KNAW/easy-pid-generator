@@ -5,6 +5,7 @@ easy-pid-generator
 SYNOPSIS
 --------
 
+    easy-pid-generator exists {doi|urn} <identifier>
     easy-pid-generator generate {doi|urn}
     easy-pid-generator initialize {doi|urn} <seed>
     easy-pid-generator run-service
@@ -22,6 +23,14 @@ ARGUMENTS
     Options:
       -h, --help      Show help message
       -v, --version   Show version of this program
+      
+    Subcommand: exists - Check if a specific PID has been minted by this easy-pid-generator
+      -h, --help   Show help message
+    
+     trailing arguments:
+      pid-type (required)   The type of the given PID, either 'doi' or 'urn'
+      pid (required)        The PID to be checked
+    ---
     
     Subcommand: generate - Generate a specified PID
        -h, --help   Show help message

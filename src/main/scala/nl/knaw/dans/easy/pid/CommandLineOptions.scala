@@ -25,7 +25,8 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
   private val SUBCOMMAND_SEPARATOR = "---\n"
   val description = "Generate a Persistent Identifier (DOI or URN)"
   val synopsis =
-    s"""  $printedName generate {doi|urn}
+    s"""  $printedName exists {doi|urn} <identifier>
+       |  $printedName generate {doi|urn}
        |  $printedName initialize {doi|urn} <seed>
        |  $printedName run-service
        """.stripMargin
@@ -46,6 +47,16 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
     {
       case e: IllegalArgumentException => Left(e.getMessage)
     })
+
+  val exists = new Subcommand("exists") {
+    descr("Check if a specific PID has been minted by this easy-pid-generator")
+    val pidType: ScallopOption[PidType] = trailArg(name = "pid-type", required = true,
+      descr = "The type of the given PID, either 'doi' or 'urn'")
+    val pid: ScallopOption[Pid] = trailArg(name = "pid", required = true,
+      descr = "The PID to be checked")
+    footer(SUBCOMMAND_SEPARATOR)
+  }
+  addSubcommand(exists)
 
   val generate = new Subcommand("generate") {
     descr("Generate a specified PID")

@@ -31,6 +31,18 @@ class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnh
 
   def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
 
+  def exists(pidType: PidType, pid: Pid): Try[Boolean] = {
+    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.exists(pidType, pid))
+        .doIfSuccess {
+          case true => logger.info(s"Checked the existance of $pidType $pid - did exist indeed")
+          case false => logger.info(s"Checked the existance of $pidType $pid - did not exist")
+        }
+        .doIfFailure {
+          // TODO other exceptions
+          case e => logger.error(e.getMessage, e)
+        }
+  }
+
   def generate(pidType: PidType): Try[Pid] = {
     synchronized {
       wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.generate(pidType))

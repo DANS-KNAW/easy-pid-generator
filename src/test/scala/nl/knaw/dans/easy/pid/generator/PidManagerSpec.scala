@@ -34,6 +34,22 @@ class PidManagerSpec extends TestSupportFixture
   val formatter: PidFormatter = mock[PidFormatter]
   override val pidManager: PidManager = new PidManager(Map(DOI -> formatter))
 
+  "exists" should "return true when the given pid already exists in the database" in {
+    val pid = "da_pid"
+
+    (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(Some(DateTime.now()))
+
+    pidManager.exists(DOI, pid) should matchPattern { case Success(true) => }
+  }
+
+  it should "return false when the given pid doesn't exist in the database" in {
+    val pid = "da_pid"
+
+    (database.hasPid(_: PidType, _: Pid)(_: Connection)) expects(DOI, pid, *) once() returning Success(None)
+
+    pidManager.exists(DOI, pid) should matchPattern { case Success(false) => }
+  }
+
   "generate" should "return a new Pid with a given PidType, while calculating/storing the next seed and storing the new Pid" in {
     val seed = 123456L
     val nextSeed = 2084531525L
