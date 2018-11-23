@@ -46,7 +46,10 @@ object Command extends App with DebugEnhancedLogging {
   private def runSubcommand(app: PidGeneratorApp): Try[FeedBackMessage] = {
     commandLine.subcommand
       .collect {
-        case generate @ commandLine.generate => app.generate(generate.pidType())
+        case exists @ commandLine.exists =>
+          app.exists(exists.pidType(), exists.pid()).map(_.toString.toUpperCase)
+        case generate @ commandLine.generate =>
+          app.generate(generate.pidType())
         case init @ commandLine.initialize =>
           val pidType = init.pidType()
           val seed = init.seed()

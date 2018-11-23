@@ -29,6 +29,20 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
     Ok(s"Persistent Identifier Generator running (v${ configuration.version })")
   }
 
+  // GET /{doi|urn}/{...}
+  get("/:type/:id") {
+    (params.get("type").flatMap(PidType.parse), params.get("id")) match {
+      case (Some(pidType), Some(pid)) => app.exists(pidType, pid)
+        .map {
+          case true => NoContent()
+          case false => NotFound(s"$pidType $pid doesn't exist")
+        }
+        .getOrRecover(
+          e => InternalServerError(s"Error while checking the existence of $pidType $pid: ${ e.getMessage }"))
+      case (_, _) => BadRequest("Usage: GET /{doi|urn}/{...}")
+    }
+  }
+
   // POST /create?type={doi|urn}
   post("/create") {
     params.get("type").flatMap(PidType.parse)

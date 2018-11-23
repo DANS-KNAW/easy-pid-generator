@@ -44,6 +44,31 @@ class PidGeneratorAppSpec extends TestSupportFixture
     super.afterEach()
   }
 
+  "exists(doi)" should "return true when it is already in the database" in {
+    val seed = 1073741824L
+    val doi = "10.5072/dans-x6f-kf66"
+
+    // init seed
+    // TODO use library call later
+    database.initSeed(DOI, seed) shouldBe a[Success[_]]
+
+    // generate DOI
+    app.generate(DOI) should matchPattern { case Success(`doi`) => }
+
+    // test that the next seed and new DOI are stored in the database
+    app.exists(DOI, doi) should matchPattern { case Success(true) => }
+  }
+
+  it should "return false when it is already in the database" in {
+    val doi = "10.5072/dans-x6f-kf66"
+
+    // do not initialize seed
+    // do not generate a DOI
+
+    // test that the next seed and new DOI are stored in the database
+    app.exists(DOI, doi) should matchPattern { case Success(false) => }
+  }
+
   "generate(doi)" should "return the next DOI and store it in the database as well" in {
     val seed = 1073741824L
     val doi = "10.5072/dans-x6f-kf66"

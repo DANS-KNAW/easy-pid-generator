@@ -29,6 +29,10 @@ trait PidManagerComponent {
 
   class PidManager(formatters: Map[PidType, PidFormatter]) {
 
+    def exists(pidType: PidType, pid: Pid)(implicit connection: Connection): Try[Boolean] = {
+      database.hasPid(pidType, pid).map(_.fold(false)(_ => true))
+    }
+
     /**
      * Generates the next PID of the specified type.
      *

@@ -44,6 +44,28 @@ class PidGeneratorServletSpec extends TestSupportFixture
     }
   }
 
+  "GET /doi/<doi>" should "return 204 when the DOI is present" in {
+    app.exists _ expects (DOI, "my-doi") once() returning Success(true)
+    get("/doi/my-doi") {
+      status shouldBe 204
+    }
+  }
+
+  it should "return 404 when the DOI is not present" in {
+    app.exists _ expects (DOI, "my-doi") once() returning Success(false)
+    get("/doi/my-doi") {
+      status shouldBe 404
+      body shouldBe "doi my-doi doesn't exist"
+    }
+  }
+
+  it should "return 400 when an unknown PID type is requested" in {
+    get("/unknown/my-pid") {
+      status shouldBe 400
+      body shouldBe "Usage: GET /{doi|urn}/{...}"
+    }
+  }
+
   "POST /create?type=doi" should "return the next DOI PID" in {
     (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
     post("/create", ("type", "doi")) {

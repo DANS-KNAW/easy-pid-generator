@@ -5,6 +5,7 @@ easy-pid-generator
 SYNOPSIS
 --------
 
+    easy-pid-generator exists {doi|urn} <identifier>
     easy-pid-generator generate {doi|urn}
     easy-pid-generator initialize {doi|urn} <seed>
     easy-pid-generator run-service
@@ -22,6 +23,14 @@ ARGUMENTS
     Options:
       -h, --help      Show help message
       -v, --version   Show version of this program
+      
+    Subcommand: exists - Check if a specific PID has been minted by this easy-pid-generator
+      -h, --help   Show help message
+    
+     trailing arguments:
+      pid-type (required)   The type of the given PID, either 'doi' or 'urn'
+      pid (required)        The PID to be checked
+    ---
     
     Subcommand: generate - Generate a specified PID
        -h, --help   Show help message
@@ -58,6 +67,20 @@ a short message indicating the service is up and running
 
 #### Response statuses
 `200 OK` - service is up and running
+
+
+### GET (check existence of PID)
+_URI:_ `http://test.dans.knaw.nl:20140/{doi|urn}/{pid}`
+
+Checks if the given PID is already minted
+
+#### Response body
+when the PID was already minted - nothing
+when the PID was not yet minted - a short message indicating this fact
+
+#### Response statuses
+`204 No Content` - PID was already minted
+`404 Not Found` - PID was not yet minted
 
 
 ### POST (generate new PID)
