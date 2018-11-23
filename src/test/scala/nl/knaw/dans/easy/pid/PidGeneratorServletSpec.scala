@@ -59,7 +59,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
     }
   }
 
-  it should "return 500 when an unknown PID type is requested" in {
+  it should "return 400 when an unknown PID type is requested" in {
     get("/unknown/my-pid") {
       status shouldBe 400
       body shouldBe "Usage: GET /{doi|urn}/{...}"
