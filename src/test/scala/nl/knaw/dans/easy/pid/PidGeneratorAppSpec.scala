@@ -17,9 +17,9 @@ package nl.knaw.dans.easy.pid
 
 import java.util.concurrent.{ ConcurrentHashMap, CountDownLatch, Executors }
 
-import nl.knaw.dans.lib.error.TryExtensions
 import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.generator.DatabaseComponent
+import nl.knaw.dans.lib.error.TryExtensions
 import org.joda.time.DateTime
 
 import scala.collection.JavaConverters._
@@ -128,12 +128,11 @@ class PidGeneratorAppSpec extends TestSupportFixture
   it should "manage concurrency correctly" in {
     app.initialize(DOI, 123456)
 
-    def test(name: String, start: CountDownLatch, done: CountDownLatch, results: mutable.Map[String, Try[Pid]]): Runnable = new Runnable {
-      def run(): Unit = {
-        start.await()
-        results.put(name, app.generate(DOI))
-        done.countDown()
-      }
+    def test(name: String, start: CountDownLatch, done: CountDownLatch,
+             results: mutable.Map[String, Try[Pid]]): Runnable = () => {
+      start.await()
+      results.put(name, app.generate(DOI))
+      done.countDown()
     }
 
     val n = 10
@@ -148,8 +147,22 @@ class PidGeneratorAppSpec extends TestSupportFixture
     start.countDown()
     done.await()
 
+    val expectedResults = Set(
+      "10.5072/dans-2ap-4qfd",
+      "10.5072/dans-zve-22y5",
+      "10.5072/dans-x5f-3p9r",
+      "10.5072/dans-xnr-c7jf",
+      "10.5072/dans-x75-qa68",
+      "10.5072/dans-229-ftfq",
+      "10.5072/dans-zyq-5znp",
+      "10.5072/dans-z8c-gnm3",
+      "10.5072/dans-2zt-warx",
+      "10.5072/dans-z7p-ebra",
+    )
+
     results.keys should contain theSameElementsAs (1 to n).map(i => s"test$i")
-    all(results.values).shouldBe(a[Success[_]])
+    all(results.values) shouldBe a[Success[_]]
+    results.collect { case (_, Success(doi)) => doi }.toSeq should contain theSameElementsAs expectedResults
   }
 
   "initialize" should "set a seed in the database" in {

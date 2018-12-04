@@ -33,7 +33,7 @@ trait DatabaseComponent extends DebugEnhancedLogging {
     def getSeed(pidType: PidType)(implicit connection: Connection): Try[Option[Seed]] = {
       trace(pidType)
       val resultSet = for {
-        prepStatement <- managed(connection.prepareStatement("SELECT value FROM seed WHERE type=?;"))
+        prepStatement <- managed(connection.prepareStatement("SELECT value FROM seed WHERE type=? FOR UPDATE;"))
         _ = prepStatement.setString(1, pidType.name)
         resultSet <- managed(prepStatement.executeQuery())
       } yield resultSet
