@@ -17,6 +17,14 @@
 
 echo -n "Pre-creating log and database..."
 TEMPDIR=data
-sqlite3 $TEMPDIR/database.db < src/test/resources/database/database.sql
+
+cp src/test/resources/database/database.sql home/install/db-tables.sql
+
+mkdir data/database
+echo 'urlid pidgen' > data/database/db.rc
+echo 'url jdbc:hsqldb:file:data/database/db;shutdown=true' >> data/database/db.rc
+
+java -jar lib/sqltool.jar --rcFile=data/database/db.rc pidgen home/install/db-tables.sql
+
 touch $TEMPDIR/easy-pid-generator.log
 echo "OK"
