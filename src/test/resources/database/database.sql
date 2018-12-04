@@ -11,7 +11,3 @@ CREATE TABLE minted(
     PRIMARY KEY (type, value),
     FOREIGN KEY (type) REFERENCES seed (type)
 );
-
--- to ensure the foreign key constraint is respected,
--- SQLite wants to have the following explicitly stated
-PRAGMA foreign_keys = ON;

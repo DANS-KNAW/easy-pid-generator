@@ -15,10 +15,11 @@
  */
 package nl.knaw.dans.easy.pid.fixture
 
-import java.nio.file.{ Files, Path }
+import java.nio.file.Path
 import java.sql.Connection
 
 import nl.knaw.dans.easy.pid.DatabaseAccessComponent
+import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterEach
 import resource.managed
 
@@ -29,11 +30,11 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponen
 
   implicit var connection: Connection = _
 
-  val databaseFile: Path = testDir.resolve("database.db")
+  private val databaseDir: Path = testDir.resolve("database")
 
   override val databaseAccess: DatabaseAccess = new DatabaseAccess {
-    override val dbDriverClassName = "org.sqlite.JDBC"
-    override val dbUrl = s"jdbc:sqlite:${ databaseFile.toString }"
+    override val dbDriverClassName = "org.hsqldb.jdbcDriver"
+    override val dbUrl = s"jdbc:hsqldb:file:${ databaseDir.toString }/db"
     override val dbUsername = Option.empty[String]
     override val dbPassword = Option.empty[String]
 
@@ -53,11 +54,12 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponen
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    Files.deleteIfExists(databaseFile)
+    FileUtils.deleteQuietly(databaseDir.toFile)
     databaseAccess.initConnectionPool()
   }
 
   override def afterEach(): Unit = {
+    managed(connection.createStatement).acquireAndGet(_.execute("SHUTDOWN"))
     connection.close()
     databaseAccess.closeConnectionPool()
     super.afterEach()
