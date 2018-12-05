@@ -18,8 +18,6 @@
 echo -n "Pre-creating log and database..."
 TEMPDIR=data
 
-cp src/test/resources/database/database.sql home/install/db-tables.sql
-
 mkdir data/database
 cp src/test/resources/database/db.properties data/database/db.properties
 cp src/test/resources/database/db.script data/database/db.script
