@@ -59,7 +59,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.initSeed(DOI, 654321L) shouldBe a[Success[_]]
     inside(database.initSeed(DOI, 123456L)) {
       case Failure(e: SQLException) =>
-        e.getMessage.toLowerCase should (contain("unique constraint") and contain("seed"))
+        e.getMessage.toLowerCase should (include("unique constraint") and include("seed"))
     }
   }
 
@@ -125,7 +125,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e.getMessage.toLowerCase should (contain("foreign key") and contain("minted"))
+        e.getMessage.toLowerCase should (include("foreign key") and include("minted"))
     }
   }
 
@@ -137,7 +137,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e.getMessage.toLowerCase should (contain("unique constraint") and contain("minted"))
+        e.getMessage.toLowerCase should (include("unique constraint") and include("minted"))
     }
   }
 
@@ -149,7 +149,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created.plusDays(1))) {
       case Failure(e: SQLException) =>
-        e.getMessage.toLowerCase should (contain("unique constraint") and contain("minted"))
+        e.getMessage.toLowerCase should (include("unique constraint") and include("minted"))
     }
   }
 }
