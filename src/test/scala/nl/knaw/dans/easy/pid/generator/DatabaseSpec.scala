@@ -15,7 +15,7 @@
  */
 package nl.knaw.dans.easy.pid.generator
 
-import java.sql.{ SQLException, Timestamp }
+import java.sql.SQLException
 
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.{ DOI, PidType, URN, timeZone }
@@ -59,7 +59,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.initSeed(DOI, 654321L) shouldBe a[Success[_]]
     inside(database.initSeed(DOI, 123456L)) {
       case Failure(e: SQLException) =>
-        e should have message "integrity constraint violation: unique constraint or index violation; SYS_PK_10094 table: SEED"
+        e.getMessage.toLowerCase should (contain("unique constraint") and contain("seed"))
     }
   }
 
@@ -125,7 +125,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e should have message "integrity constraint violation: foreign key no parent; SYS_FK_10107 table: MINTED"
+        e.getMessage.toLowerCase should (contain("foreign key") and contain("minted"))
     }
   }
 
@@ -137,7 +137,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e should have message "integrity constraint violation: unique constraint or index violation; SYS_PK_10106 table: MINTED"
+        e.getMessage.toLowerCase should (contain("unique constraint") and contain("minted"))
     }
   }
 
@@ -149,7 +149,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created.plusDays(1))) {
       case Failure(e: SQLException) =>
-        e should have message "integrity constraint violation: unique constraint or index violation; SYS_PK_10106 table: MINTED"
+        e.getMessage.toLowerCase should (contain("unique constraint") and contain("minted"))
     }
   }
 }
