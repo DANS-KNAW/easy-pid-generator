@@ -15,8 +15,8 @@ DB_PROPS_BACKUP=$ROOT/db-$(date  +"%Y-%m-%dT%H:%M:%S").properties
 DB_SCRIPT_BACKUP=$ROOT/db-$(date  +"%Y-%m-%dT%H:%M:%S").script
 
 # rename the original files to put them back later, if necessary
-mv $DB_PROPS $DB_PROPS_BACKUP
-mv $DB_SCRIPT $DB_SCRIPT_BACKUP
+[ -f $DB_PROPS ] && mv $DB_PROPS $DB_PROPS_BACKUP
+[ -f $DB_SCRIPT ] && mv $DB_SCRIPT $DB_SCRIPT_BACKUP
 
 echo 'downloading tools'
 # download necessary libraries
@@ -35,8 +35,8 @@ java -jar $SQLTOOLJAR --rcFile=$RC pidgen $ROOT/database.sql
 if [[ $? -eq 0 ]]; then
     # remove lib directory and the original files that now have been replaced
     rm -rf $LIB
-    rm $DB_PROPS_BACKUP
-    rm $DB_SCRIPT_BACKUP
+    [ -f $DB_PROPS_BACKUP ] && rm $DB_PROPS_BACKUP
+    [ -f $DB_SCRIPT_BACKUP ] && rm $DB_SCRIPT_BACKUP
 
     echo 'new database script files are generated'
 else
@@ -44,12 +44,12 @@ else
 
     # remove lib directory and newly generated files
     rm -rf $LIB
-    rm $DB_PROPS
-    rm $DB_SCRIPT
+    [ -f $DB_PROPS ] && rm $DB_PROPS
+    [ -f $DB_SCRIPT ] && rm $DB_SCRIPT
 
     # put back the original files
-    mv $DB_PROPS_BACKUP $DB_PROPS
-    mv $DB_SCRIPT_BACKUP $DB_SCRIPT
+    [ -f $DB_PROPS_BACKUP ] && mv $DB_PROPS_BACKUP $DB_PROPS
+    [ -f $DB_SCRIPT_BACKUP ] && mv $DB_SCRIPT_BACKUP $DB_SCRIPT
 
     echo 'changes have been rolled back'
 fi
