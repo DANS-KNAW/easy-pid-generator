@@ -16,11 +16,11 @@
 #
 
 echo -n "Pre-creating log and database..."
-TEMPDIR=data
+DATADIR=data
 
 mkdir data/database
-cp src/test/resources/database/db.properties data/database/db.properties
-cp src/test/resources/database/db.script data/database/db.script
+cp src/test/resources/database/db.properties $DATADIR/database/db.properties
+cp src/test/resources/database/db.script $DATADIR/database/db.script
 
-touch $TEMPDIR/easy-pid-generator.log
+touch $DATADIR/easy-pid-generator.log
 echo "OK"
