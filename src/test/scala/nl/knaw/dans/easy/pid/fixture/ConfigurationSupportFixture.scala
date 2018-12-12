@@ -31,10 +31,10 @@ trait ConfigurationSupportFixture {
 
   def getApplicationProperties: String = {
     s"""
-       |pid-generator.database.driver-class=org.sqlite.JDBC
-       |pid-generator.database.url=jdbc:sqlite:$testDir/database.db
-       |#pid-generator.database.username=sqlite-doesn't-need-a-username
-       |#pid-generator.database.password=sqlite-doesn't-need-a-password
+       |pid-generator.database.driver-class=org.hsqldb.jdbcDriver
+       |pid-generator.database.url=jdbc:hsqldb:file:$testDir/database/db
+       |#pid-generator.database.username=no-username-required
+       |#pid-generator.database.password=no-password-required
        |
        |pid-generator.daemon.http.port=8060
        |

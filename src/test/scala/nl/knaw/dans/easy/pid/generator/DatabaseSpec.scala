@@ -20,6 +20,7 @@ import java.sql.SQLException
 import nl.knaw.dans.easy.pid.fixture.{ SeedDatabaseFixture, TestSupportFixture }
 import nl.knaw.dans.easy.pid.{ DOI, PidType, URN, timeZone }
 import org.joda.time.DateTime
+import org.joda.time.format.ISODateTimeFormat
 import resource.managed
 
 import scala.util.{ Failure, Success }
@@ -58,7 +59,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.initSeed(DOI, 654321L) shouldBe a[Success[_]]
     inside(database.initSeed(DOI, 123456L)) {
       case Failure(e: SQLException) =>
-        e should have message "[SQLITE_CONSTRAINT_PRIMARYKEY]  A PRIMARY KEY constraint failed (UNIQUE constraint failed: seed.type)"
+        e.getMessage.toLowerCase should (include("unique constraint") and include("seed"))
     }
   }
 
@@ -83,9 +84,13 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
   it should "return the related timestamp if the requested PID is already in the database" in {
     val pid = "testpid"
     val created = new DateTime(1992, 7, 30, 16, 2, timeZone)
+    val createdFormatted = created.toString(ISODateTimeFormat.dateTimeNoMillis())
+      .replace("T", " ")
+      .replace("Z", "+0:00")
+
     initSeed(URN)
 
-    managed(connection.prepareStatement(s"INSERT INTO minted (type, value, created) VALUES ('urn', '$pid', '${ created.getMillis }');"))
+    managed(connection.prepareStatement(s"INSERT INTO minted (type, value, created) VALUES ('urn', '$pid', '$createdFormatted');"))
       .foreach(_.executeUpdate())
 
     database.hasPid(URN, pid) should matchPattern { case Success(Some(`created`)) => }
@@ -120,7 +125,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
 
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e should have message "[SQLITE_CONSTRAINT_FOREIGNKEY]  A foreign key constraint failed (FOREIGN KEY constraint failed)"
+        e.getMessage.toLowerCase should (include("foreign key") and include("minted"))
     }
   }
 
@@ -132,7 +137,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created)) {
       case Failure(e: SQLException) =>
-        e should have message "[SQLITE_CONSTRAINT_PRIMARYKEY]  A PRIMARY KEY constraint failed (UNIQUE constraint failed: minted.type, minted.value)"
+        e.getMessage.toLowerCase should (include("unique constraint") and include("minted"))
     }
   }
 
@@ -144,7 +149,7 @@ class DatabaseSpec extends TestSupportFixture with SeedDatabaseFixture with Data
     database.addPid(DOI, pid, created) shouldBe a[Success[_]]
     inside(database.addPid(DOI, pid, created.plusDays(1))) {
       case Failure(e: SQLException) =>
-        e should have message "[SQLITE_CONSTRAINT_PRIMARYKEY]  A PRIMARY KEY constraint failed (UNIQUE constraint failed: minted.type, minted.value)"
+        e.getMessage.toLowerCase should (include("unique constraint") and include("minted"))
     }
   }
 }
