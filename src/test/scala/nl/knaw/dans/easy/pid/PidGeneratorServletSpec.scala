@@ -17,16 +17,17 @@ package nl.knaw.dans.easy.pid
 
 import java.sql.SQLException
 
-import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, ServletFixture, TestSupportFixture }
+import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, TestSupportFixture }
 import org.joda.time.DateTime
 import org.scalamock.scalatest.MockFactory
+import org.scalatra.test.EmbeddedJettyContainer
 import org.scalatra.test.scalatest.ScalatraSuite
 
 import scala.util.{ Failure, Success }
 
 class PidGeneratorServletSpec extends TestSupportFixture
   with ConfigurationSupportFixture
-  with ServletFixture
+  with EmbeddedJettyContainer
   with ScalatraSuite
   with MockFactory {
 
