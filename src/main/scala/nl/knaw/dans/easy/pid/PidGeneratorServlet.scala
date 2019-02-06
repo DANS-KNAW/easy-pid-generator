@@ -31,7 +31,21 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
 
   // GET /{doi|urn}/{...}
   get("/:type/:id") {
-    (params.get("type").flatMap(PidType.parse), params.get("id")) match {
+    doiExists(params.get("type").flatMap(PidType.parse), params.get("id"))
+  }
+
+  // GET /{doi|urn}/{...}/{...}
+  get("/:type/:prefix/:suffix") {
+    val pid = for {
+      prefix <- params.get("prefix")
+      suffix <- params.get("suffix")
+    } yield s"$prefix/$suffix"
+
+    doiExists(params.get("type").flatMap(PidType.parse), pid)
+  }
+
+  private def doiExists(maybePidType: Option[PidType], maybePid: Option[Pid]): ActionResult = {
+    (maybePidType, maybePid) match {
       case (Some(pidType), Some(pid)) => app.exists(pidType, pid)
         .map {
           case true => NoContent()
