@@ -17,21 +17,27 @@ package nl.knaw.dans.easy.pid
 
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
+import nl.knaw.dans.lib.logging.servlet._
 import org.scalatra._
 
 import scala.util.{ Failure, Success, Try }
 
-class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) extends ScalatraServlet with DebugEnhancedLogging {
+class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) extends ScalatraServlet
+  with ServletLogger
+  with PlainLogFormatter
+  with DebugEnhancedLogging {
   logger.info("PID Generator Servlet running...")
 
   get("/") {
     contentType = "text/plain"
     Ok(s"Persistent Identifier Generator running (v${ configuration.version })")
+      .logResponse
   }
 
   // GET /{doi|urn}/{...}
   get("/:type/:id") {
     doiExists(params.get("type").flatMap(PidType.parse), params.get("id"))
+      .logResponse
   }
 
   // GET /{doi|urn}/{...}/{...}
@@ -42,6 +48,7 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
     } yield s"$prefix/$suffix"
 
     doiExists(params.get("type").flatMap(PidType.parse), pid)
+      .logResponse
   }
 
   private def doiExists(maybePidType: Option[PidType], maybePid: Option[Pid]): ActionResult = {
@@ -69,11 +76,12 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
           case e => InternalServerError(s"Error while generating the next $pidType: ${ e.getMessage }")
         })
       .getOrElse(BadRequest("No or unknown Pid type specified, either choose 'doi' or 'urn'"))
+      .logResponse
   }
 
   // POST /init?type={doi|urn}&seed={...}
   post("/init") {
-    (params.get("type").flatMap(PidType.parse), params.get("seed").map(s => Try { s.toLong })) match {
+    ((params.get("type").flatMap(PidType.parse), params.get("seed").map(s => Try { s.toLong })) match {
       case (Some(pidType), Some(Success(seed))) => app.initialize(pidType, seed)
         .map(_ => Created(s"Pid type $pidType is seeded with $seed"))
         .getOrRecover {
@@ -83,6 +91,6 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
         }
       case (_, Some(Failure(_))) => BadRequest("The seed is not an integer value")
       case (_, _) => BadRequest("Usage: POST /init?type={doi|urn}&seed={...}")
-    }
+    }).logResponse
   }
 }
