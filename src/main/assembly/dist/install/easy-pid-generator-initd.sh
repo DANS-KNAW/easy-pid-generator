@@ -32,6 +32,7 @@ jsvc_exec()
 
     LC_ALL=en_US.UTF-8 \
     $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID -wait $WAIT_TIME \
+          -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m \
           -Dapp.home=$APPHOME \
           -Dlogback.configurationFile=$LOGBACK_CFG $1 $CLASS $ARGS
 }
