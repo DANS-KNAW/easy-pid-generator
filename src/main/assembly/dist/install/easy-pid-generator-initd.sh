@@ -34,6 +34,7 @@ jsvc_exec()
     $EXEC -home $JAVA_HOME -cp $CLASSPATH -user $USER -outfile $OUTFILE -errfile $ERRFILE -pidfile $PID -wait $WAIT_TIME \
           -XX:+HeapDumpOnOutOfMemoryError -Xms256m -Xmx512m \
           -Dapp.home=$APPHOME \
+          -Dorg.scalatra.environment="production" \
           -Dlogback.configurationFile=$LOGBACK_CFG $1 $CLASS $ARGS
 }
 
