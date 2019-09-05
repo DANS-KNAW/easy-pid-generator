@@ -3,6 +3,7 @@ Description=EASY PID Generator Service
 
 [Service]
 ExecStart=/bin/java \
+ $INITIAL_HEAP_SIZE \
  -Dlogback.configurationFile=/etc/opt/dans.knaw.nl/easy-pid-generator/logback-service.xml \
  -Dapp.home=/opt/dans.knaw.nl/easy-pid-generator \
  -Dorg.scalatra.environment="production" \
