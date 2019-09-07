@@ -22,11 +22,6 @@ import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.Try
 
-/**
- * Exposes the application's API to the application's driver (e.g. Command or ServiceStarter).
- *
- * @param wiring object that configures and wires together the application's components
- */
 class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnhancedLogging {
 
   def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
