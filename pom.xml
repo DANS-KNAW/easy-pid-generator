@@ -25,7 +25,7 @@
     </parent>
     <groupId>nl.knaw.dans.easy</groupId>
     <artifactId>easy-pid-generator</artifactId>
-    <version>2.1.5-SNAPSHOT</version>
+    <version>2.1.5</version>
     <name>EASY PID Generator Service</name>
     <url>https://github.com/DANS-KNAW/easy-pid-generator</url>
     <description>Generate a Persistent Identifier (DOI or URN)</description>
@@ -35,7 +35,7 @@
     </properties>
     <scm>
         <developerConnection>scm:git:https://github.com/DANS-KNAW/${project.artifactId}</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v2.1.5</tag>
     </scm>
     <dependencies>
         <dependency>
