@@ -3,9 +3,8 @@ info:
   title: PID Generator API
   version: 2.1.6
   description: |
-    This document specifies the PID Generator API. It provides an interface to generate and check persistent identifiers (DOI or URN).
-    This API implements the operations `GET` on the paths `/` and ...  .
-
+  This document specifies the PID Generator API. It provides an interface to generate and check persistent identifiers (DOI or URN).
+  This API implements the operation `GET` on the paths `/` and `/{doi|urn}/{pid}`, and the operation `POST` on the paths `/create?type={doi|urn}` and `/init?type={doi|urn}&seed={s}`.
 
   license:
     name: Apache 2.0
@@ -49,7 +48,6 @@ paths:
         - $ref: '#/components/parameters/doi|urn'
         - $ref: '#/components/parameters/pid'
 
-
   /create?type={doi|urn}:
     post:
       summary: Generates and mints a new PID of the kind specified by the type.
@@ -64,7 +62,6 @@ paths:
           description: Internal server error.
       parameters:
         - $ref: '#/components/parameters/doi|urn'
-
 
   /init?type={doi|urn}&seed={s}:
     post:
@@ -87,7 +84,7 @@ paths:
 components:
   parameters:
     doi|urn:
-      in: query
+      in: path
       name: doi/urn
       schema:
         type: string
