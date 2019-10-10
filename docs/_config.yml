@@ -2,7 +2,7 @@ title: easy-pid-generator
 description: >-
   A simple tool to check and create persistent identifiers.
 baseurl: "/easy-pid-generator"
-github_username: DANS-KNAW
+github_username: rkruithof
 
 # Build settings
 markdown: kramdown
