@@ -1,6 +1,6 @@
 title: easy-pid-generator
 description: >-
-  A simple way to archive data packages.
+  A simple tool to check and create persistent identifiers.
 baseurl: "/easy-pid-generator"
 github_username: DANS-KNAW
 
