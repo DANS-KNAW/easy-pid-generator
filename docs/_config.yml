@@ -1,7 +1,7 @@
-title: easy-download
+title: easy-pid-generator
 description: >-
   A simple way to archive data packages.
-baseurl: "/easy-download"
+baseurl: "/easy-pid-generator"
 github_username: DANS-KNAW
 
 # Build settings
