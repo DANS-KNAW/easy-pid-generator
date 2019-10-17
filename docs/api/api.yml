@@ -3,8 +3,8 @@ info:
   title: PID Generator API
   version: 2.1.6
   description: |
-  This document specifies the PID Generator API. It provides an interface to generate and check persistent identifiers (DOI or URN).
-  This API implements the operation `GET` on the paths `/` and `/{doi|urn}/{pid}`, and the operation `POST` on the paths `/create?type={doi|urn}` and `/init?type={doi|urn}&seed={s}`.
+    This document specifies the PID Generator API. It provides an interface to generate and check persistent identifiers (DOI or URN).
+    This API implements the operation `GET` on the paths `/` and `/{doi|urn}/{pid}`, and the operation `POST` on the paths `/create?type={doi|urn}` and `/init?type={doi|urn}&seed={s}`.
 
   license:
     name: Apache 2.0
