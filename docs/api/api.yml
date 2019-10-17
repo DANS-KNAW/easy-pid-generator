@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: PID Generator API
+  version: 2.1.6
+  description: |
+    This document specifies the PID Generator API. It provides an interface to generate and check persistent identifiers (DOI or URN).
+    This API implements the operation `GET` on the paths `/` and `/{doi|urn}/{PID}`, and the operation `POST` on the paths `/create?type={doi|urn}` and `/init?type={doi|urn}&seed={s}`.
+
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: 'http://localhost:20140'
+  - url: 'https://datavault.dans.knaw.nl:20140'
+
+paths:
+  /:
+    get:
+      summary: Returns a description of the service.
+      description:
+        This is the starting place for navigating the PID Generator Service. It returns a description of the service.
+      responses:
+        200:
+          description: Description of the service
+          content:
+            text/plain:
+              schema:
+                type: string
+                description: A plain text, human readable description of the service
+                example: Persistent Identifier Generator running (v2.1.6).
+
+  /{PIDtype}/{pid}:
+    get:
+      summary: Checks if the given PID is already minted.
+      description: |
+        Check if a specific PID has been minted by this PID generator.
+      responses:
+        204:
+          description: No Content. The PID was already minted.
+        400:
+          description: Bad request. The PID type must be either 'doi' or 'urn'.
+        404:
+          description: Not Found. The PID was not yet minted.
+        500:
+          description: Internal server error.
+      parameters:
+        - $ref: '#/components/parameters/PIDtype'
+        - $ref: '#/components/parameters/PID'
+
+  /create:
+    post:
+      summary: Generates and mints a new PID of the kind specified by the type.
+      description: |
+        Generate a new PID of a type specified in the 'type' field.
+      responses:
+        201:
+          description: Created. The PID has been generated and minted.
+        400:
+          description: Bad request. The PID type must be either 'doi' or 'urn'.
+        500:
+          description: Internal server error.
+      parameters:
+        - $ref: '#/components/parameters/type'
+
+  /init:
+    post:
+      summary: Initializes a certain kind of PID with a seed, such that new PIDs of this kind can be generated
+      description: |
+        Initialize a certain kind of PID with a seed, such that PIDs of this kind can be generated.
+      responses:
+        201:
+          description: Created. The operation was successful.
+        400:
+          description: Bad request. The PID type must be either 'doi' or 'urn', the seed must be an integer value, the PID type and seed must be provided.
+        409:
+          description: Conflict. This kind of PID is already initialized.
+        500:
+          description: Internal server error.
+      parameters:
+        - $ref: '#/components/parameters/type'
+        - $ref: '#/components/parameters/seed'
+
+components:
+  parameters:
+    PIDtype:
+      in: path
+      name: PIDtype
+      schema:
+        type: string
+      required: true
+      description: The type of PID for which the operation should be performed. Valid entries are 'doi' and 'urn'.
+    PID:
+      in: path
+      name: pid
+      schema:
+        type: string
+      required: true
+      description: The Persistent Identifier for which existence should be checked.
+    seed:
+      in: query
+      name: seed
+      schema:
+        type: integer
+      required: true
+      description: The seed number with which the generator should be initialized.
+    type:
+      in: query
+      name: type
+      schema:
+        type: string
+      required: true
+      description: The type of identifier for which the call should be made, either DOI or URN. Valid entries are 'doi' and 'urn'.
