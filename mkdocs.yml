@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2018 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
+# Copyright (C) 2015 DANS - Data Archiving and Networked Services (info@dans.knaw.nl)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,13 +14,13 @@
 # limitations under the License.
 #
 
-site_name: easy-module-archetype
+site_name: easy-pid-generator
 theme:
   name: dans
   disclaimer: false
 
-repo_name: DANS-KNAW/easy-module-archetype
-repo_url: https://github.com/DANS-KNAW/easy-module-archetype
+repo_name: DANS-KNAW/easy-pid-generator
+repo_url: https://github.com/DANS-KNAW/easy-pid-generator
 
 nav:
   - Manual: index.md
