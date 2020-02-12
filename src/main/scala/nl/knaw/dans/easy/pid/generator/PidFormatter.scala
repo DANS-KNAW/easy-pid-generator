@@ -17,11 +17,7 @@ package nl.knaw.dans.easy.pid.generator
 
 import nl.knaw.dans.easy.pid.Seed
 
-trait PidFormatter {
-  val namespace: String
-  val dashPosition: Int
-  val illegalChars: Map[Char, Char]
-  val length: Int
+class PidFormatter(namespace: String, dashPosition: Int, illegalChars: Map[Char, Char], length: Int) {
 
   private val maxRadius = 36
 
@@ -37,14 +33,6 @@ trait PidFormatter {
 }
 
 object PidFormatter {
-  def apply(ns: String, dp: Int, il: Map[Char, Char], len: Int): PidFormatter = {
-    new PidFormatter {
-      override val namespace: String = ns
-      override val dashPosition: Int = dp
-      override val illegalChars: Map[Char, Char] = il
-      override val length: Int = len
-    }
-  }
 
   /**
    * Formats a PID using the specs provided in the parameters.

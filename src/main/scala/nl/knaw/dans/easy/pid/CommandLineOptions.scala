@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
+import nl.knaw.dans.easy.pid.PidType.PidType
 import org.rogach.scallop.{ ScallopConf, ScallopOption, Subcommand, ValueConverter, singleArgConverter }
 
 class CommandLineOptions(args: Array[String], configuration: Configuration) extends ScallopConf(args) {
@@ -43,10 +44,9 @@ class CommandLineOptions(args: Array[String], configuration: Configuration) exte
        |""".stripMargin)
 
   private implicit val pidParser: ValueConverter[PidType] = singleArgConverter(
-    PidType.parse(_).getOrElse(throw new IllegalArgumentException("only 'doi' or 'urn' allowed")),
-    {
-      case e: IllegalArgumentException => Left(e.getMessage)
-    })
+    conv = PidType.parse(_).getOrElse { throw new IllegalArgumentException("only 'doi' or 'urn' allowed") },
+    handler = { case e: IllegalArgumentException => Left(e.getMessage) },
+  )
 
   val exists = new Subcommand("exists") {
     descr("Check if a specific PID has been minted by this easy-pid-generator")

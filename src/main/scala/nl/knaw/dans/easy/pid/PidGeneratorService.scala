@@ -25,7 +25,10 @@ import org.scalatra.servlet.ScalatraListener
 
 import scala.util.Try
 
-class PidGeneratorService(val serverPort: Int, app: PidGeneratorApp, servlets: (String, ScalatraServlet)*) extends DebugEnhancedLogging {
+class PidGeneratorService(val serverPort: Int,
+                          app: PidGeneratorApp,
+                          servlets: Map[String, ScalatraServlet],
+                         ) extends DebugEnhancedLogging {
 
   private val server = new Server(serverPort) {
     this.setHandler(new ServletContextHandler(ServletContextHandler.NO_SESSIONS) {

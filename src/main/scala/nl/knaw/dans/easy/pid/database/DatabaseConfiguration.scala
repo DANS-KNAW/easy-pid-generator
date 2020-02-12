@@ -13,20 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package nl.knaw.dans.easy.pid.fixture
+package nl.knaw.dans.easy.pid.database
 
-import better.files.File
-import better.files.File.currentWorkingDirectory
-import org.scalatest.{ BeforeAndAfterEach, FlatSpec, Inside, Matchers }
+import nl.knaw.dans.lib.string._
 
-trait TestSupportFixture extends FlatSpec with Matchers with Inside with BeforeAndAfterEach {
+case class DatabaseConfiguration(dbDriverClassName: String,
+                                 dbUrl: String,
+                                 dbUsername: Option[String] = Option.empty,
+                                 dbPassword: Option[String] = Option.empty)
 
-  override def beforeEach(): Unit = {
-    super.beforeEach()
-
-    if (testDir.exists) testDir.delete()
-    testDir.createDirectories()
+object DatabaseConfiguration {
+  def apply(dbDriverClassName: String,
+            dbUrl: String,
+            dbUsername: String,
+            dbPassword: String): DatabaseConfiguration = {
+    new DatabaseConfiguration(dbDriverClassName, dbUrl, dbUsername.toOption, dbPassword.toOption)
   }
-
-  lazy val testDir: File = currentWorkingDirectory / "target" / "test" / getClass.getSimpleName
 }

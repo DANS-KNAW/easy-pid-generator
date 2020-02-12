@@ -15,8 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.nio.file.Paths
-
+import better.files.File
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import resource._
@@ -28,7 +27,7 @@ import scala.util.{ Failure, Try }
 object Command extends App with DebugEnhancedLogging {
   type FeedBackMessage = String
 
-  val configuration = Configuration(Paths.get(System.getProperty("app.home")))
+  val configuration = Configuration(File(System.getProperty("app.home")))
   val commandLine: CommandLineOptions = new CommandLineOptions(args, configuration)
   val app = new PidGeneratorApp(configuration)
 
@@ -61,8 +60,13 @@ object Command extends App with DebugEnhancedLogging {
   }
 
   private def runAsService(app: PidGeneratorApp): Try[FeedBackMessage] = Try {
-    val service = new PidGeneratorService(configuration.properties.getInt("pid-generator.daemon.http.port"), app,
-      "/" -> new PidGeneratorServlet(app, configuration))
+    val service = new PidGeneratorService(
+      serverPort = configuration.serverPort,
+      app = app,
+      servlets = Map(
+        "/" -> new PidGeneratorServlet(app, configuration.version),
+      ),
+    )
     Runtime.getRuntime.addShutdownHook(new Thread("service-shutdown") {
       override def run(): Unit = {
         service.stop()

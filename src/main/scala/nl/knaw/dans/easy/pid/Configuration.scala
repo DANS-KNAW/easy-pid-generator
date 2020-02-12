@@ -15,27 +15,55 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.nio.file.{ Files, Path, Paths }
-
+import better.files.File
+import better.files.File.root
+import nl.knaw.dans.easy.pid.PidType.PidType
+import nl.knaw.dans.easy.pid.database.DatabaseConfiguration
+import nl.knaw.dans.easy.pid.generator.PidFormatter
 import org.apache.commons.configuration.PropertiesConfiguration
-import resource.managed
 
-import scala.io.Source
-
-case class Configuration(version: String, properties: PropertiesConfiguration)
+case class Configuration(version: String,
+                         serverPort: Int,
+                         databaseConfig: DatabaseConfiguration,
+                         formatters: Map[PidType, PidFormatter],
+                        )
 
 object Configuration {
 
-  def apply(home: Path): Configuration = {
+  def apply(home: File): Configuration = {
     val cfgPath = Seq(
-      Paths.get(s"/etc/opt/dans.knaw.nl/easy-pid-generator/"),
-      home.resolve("cfg"))
-      .find(Files.exists(_))
+      root / "etc" / "opt" / "dans.knaw.nl" / "easy-pid-generator",
+      home / "cfg")
+      .find(_.exists)
       .getOrElse { throw new IllegalStateException("No configuration directory found") }
+    val properties = new PropertiesConfiguration() {
+      setDelimiterParsingDisabled(true)
+      load((cfgPath / "application.properties").toJava)
+    }
 
     new Configuration(
-      version = managed(Source.fromFile(home.resolve("bin/version").toFile)).acquireAndGet(_.mkString).stripLineEnd,
-      properties = new PropertiesConfiguration(cfgPath.resolve("application.properties").toFile)
+      version = (home / "bin" / "version").contentAsString.stripLineEnd,
+      serverPort = properties.getInt("pid-generator.daemon.http.port"),
+      databaseConfig = DatabaseConfiguration(
+        dbDriverClassName = properties.getString("pid-generator.database.driver-class"),
+        dbUrl = properties.getString("pid-generator.database.url"),
+        dbUsername = Option(properties.getString("pid-generator.database.username")),
+        dbPassword = Option(properties.getString("pid-generator.database.password")),
+      ),
+      formatters = Map(
+        PidType.DOI -> new PidFormatter(
+          namespace = properties.getString("pid-generator.types.doi.namespace"),
+          dashPosition = properties.getInt("pid-generator.types.doi.dashPosition"),
+          illegalChars = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v'),
+          length = 7,
+        ),
+        PidType.URN -> new PidFormatter(
+          namespace = properties.getString("pid-generator.types.urn.namespace"),
+          dashPosition = properties.getInt("pid-generator.types.urn.dashPosition"),
+          illegalChars = Map.empty[Char, Char],
+          length = 6,
+        )
+      ),
     )
   }
 }

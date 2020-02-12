@@ -15,6 +15,7 @@
  */
 package nl.knaw.dans.easy.pid
 
+import nl.knaw.dans.easy.pid.PidType.PidType
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 import nl.knaw.dans.lib.logging.servlet._
@@ -22,7 +23,7 @@ import org.scalatra._
 
 import scala.util.{ Failure, Success, Try }
 
-class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) extends ScalatraServlet
+class PidGeneratorServlet(app: PidGeneratorApp, applicationVersion: String) extends ScalatraServlet
   with ServletLogger
   with PlainLogFormatter
   with LogResponseBodyOnError
@@ -31,7 +32,7 @@ class PidGeneratorServlet(app: PidGeneratorApp, configuration: Configuration) ex
 
   get("/") {
     contentType = "text/plain"
-    Ok(s"Persistent Identifier Generator running (v${ configuration.version })")
+    Ok(s"Persistent Identifier Generator running (v$applicationVersion)")
   }
 
   // GET /{doi|urn}/{...}

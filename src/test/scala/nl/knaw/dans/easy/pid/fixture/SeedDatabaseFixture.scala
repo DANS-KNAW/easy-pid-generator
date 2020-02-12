@@ -15,28 +15,29 @@
  */
 package nl.knaw.dans.easy.pid.fixture
 
-import java.nio.file.Path
 import java.sql.Connection
 
-import nl.knaw.dans.easy.pid.DatabaseAccessComponent
-import org.apache.commons.io.FileUtils
+import nl.knaw.dans.easy.pid.database.{ DatabaseAccess, DatabaseConfiguration }
 import org.scalatest.BeforeAndAfterEach
 import resource.managed
 
 import scala.io.Source
 
-trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponent {
+trait SeedDatabaseFixture extends BeforeAndAfterEach {
   this: TestSupportFixture =>
 
   implicit var connection: Connection = _
 
-  private val databaseDir: Path = testDir.resolve("database")
+  private val databaseDir = testDir / "database"
 
-  override val databaseAccess: DatabaseAccess = new DatabaseAccess {
-    override val dbDriverClassName = "org.hsqldb.jdbcDriver"
-    override val dbUrl = s"jdbc:hsqldb:file:${ databaseDir.toString }/db"
-    override val dbUsername = Option.empty[String]
-    override val dbPassword = Option.empty[String]
+  val databaseAccess: DatabaseAccess = new DatabaseAccess(
+    DatabaseConfiguration(
+      dbDriverClassName = "org.hsqldb.jdbcDriver",
+      dbUrl = s"jdbc:hsqldb:file:$databaseDir/db",
+      dbUsername = Option.empty[String],
+      dbPassword = Option.empty[String],
+    ),
+  ) {
 
     override def createConnectionPool: ConnectionPool = {
       val pool = super.createConnectionPool
@@ -54,7 +55,10 @@ trait SeedDatabaseFixture extends BeforeAndAfterEach with DatabaseAccessComponen
 
   override def beforeEach(): Unit = {
     super.beforeEach()
-    FileUtils.deleteQuietly(databaseDir.toFile)
+
+    if (databaseDir.exists)
+      databaseDir.delete()
+
     databaseAccess.initConnectionPool()
   }
 

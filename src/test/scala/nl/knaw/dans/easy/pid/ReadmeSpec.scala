@@ -15,15 +15,14 @@
  */
 package nl.knaw.dans.easy.pid
 
-import java.io.{ ByteArrayOutputStream, File }
-import java.nio.file.Paths
+import java.io.ByteArrayOutputStream
 
-import nl.knaw.dans.easy.pid.fixture.CustomMatchers
-import org.scalatest._
+import better.files.File
+import nl.knaw.dans.easy.pid.fixture.{ ConfigurationSupportFixture, CustomMatchers, TestSupportFixture }
 
-class ReadmeSpec extends FlatSpec with Matchers with CustomMatchers {
+class ReadmeSpec extends TestSupportFixture with CustomMatchers with ConfigurationSupportFixture {
 
-  private val configuration = Configuration(Paths.get("src/main/assembly/dist"))
+  //  private val configuration = Configuration(Paths.get("src/main/assembly/dist"))
   private val clo = new CommandLineOptions(Array[String](), configuration) {
     // avoids System.exit() in case of invalid arguments or "--help"
     override def verify(): Unit = {
@@ -43,17 +42,17 @@ class ReadmeSpec extends FlatSpec with Matchers with CustomMatchers {
     val lineSeparators = s"(${ System.lineSeparator() })+"
     val options = helpInfo.split(s"${ lineSeparators }Options:$lineSeparators")(1)
     options.trim.length shouldNot be(0)
-    new File("docs/index.md") should containTrimmed(options)
+    File("docs/index.md") should containTrimmed(options)
   }
 
   "synopsis in help info" should "be part of README.md" in {
-    new File("docs/index.md") should containTrimmed(clo.synopsis)
+    File("docs/index.md") should containTrimmed(clo.synopsis)
   }
 
   "description line(s) in help info" should "be part of README.md and pom.xml" in {
-    new File("docs/index.md") should containTrimmed(clo.description)
-    new File("README.md") should containTrimmed(clo.description)
-    new File("pom.xml") should containTrimmed(clo.description)
+    File("docs/index.md") should containTrimmed(clo.description)
+    File("README.md") should containTrimmed(clo.description)
+    File("pom.xml") should containTrimmed(clo.description)
   }
 
   "synopsis" should "list all subcommands" in {

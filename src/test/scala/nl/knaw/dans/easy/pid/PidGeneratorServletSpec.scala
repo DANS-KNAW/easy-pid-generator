@@ -31,10 +31,10 @@ class PidGeneratorServletSpec extends TestSupportFixture
   with ScalatraSuite
   with MockFactory {
 
-  class MockedPidGeneratorApp extends PidGeneratorApp(null: ApplicationWiring)
+  class MockedPidGeneratorApp extends PidGeneratorApp(configuration)
 
   val app: PidGeneratorApp = mock[MockedPidGeneratorApp]
-  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app, configuration)
+  val pidServlet: PidGeneratorServlet = new PidGeneratorServlet(app, "1.0.0-UNITTEST")
 
   addServlet(pidServlet, "/*")
 
@@ -46,14 +46,14 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   "GET /doi/<doi>" should "return 204 when the DOI is present" in {
-    app.exists _ expects (DOI, "my-doi") once() returning Success(true)
+    app.exists _ expects(PidType.DOI, "my-doi") once() returning Success(true)
     get("/doi/my-doi") {
       status shouldBe 204
     }
   }
 
   it should "return 404 when the DOI is not present" in {
-    app.exists _ expects (DOI, "my-doi") once() returning Success(false)
+    app.exists _ expects(PidType.DOI, "my-doi") once() returning Success(false)
     get("/doi/my-doi") {
       status shouldBe 404
       body shouldBe "doi my-doi doesn't exist"
@@ -68,14 +68,14 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   "GET /doi/<prefix>/<suffix>" should "return 204 when the DOI is present" in {
-    app.exists _ expects (DOI, "my-prefix/my-suffix") once() returning Success(true)
+    app.exists _ expects(PidType.DOI, "my-prefix/my-suffix") once() returning Success(true)
     get("/doi/my-prefix/my-suffix") {
       status shouldBe 204
     }
   }
 
   it should "return 404 when the DOI is not present" in {
-    app.exists _ expects (DOI, "my-prefix/my-suffix") once() returning Success(false)
+    app.exists _ expects(PidType.DOI, "my-prefix/my-suffix") once() returning Success(false)
     get("/doi/my-prefix/my-suffix") {
       status shouldBe 404
       body shouldBe "doi my-prefix/my-suffix doesn't exist"
@@ -90,7 +90,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   "POST /create?type=doi" should "return the next DOI PID" in {
-    (app.generate(_: PidType)) expects DOI once() returning Success("doi output")
+    app.generate _ expects PidType.DOI once() returning Success("doi output")
     post("/create", ("type", "doi")) {
       status shouldBe 201
       body shouldBe "doi output"
@@ -98,7 +98,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   it should "return a 500 when the database connection fails suddenly" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(DatabaseException(new Exception("test")))
+    app.generate _ expects PidType.DOI once() returning Failure(DatabaseException(new Exception("test")))
     post("/create", ("type", "doi")) {
       status shouldBe 500
       body should include("database connection failed")
@@ -106,7 +106,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   it should "return a 500 when the generator is not initialized" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(PidNotInitialized(DOI))
+    app.generate _ expects PidType.DOI once() returning Failure(PidNotInitialized(PidType.DOI))
     post("/create", ("type", "doi")) {
       status shouldBe 500
       body should include("not yet initialized")
@@ -114,7 +114,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   it should "return a 500 when the generator encounters a duplicate Pid" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(DuplicatePid(DOI, 1L, 2L, "testpid", new DateTime(1992, 7, 30, 16, 1)))
+    app.generate _ expects PidType.DOI once() returning Failure(DuplicatePid(PidType.DOI, 1L, 2L, "testpid", new DateTime(1992, 7, 30, 16, 1)))
     post("/create", ("type", "doi")) {
       status shouldBe 500
       body should include("Duplicate doi detected: testpid.")
@@ -122,7 +122,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   }
 
   it should "return a 500 when the generator failed unexpectedly" in {
-    (app.generate(_: PidType)) expects DOI once() returning Failure(new Exception("unexpected failure"))
+    app.generate _ expects PidType.DOI once() returning Failure(new Exception("unexpected failure"))
     post("/create", ("type", "doi")) {
       status shouldBe 500
       body shouldBe "Error while generating the next doi: unexpected failure"
@@ -145,7 +145,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
 
   "POST /init?type=doi&seed=123456" should "return a 201 when the DOI is set correctly" in {
     val seed = 123456L
-    app.initialize _ expects(DOI, seed) once() returning Success(())
+    app.initialize _ expects(PidType.DOI, seed) once() returning Success(())
 
     post("/init", "type" -> "doi", "seed" -> seed.toString) {
       status shouldBe 201
@@ -156,7 +156,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
   it should "return a 409 when the DOI is already seeded" in {
     val seed = 123456L
     val otherSeed = 654321L
-    app.initialize _ expects(DOI, seed) once() returning Failure(PidAlreadyInitialized(DOI, otherSeed))
+    app.initialize _ expects(PidType.DOI, seed) once() returning Failure(PidAlreadyInitialized(PidType.DOI, otherSeed))
 
     post("/init", "type" -> "doi", "seed" -> seed.toString) {
       status shouldBe 409
@@ -166,7 +166,7 @@ class PidGeneratorServletSpec extends TestSupportFixture
 
   it should "return a 500 when the database connection fails unexpectedly" in {
     val seed = 123456L
-    app.initialize _ expects(DOI, seed) once() returning Failure(DatabaseException(new SQLException("err")))
+    app.initialize _ expects(PidType.DOI, seed) once() returning Failure(DatabaseException(new SQLException("err")))
 
     post("/init", "type" -> "doi", "seed" -> seed.toString) {
       status shouldBe 500

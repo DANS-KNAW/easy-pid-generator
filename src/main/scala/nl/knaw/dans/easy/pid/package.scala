@@ -18,30 +18,28 @@ package nl.knaw.dans.easy
 import java.sql.Timestamp
 import java.util.Calendar
 
+import nl.knaw.dans.easy.pid.PidType.PidType
 import org.joda.time.format.{ DateTimeFormatter, ISODateTimeFormat }
 import org.joda.time.{ DateTime, DateTimeZone }
 
 import scala.language.implicitConversions
+import scala.util.Try
 
 package object pid {
 
   type Seed = Long
   type Pid = String
 
-  sealed abstract class PidType(val name: String) {
-    override def toString: String = name
-  }
-  object PidType {
+  object PidType extends Enumeration {
+    type PidType = Value
+
+    val DOI: PidType = Value("doi")
+    val URN: PidType = Value("urn")
+
     def parse(name: String): Option[PidType] = {
-      name match {
-        case "doi" => Some(DOI)
-        case "urn" => Some(URN)
-        case _ => None
-      }
+      Try { PidType.withName(name) }.toOption
     }
   }
-  case object DOI extends PidType("doi")
-  case object URN extends PidType("urn")
 
   case class DatabaseException(cause: Throwable) extends Exception(s"The database connection failed; cause: ${ cause.getMessage }", cause)
   case class PidNotInitialized(pidType: PidType) extends Exception(s"The pid generator is not yet initialized. There is no seed available for minting a $pidType.")

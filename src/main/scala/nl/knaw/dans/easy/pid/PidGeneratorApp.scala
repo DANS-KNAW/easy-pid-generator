@@ -16,31 +16,38 @@
 package nl.knaw.dans.easy.pid
 
 import java.io.Closeable
+import java.sql.Connection
 
+import nl.knaw.dans.easy.pid.PidType.PidType
+import nl.knaw.dans.easy.pid.database.DatabaseAccess
+import nl.knaw.dans.easy.pid.generator.{ Database, PidManager }
 import nl.knaw.dans.lib.error._
 import nl.knaw.dans.lib.logging.DebugEnhancedLogging
 
 import scala.util.Try
 
-class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnhancedLogging {
+class PidGeneratorApp(configuration: Configuration) extends Closeable with DebugEnhancedLogging {
 
-  def this(configuration: Configuration) = this(new ApplicationWiring(configuration))
+  private val databaseAccess = new DatabaseAccess(configuration.databaseConfig)
+
+  private def pidManager(implicit connection: Connection) = new PidManager(configuration.formatters, new Database)
 
   def exists(pidType: PidType, pid: Pid): Try[Boolean] = {
-    wiring.databaseAccess.doTransaction(implicit connection => wiring.pidManager.exists(pidType, pid))
-        .doIfSuccess {
-          case true => logger.info(s"Checked the existance of $pidType $pid - did exist indeed")
-          case false => logger.info(s"Checked the existance of $pidType $pid - did not exist")
-        }
-        .doIfFailure {
-          // TODO other exceptions
-          case e => logger.error(e.getMessage, e)
-        }
+    databaseAccess
+      .doTransaction(implicit connection => pidManager.exists(pidType, pid))
+      .doIfSuccess {
+        case true => logger.info(s"Checked the existance of $pidType $pid - did exist indeed")
+        case false => logger.info(s"Checked the existance of $pidType $pid - did not exist")
+      }
+      .doIfFailure {
+        // TODO other exceptions
+        case e => logger.error(e.getMessage, e)
+      }
   }
 
   def generate(pidType: PidType): Try[Pid] = {
-    wiring.databaseAccess
-      .doTransaction(implicit connection => wiring.pidManager.generate(pidType))
+    databaseAccess
+      .doTransaction(implicit connection => pidManager.generate(pidType))
       .doIfSuccess(pid => logger.info(s"Minted a new $pidType: $pid"))
       .doIfFailure {
         case e: PidNotInitialized => logger.info(e.getMessage)
@@ -51,8 +58,8 @@ class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnh
   }
 
   def initialize(pidType: PidType, seed: Seed): Try[Unit] = {
-    wiring.databaseAccess
-      .doTransaction(implicit connection => wiring.pidManager.initialize(pidType, seed))
+    databaseAccess
+      .doTransaction(implicit connection => pidManager.initialize(pidType, seed))
       .doIfSuccess(_ => logger.info(s"Pid type $pidType is seeded with $seed"))
       .doIfFailure {
         case e: PidAlreadyInitialized => logger.info(e.getMessage)
@@ -62,10 +69,10 @@ class PidGeneratorApp(wiring: ApplicationWiring) extends Closeable with DebugEnh
   }
 
   def init(): Try[Unit] = {
-    wiring.databaseAccess.initConnectionPool()
+    databaseAccess.initConnectionPool()
   }
 
   override def close(): Unit = {
-    wiring.databaseAccess.closeConnectionPool().unsafeGetOrThrow
+    databaseAccess.closeConnectionPool().unsafeGetOrThrow
   }
 }

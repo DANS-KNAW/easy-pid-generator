@@ -15,37 +15,33 @@
  */
 package nl.knaw.dans.easy.pid.fixture
 
-import java.io.StringReader
-
-import nl.knaw.dans.easy.pid.Configuration
-import org.apache.commons.configuration.PropertiesConfiguration
+import nl.knaw.dans.easy.pid.database.DatabaseConfiguration
+import nl.knaw.dans.easy.pid.generator.PidFormatter
+import nl.knaw.dans.easy.pid.{ Configuration, PidType }
 
 trait ConfigurationSupportFixture {
   this: TestSupportFixture =>
 
-  val configuration: Configuration = {
-    val appProps = new PropertiesConfiguration()
-    appProps.load(new StringReader(getApplicationProperties))
-    Configuration("1.0.0-UNITTEST", appProps)
-  }
-
-  def getApplicationProperties: String = {
-    s"""
-       |pid-generator.database.driver-class=org.hsqldb.jdbcDriver
-       |pid-generator.database.url=jdbc:hsqldb:file:$testDir/database/db
-       |#pid-generator.database.username=no-username-required
-       |#pid-generator.database.password=no-password-required
-       |
-       |pid-generator.daemon.http.port=8060
-       |
-       |pid-generator.types.urn.namespace=urn:nbn:nl:ui:13-
-       |pid-generator.types.urn.dashPosition=4
-       |pid-generator.types.urn.firstSeed=1
-       |
-       |pid-generator.types.doi.namespace=10.5072/dans-
-       |pid-generator.types.doi.dashPosition=3
-       |pid-generator.types.doi.firstSeed=1073741824
-       |
-    """.stripMargin
-  }
+  val configuration: Configuration = Configuration(
+    version = "1.0.0-UNITTEST",
+    serverPort = 8060,
+    databaseConfig = DatabaseConfiguration(
+      dbDriverClassName = "org.hsqldb.jdbcDriver",
+      dbUrl = s"jdbc:hsqldb:file:$testDir/database/db",
+    ),
+    formatters = Map(
+      PidType.DOI -> new PidFormatter(
+        namespace = "10.5072/dans-",
+        dashPosition = 3,
+        illegalChars = Map('0' -> 'z', 'o' -> 'y', '1' -> 'x', 'i' -> 'w', 'l' -> 'v'),
+        length = 7,
+      ),
+      PidType.URN -> new PidFormatter(
+        namespace = "urn:nbn:nl:ui:13-",
+        dashPosition = 4,
+        illegalChars = Map.empty[Char, Char],
+        length = 6,
+      )
+    )
+  )
 }
