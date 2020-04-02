@@ -17,9 +17,11 @@ package nl.knaw.dans.easy.pid.fixture
 
 import better.files.File
 import better.files.File.currentWorkingDirectory
-import org.scalatest.{ BeforeAndAfterEach, FlatSpec, Inside, Matchers }
+import org.scalatest.{ BeforeAndAfterEach, Inside }
+import org.scalatest.flatspec.AnyFlatSpec
+import org.scalatest.matchers.should.Matchers
 
-trait TestSupportFixture extends FlatSpec with Matchers with Inside with BeforeAndAfterEach {
+trait TestSupportFixture extends AnyFlatSpec with Matchers with Inside with BeforeAndAfterEach {
 
   override def beforeEach(): Unit = {
     super.beforeEach()
