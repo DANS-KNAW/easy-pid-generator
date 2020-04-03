@@ -17,12 +17,13 @@ package nl.knaw.dans.easy.pid.generator
 
 import nl.knaw.dans.easy.pid.Seed
 import org.scalacheck.Gen
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scalatest.{ Matchers, PropSpec }
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.propspec.AnyPropSpec
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 
 import scala.language.postfixOps
 
-class PidFormatterSpec extends PropSpec with GeneratorDrivenPropertyChecks with Matchers {
+class PidFormatterSpec extends AnyPropSpec with ScalaCheckDrivenPropertyChecks with Matchers {
 
   def genMap(n: Int): Gen[Map[Char, Char]] = {
     Gen.mapOf(for {
