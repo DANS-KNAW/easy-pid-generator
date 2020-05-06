@@ -21,8 +21,8 @@ DB_SCRIPT_BACKUP=$ROOT/db-$(date  +"%Y-%m-%dT%H:%M:%S").script
 echo 'downloading tools'
 # download necessary libraries
 mkdir $LIB
-curl -s http://central.maven.org/maven2/org/hsqldb/sqltool/2.4.1/sqltool-2.4.1.jar > $SQLTOOLJAR
-curl -s http://central.maven.org/maven2/org/hsqldb/hsqldb/2.4.1/hsqldb-2.4.1.jar > $HSQLDBJAR
+curl -s https://repo1.maven.org/maven2/org/hsqldb/sqltool/2.4.1/sqltool-2.4.1.jar > $SQLTOOLJAR
+curl -s https://repo1.maven.org/maven2/org/hsqldb/hsqldb/2.4.1/hsqldb-2.4.1.jar > $HSQLDBJAR
 
 # write the db.rc file
 echo 'urlid pidgen' > $RC
