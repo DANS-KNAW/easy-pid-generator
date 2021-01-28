@@ -5,6 +5,11 @@ matrix:
       cache:
         directories:
           - "$HOME/.m2/repository"
+    - language: java
+      jdk: openjdk11
+      cache:
+        directories:
+          - "$HOME/.m2/repository"
     - language: python
       if: branch = master AND NOT type = pull_request
       python: 3.7.1
